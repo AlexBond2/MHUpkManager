@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MHUpkManager", "src\MHUpkManager.csproj", "{5D5B1288-BC51-4EC2-A938-2827F685983A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DDSLib", "DDSLib\DDSLib.csproj", "{63287C47-8658-4401-9C51-D06C2A95AF99}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UpkManager", "UpkManager\UpkManager.csproj", "{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5D5B1288-BC51-4EC2-A938-2827F685983A}.Debug|x64.ActiveCfg = Debug|x64
+		{5D5B1288-BC51-4EC2-A938-2827F685983A}.Debug|x64.Build.0 = Debug|x64
+		{5D5B1288-BC51-4EC2-A938-2827F685983A}.Release|x64.ActiveCfg = Release|x64
+		{5D5B1288-BC51-4EC2-A938-2827F685983A}.Release|x64.Build.0 = Release|x64
+		{63287C47-8658-4401-9C51-D06C2A95AF99}.Debug|x64.ActiveCfg = Debug|x64
+		{63287C47-8658-4401-9C51-D06C2A95AF99}.Debug|x64.Build.0 = Debug|x64
+		{63287C47-8658-4401-9C51-D06C2A95AF99}.Release|x64.ActiveCfg = Release|x64
+		{63287C47-8658-4401-9C51-D06C2A95AF99}.Release|x64.Build.0 = Release|x64
+		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Debug|x64.ActiveCfg = Debug|x64
+		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Debug|x64.Build.0 = Debug|x64
+		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Release|x64.ActiveCfg = Release|x64
+		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7938040-AFED-44A0-B469-75273063A654}
+	EndGlobalSection
+EndGlobal

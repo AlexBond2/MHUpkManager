@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\MHIcon.ico</ApplicationIcon>
+    <ImplicitUsings>enable</ImplicitUsings>    
+	<PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
+    <Copyright>AlexBond (c) 2025</Copyright>
+    <AssemblyVersion>1.0</AssemblyVersion>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Content Include="Resources\MHIcon.ico" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\DDSLib\DDSLib.csproj" />
+    <ProjectReference Include="..\UpkManager\UpkManager.csproj" />
+  </ItemGroup>
+  
+  <Target Name="CopyDlls" AfterTargets="AfterBuild">
+    <Copy SourceFiles="..\UpkManager\Compression\lib64\lzo2_64.dll" DestinationFolder="$(OutDir)" />
+    <Copy SourceFiles="..\UpkManager\Compression\lib64\msvcr100.dll" DestinationFolder="$(OutDir)" />
+  </Target>
+  
+</Project>
