@@ -25,7 +25,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
         {
-            await base.ReadPropertyValue(reader, size, header).ConfigureAwait(false);
+            await base.ReadPropertyValue(reader, size, header);
 
             ObjectIndexName = header.GetObjectTableEntry(IntValue)?.NameTableIndex;
         }

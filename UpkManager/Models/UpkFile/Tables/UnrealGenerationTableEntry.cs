@@ -48,7 +48,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 Writer.WriteInt32(NameTableCount);
 
                 Writer.WriteInt32(NetObjectCount);
-            }).ConfigureAwait(false);
+            });
         }
 
         #endregion UnrealUpkBuilderBase Implementation

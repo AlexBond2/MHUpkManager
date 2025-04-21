@@ -32,7 +32,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
             Header = new UnrealCompressedChunkHeader();
 
-            await Header.ReadCompressedChunkHeader(reader.Branch(CompressedOffset), 1, UncompressedSize, CompressedSize).ConfigureAwait(false);
+            await Header.ReadCompressedChunkHeader(reader.Branch(CompressedOffset), 1, UncompressedSize, CompressedSize);
         }
 
         #endregion Unreal Methods

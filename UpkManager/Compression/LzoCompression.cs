@@ -58,11 +58,11 @@ namespace UpkManager.Compression
                 byte[] workMemory = new byte[WorkMemorySize_1x_1];
 
                 Lzo2.lzo1x_1_compress_64(Source, Source.Length, compressed, ref compressedSize, workMemory);
-            }).ConfigureAwait(false);
+            });
 
             byte[] sizedToFit = new byte[compressedSize];
 
-            await Task.Run(() => Array.ConstrainedCopy(compressed, 0, sizedToFit, 0, compressedSize)).ConfigureAwait(false);
+            await Task.Run(() => Array.ConstrainedCopy(compressed, 0, sizedToFit, 0, compressedSize));
 
             return sizedToFit;
         }
@@ -74,7 +74,7 @@ namespace UpkManager.Compression
                 int destinationSize = Destination.Length;
 
                 Lzo2.lzo1x_decompress_64(Source, Source.Length, Destination, ref destinationSize, null);
-            }).ConfigureAwait(false);
+            });
         }
 
         #endregion ILzoCompression Implementation

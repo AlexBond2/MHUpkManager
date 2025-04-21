@@ -39,7 +39,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
             Header = new UnrealCompressedChunkHeader();
 
-            await Header.ReadCompressedChunkHeader(reader, BulkDataFlags, UncompressedSize, CompressedSize).ConfigureAwait(false);
+            await Header.ReadCompressedChunkHeader(reader, BulkDataFlags, UncompressedSize, CompressedSize);
         }
 
         public async Task<ByteArrayReader> DecompressChunk(uint flags)
@@ -55,14 +55,14 @@ namespace UpkManager.Models.UpkFile.Compression
             foreach (UnrealCompressedChunkBlock block in Header.Blocks)
             {
                 if (((BulkDataCompressionTypes)BulkDataFlags & BulkDataCompressionTypes.LZO_ENC) > 0)
-                    await block.CompressedData.Decrypt().ConfigureAwait(false);
+                    await block.CompressedData.Decrypt();
 
                 byte[] decompressed;
 
                 const BulkDataCompressionTypes validCompression = BulkDataCompressionTypes.LZO | BulkDataCompressionTypes.LZO_ENC;
 
                 if (((BulkDataCompressionTypes)BulkDataFlags & validCompression) > 0)
-                    decompressed = await block.CompressedData.Decompress(block.UncompressedSize).ConfigureAwait(false);
+                    decompressed = await block.CompressedData.Decompress(block.UncompressedSize);
                 else
                 {
                     if (BulkDataFlags == 0) decompressed = block.CompressedData.GetBytes();
@@ -71,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
                 int offset = uncompressedOffset;
 
-                await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize)).ConfigureAwait(false);
+                await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize));
 
                 uncompressedOffset += block.UncompressedSize;
             }
@@ -94,7 +94,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
             Header = new UnrealCompressedChunkHeader();
 
-            builderSize += await Header.BuildCompressedChunkHeader(reader, BulkDataFlags).ConfigureAwait(false);
+            builderSize += await Header.BuildCompressedChunkHeader(reader, BulkDataFlags);
 
             CompressedSize = builderSize - 16;
 
@@ -144,7 +144,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
             if (((BulkDataCompressionTypes)BulkDataFlags & BulkDataCompressionTypes.StoreInSeparatefile) > 0) return;
 
-            await Header.WriteCompressedChunkHeader(Writer, CurrentOffset).ConfigureAwait(false);
+            await Header.WriteCompressedChunkHeader(Writer, CurrentOffset);
         }
 
         #endregion Unreal Methods

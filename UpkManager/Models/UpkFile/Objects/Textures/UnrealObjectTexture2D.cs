@@ -58,7 +58,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public override async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse).ConfigureAwait(false);
+            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
 
             if (skipParse) return;
 
@@ -75,13 +75,13 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
                     };
 
                     if (mip.Width >= 4 || mip.Height >= 4) 
-                        mip.ImageData = (await bulkChunk.DecompressChunk(0).ConfigureAwait(false))?.GetBytes();
+                        mip.ImageData = (await bulkChunk.DecompressChunk(0))?.GetBytes();
 
                     MipMaps.Add(mip);
-                }).ConfigureAwait(false);
+                });
             }
 
-            Guid = await reader.ReadBytes(16).ConfigureAwait(false);
+            Guid = await reader.ReadBytes(16);
         }
 
         public void ResetMipMaps(int count)
@@ -94,7 +94,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         {
             var header = new UnrealCompressedChunkHeader();
 
-            await header.ReadCompressedChunkHeader(upkReader, 1, 0, 0).ConfigureAwait(false);
+            await header.ReadCompressedChunkHeader(upkReader, 1, 0, 0);
 
             if (TryGetImageProperties(header, (int)index, overrideMipMap, out int width, out int height, out FileFormat format))
             {
@@ -106,7 +106,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
                 };
 
                 if (mip.Width >= 4 || mip.Height >= 4) 
-                    mip.ImageData = (await header.DecompressChunk().ConfigureAwait(false))?.GetBytes();
+                    mip.ImageData = (await header.DecompressChunk())?.GetBytes();
 
                 MipMaps.Add(mip);
             }
@@ -301,7 +301,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
             config.FileFormat = format;
 
-            await Task.Run(() => ddsImage.Save(ddsStream, config)).ConfigureAwait(false);
+            await Task.Run(() => ddsImage.Save(ddsStream, config));
 
             ddsStream.Close();
 
@@ -312,7 +312,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         {
             DdsSaveConfig config = configuration as DdsSaveConfig ?? new DdsSaveConfig(FileFormat.Unknown, 0, 0, false, false);
 
-            DdsFile image = await Task.Run(() => new DdsFile(filename)).ConfigureAwait(false);
+            DdsFile image = await Task.Run(() => new DdsFile(filename));
 
             bool skipFirstMip = false;
 
@@ -493,21 +493,21 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PropertyHeader.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await PropertyHeader.WriteBuffer(Writer, CurrentOffset);
 
-            await base.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await base.WriteBuffer(Writer, CurrentOffset);
 
             Writer.WriteInt32(MipMaps.Count);
 
             for (int i = 0; i < MipMaps.Count; ++i)
             {
-                await CompressedChunks[i].WriteCompressedChunk(Writer, CurrentOffset).ConfigureAwait(false);
+                await CompressedChunks[i].WriteCompressedChunk(Writer, CurrentOffset);
 
                 Writer.WriteInt32(MipMaps[i].Width);
                 Writer.WriteInt32(MipMaps[i].Height);
             }
 
-            await Writer.WriteBytes(Guid).ConfigureAwait(false);
+            await Writer.WriteBytes(Guid);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

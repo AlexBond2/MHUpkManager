@@ -32,7 +32,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
         {
-            if (size == 8) await base.ReadPropertyValue(reader, size, header).ConfigureAwait(false);
+            if (size == 8) await base.ReadPropertyValue(reader, size, header);
             else byteValue = reader.ReadByte();
         }
 
@@ -76,7 +76,7 @@ namespace UpkManager.Models.UpkFile.Properties
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
             if (byteValue.HasValue) Writer.WriteByte(byteValue.Value);
-            else await NameIndexValue.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            else await NameIndexValue.WriteBuffer(Writer, CurrentOffset);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

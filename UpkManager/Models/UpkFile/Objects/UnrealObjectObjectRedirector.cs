@@ -29,7 +29,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse).ConfigureAwait(false);
+            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
 
             if (skipParse) return;
 
@@ -52,7 +52,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PropertyHeader.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await PropertyHeader.WriteBuffer(Writer, CurrentOffset);
 
             Writer.WriteInt32(ObjectTableReference);
         }

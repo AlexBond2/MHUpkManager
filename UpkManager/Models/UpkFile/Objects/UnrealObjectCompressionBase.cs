@@ -41,11 +41,11 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse).ConfigureAwait(false);
+            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
 
             if (skipParse) return;
 
-            Unknown1 = await reader.ReadBytes(sizeof(uint) * 3).ConfigureAwait(false);
+            Unknown1 = await reader.ReadBytes(sizeof(uint) * 3);
 
             CompressedChunkOffset = reader.ReadInt32();
         }
@@ -56,9 +56,9 @@ namespace UpkManager.Models.UpkFile.Objects
 
             //    CompressedChunks.Add(compressedChunk);
 
-            await compressedChunk.ReadCompressedChunk(reader).ConfigureAwait(false);
+            await compressedChunk.ReadCompressedChunk(reader);
 
-            await chunkHandler(compressedChunk).ConfigureAwait(false);
+            await chunkHandler(compressedChunk);
         }
 
         protected async Task<int> ProcessUncompressedBulkData(ByteArrayReader reader, BulkDataCompressionTypes compressionFlags)
@@ -67,7 +67,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
             CompressedChunks.Add(compressedChunk);
 
-            int builderSize = await compressedChunk.BuildCompressedChunk(reader, compressionFlags).ConfigureAwait(false);
+            int builderSize = await compressedChunk.BuildCompressedChunk(reader, compressionFlags);
 
             return builderSize;
         }
@@ -91,7 +91,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await Writer.WriteBytes(Unknown1).ConfigureAwait(false);
+            await Writer.WriteBytes(Unknown1);
 
             Writer.WriteInt32(CurrentOffset + Writer.Index + sizeof(int));
         }

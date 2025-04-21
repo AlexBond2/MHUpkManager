@@ -43,7 +43,7 @@ namespace UpkManager.Models.UpkFile.Objects.Sounds
 
         public override async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse).ConfigureAwait(false);
+            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
 
             if (skipParse) return;
 
@@ -53,7 +53,7 @@ namespace UpkManager.Models.UpkFile.Objects.Sounds
             {
                 await ProcessCompressedBulkData(reader, async bulkChunk =>
                 {
-                    byte[] ogg = (await bulkChunk.DecompressChunk(0).ConfigureAwait(false))?.GetBytes();
+                    byte[] ogg = (await bulkChunk.DecompressChunk(0))?.GetBytes();
 
                     if (ogg == null || ogg.Length == 0)
                     {
@@ -63,7 +63,7 @@ namespace UpkManager.Models.UpkFile.Objects.Sounds
                     }
 
                     Sounds.Add(ogg);
-                }).ConfigureAwait(false);
+                });
             } while (!done);
         }
 
@@ -71,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Objects.Sounds
         {
             if (!Sounds.Any()) return;
 
-            await Task.Run(() => File.WriteAllBytes(filename, Sounds[0])).ConfigureAwait(false);
+            await Task.Run(() => File.WriteAllBytes(filename, Sounds[0]));
 
             if (Sounds.Count == 1) return;
 
@@ -84,7 +84,7 @@ namespace UpkManager.Models.UpkFile.Objects.Sounds
 
                 int i1 = i;
 
-                await Task.Run(() => File.WriteAllBytes(soundFilename, Sounds[i1])).ConfigureAwait(false);
+                await Task.Run(() => File.WriteAllBytes(soundFilename, Sounds[i1]));
             }
         }
 

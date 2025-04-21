@@ -27,18 +27,18 @@ namespace UpkManager.Models.UpkFile.Compression
 
         public async Task ReadCompressedChunkBlockData(ByteArrayReader reader)
         {
-            CompressedData = await reader.ReadByteArray(CompressedSize).ConfigureAwait(false);
+            CompressedData = await reader.ReadByteArray(CompressedSize);
         }
 
         public async Task<int> BuildCompressedChunkBlockData(ByteArrayReader reader)
         {
             UncompressedSize = reader.Remaining;
 
-            byte[] compressed = await reader.Compress().ConfigureAwait(false);
+            byte[] compressed = await reader.Compress();
 
             CompressedData = ByteArrayReader.CreateNew(compressed, 0);
 
-            //await CompressedData.Encrypt().ConfigureAwait(false); // TODO: Fix this to use the flag
+            //await CompressedData.Encrypt(); // TODO: Fix this to use the flag
 
             CompressedSize = CompressedData.Remaining;
 
@@ -47,7 +47,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
         public int BuildExistingCompressedChunkBlockData()
         {
-            //await CompressedData.Encrypt().ConfigureAwait(false);
+            //await CompressedData.Encrypt();
 
             return CompressedSize + sizeof(int) * 2;
         }
@@ -58,12 +58,12 @@ namespace UpkManager.Models.UpkFile.Compression
             {
                 Writer.WriteInt32(CompressedSize);
                 Writer.WriteInt32(UncompressedSize);
-            }).ConfigureAwait(false);
+            });
         }
 
         public async Task WriteCompressedChunkBlockData(ByteArrayWriter Writer)
         {
-            await Writer.WriteBytes(CompressedData.GetBytes()).ConfigureAwait(false);
+            await Writer.WriteBytes(CompressedData.GetBytes());
         }
 
         #endregion Unreal Methods

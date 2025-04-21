@@ -63,7 +63,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 Writer.WriteInt32(Index);
 
                 Writer.WriteInt32(Numeric);
-            }).ConfigureAwait(false);
+            });
         }
 
         #endregion UnrealUpkBuilderBase Implementation

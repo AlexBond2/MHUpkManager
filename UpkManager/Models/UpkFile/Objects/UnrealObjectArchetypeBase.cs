@@ -33,7 +33,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
             ArchetypeObjectNameIndex = header.GetObjectTableEntry(ArchetypeObjectReference)?.NameTableIndex;
 
-            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse).ConfigureAwait(false);
+            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
         }
 
         #endregion Unreal Methods
@@ -52,7 +52,7 @@ namespace UpkManager.Models.UpkFile.Objects
         {
             Writer.WriteInt32(ArchetypeObjectReference);
 
-            await base.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await base.WriteBuffer(Writer, CurrentOffset);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

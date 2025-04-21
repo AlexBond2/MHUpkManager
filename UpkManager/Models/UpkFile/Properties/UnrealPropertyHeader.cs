@@ -40,7 +40,7 @@ namespace UpkManager.Models.UpkFile.Properties
             {
                 UnrealProperty property = new UnrealProperty();
 
-                await property.ReadProperty(reader, header).ConfigureAwait(false);
+                await property.ReadProperty(reader, header);
 
                 Properties.Add(property);
 
@@ -70,7 +70,7 @@ namespace UpkManager.Models.UpkFile.Properties
         {
             Writer.WriteInt32(TypeIndex);
 
-            foreach (UnrealProperty property in Properties) await property.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            foreach (UnrealProperty property in Properties) await property.WriteBuffer(Writer, CurrentOffset);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

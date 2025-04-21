@@ -42,13 +42,13 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public async Task ReadImportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
-            await Task.Run(() => PackageNameIndex.ReadNameTableIndex(reader, header)).ConfigureAwait(false);
+            await Task.Run(() => PackageNameIndex.ReadNameTableIndex(reader, header));
 
-            await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header)).ConfigureAwait(false);
+            await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
 
             OwnerReference = reader.ReadInt32();
 
-            await Task.Run(() => NameTableIndex.ReadNameTableIndex(reader, header)).ConfigureAwait(false);
+            await Task.Run(() => NameTableIndex.ReadNameTableIndex(reader, header));
         }
 
         public void ExpandReferences(UnrealHeader header)
@@ -72,13 +72,13 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PackageNameIndex.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await PackageNameIndex.WriteBuffer(Writer, 0);
 
-            await TypeNameIndex.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await TypeNameIndex.WriteBuffer(Writer, 0);
 
             Writer.WriteInt32(OwnerReference);
 
-            await NameTableIndex.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await NameTableIndex.WriteBuffer(Writer, 0);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

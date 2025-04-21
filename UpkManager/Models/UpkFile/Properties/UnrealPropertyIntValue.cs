@@ -30,7 +30,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
         {
-            IntValue = await Task.Run(() => reader.ReadInt32()).ConfigureAwait(false);
+            IntValue = await Task.Run(() => reader.ReadInt32());
         }
 
         public override void SetPropertyValue(object value)
@@ -53,7 +53,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await Task.Run(() => Writer.WriteInt32(IntValue)).ConfigureAwait(false);
+            await Task.Run(() => Writer.WriteInt32(IntValue));
         }
 
         #endregion UnrealUpkBuilderBase Implementation

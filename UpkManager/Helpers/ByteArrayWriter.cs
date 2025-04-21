@@ -112,7 +112,7 @@ namespace UpkManager.Helpers
 
             if (Bytes.Length + index > data.Length) throw new ArgumentOutOfRangeException(nameof(Bytes), "Current Index + Bytes.Length is out of bounds of the byte array.");
 
-            await Task.Run(() => Array.ConstrainedCopy(Bytes, 0, data, index, Bytes.Length)).ConfigureAwait(false);
+            await Task.Run(() => Array.ConstrainedCopy(Bytes, 0, data, index, Bytes.Length));
 
             index += Bytes.Length;
         }

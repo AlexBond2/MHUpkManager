@@ -121,7 +121,7 @@ namespace UpkManager.Models.UpkFile
 
             progress?.Invoke(message);
 
-            await readUpkHeader().ConfigureAwait(false);
+            await readUpkHeader();
 
             const CompressionTypes validCompression = CompressionTypes.LZO | CompressionTypes.LZO_ENC;
 
@@ -131,23 +131,23 @@ namespace UpkManager.Models.UpkFile
 
                 progress?.Invoke(message);
 
-                reader = await decompressChunks().ConfigureAwait(false);
+                reader = await decompressChunks();
             }
             else if (CompressionFlags > 0) throw new Exception($"Unsupported compression type 0x{CompressionFlags:X8}.");
 
-            await readNameTable(progress).ConfigureAwait(false);
+            await readNameTable(progress);
 
-            await readImportTable(progress).ConfigureAwait(false);
+            await readImportTable(progress);
 
-            await readExportTable(progress).ConfigureAwait(false);
+            await readExportTable(progress);
 
             message.Text = "Slicing and Dicing...";
 
             progress?.Invoke(message);
 
-            await readDependsTable().ConfigureAwait(false);
+            await readDependsTable();
 
-            await decodePointers().ConfigureAwait(false);
+            await decodePointers();
 
             message.Text = "Reading Objects...";
             message.Total = ExportTableCount;
@@ -162,7 +162,7 @@ namespace UpkManager.Models.UpkFile
 
                     if (ExportTableCount > 100) progress?.Invoke(message);
                 });
-            }).ConfigureAwait(false);
+            });
 
             message.IsComplete = true;
 
@@ -219,17 +219,17 @@ namespace UpkManager.Models.UpkFile
         {
             writer = Writer;
 
-            await writeUpkHeader().ConfigureAwait(false);
+            await writeUpkHeader();
 
-            await writeNameTable().ConfigureAwait(false);
+            await writeNameTable();
 
-            await writeImportTable().ConfigureAwait(false);
+            await writeImportTable();
 
-            await encodePointers().ConfigureAwait(false);
+            await encodePointers();
 
-            await writeExportTable().ConfigureAwait(false);
+            await writeExportTable();
 
-            await writeDependsTable().ConfigureAwait(false);
+            await writeDependsTable();
         }
 
         #endregion UnrealUpkBuilderBase Implementation
@@ -249,7 +249,7 @@ namespace UpkManager.Models.UpkFile
 
             Size = reader.ReadInt32();
 
-            await Group.ReadString(reader).ConfigureAwait(false);
+            await Group.ReadString(reader);
 
             Flags = reader.ReadUInt32();
 
@@ -264,11 +264,11 @@ namespace UpkManager.Models.UpkFile
 
             DependsTableOffset = reader.ReadInt32();
 
-            Guid = await reader.ReadBytes(16).ConfigureAwait(false);
+            Guid = await reader.ReadBytes(16);
 
             GenerationTableCount = reader.ReadInt32();
 
-            GenerationTable = await readGenerationTable().ConfigureAwait(false);
+            GenerationTable = await readGenerationTable();
 
             EngineVersion = reader.ReadUInt32();
             CookerVersion = reader.ReadUInt32();
@@ -277,7 +277,7 @@ namespace UpkManager.Models.UpkFile
 
             CompressionTableCount = reader.ReadInt32();
 
-            CompressedChunks = await readCompressedChunksTable().ConfigureAwait(false);
+            CompressedChunks = await readCompressedChunksTable();
 
             Unknown1 = reader.ReadUInt32();
             Unknown2 = reader.ReadUInt32();
@@ -294,7 +294,7 @@ namespace UpkManager.Models.UpkFile
 
             writer.WriteInt32(BuilderSize);
 
-            await Group.WriteBuffer(writer, 0).ConfigureAwait(false);
+            await Group.WriteBuffer(writer, 0);
 
             writer.WriteUInt32(Flags);
 
@@ -309,11 +309,11 @@ namespace UpkManager.Models.UpkFile
 
             writer.WriteInt32(BuilderDependsTableOffset);
 
-            await writer.WriteBytes(Guid).ConfigureAwait(false);
+            await writer.WriteBytes(Guid);
 
             writer.WriteInt32(GenerationTable.Count);
 
-            await writeGenerationTable().ConfigureAwait(false);
+            await writeGenerationTable();
 
             writer.WriteUInt32(EngineVersion);
             writer.WriteUInt32(CookerVersion);
@@ -334,7 +334,7 @@ namespace UpkManager.Models.UpkFile
             {
                 UnrealGenerationTableEntry info = new UnrealGenerationTableEntry();
 
-                await Task.Run(() => info.ReadGenerationTableEntry(reader)).ConfigureAwait(false);
+                await Task.Run(() => info.ReadGenerationTableEntry(reader));
 
                 generations.Add(info);
             }
@@ -346,7 +346,7 @@ namespace UpkManager.Models.UpkFile
         {
             foreach (UnrealGenerationTableEntry entry in GenerationTable)
             {
-                await entry.WriteBuffer(writer, 0).ConfigureAwait(false);
+                await entry.WriteBuffer(writer, 0);
             }
         }
 
@@ -358,7 +358,7 @@ namespace UpkManager.Models.UpkFile
             {
                 UnrealCompressedChunk chunk = new UnrealCompressedChunk();
 
-                await chunk.ReadCompressedChunk(reader).ConfigureAwait(false);
+                await chunk.ReadCompressedChunk(reader);
 
                 chunks.Add(chunk);
             }
@@ -382,18 +382,18 @@ namespace UpkManager.Models.UpkFile
 
                 foreach (UnrealCompressedChunkBlock block in chunk.Header.Blocks)
                 {
-                    if (((CompressionTypes)CompressionFlags & CompressionTypes.LZO_ENC) > 0) await block.CompressedData.Decrypt().ConfigureAwait(false);
+                    if (((CompressionTypes)CompressionFlags & CompressionTypes.LZO_ENC) > 0) await block.CompressedData.Decrypt();
 
-                    byte[] decompressed = await block.CompressedData.Decompress(block.UncompressedSize).ConfigureAwait(false);
+                    byte[] decompressed = await block.CompressedData.Decompress(block.UncompressedSize);
 
                     int offset = uncompressedOffset;
 
-                    await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize)).ConfigureAwait(false);
+                    await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize));
 
                     uncompressedOffset += block.UncompressedSize;
                 }
 
-                await Task.Run(() => Array.ConstrainedCopy(chunkData, 0, data, chunk.UncompressedOffset, chunk.Header.UncompressedSize)).ConfigureAwait(false);
+                await Task.Run(() => Array.ConstrainedCopy(chunkData, 0, data, chunk.UncompressedOffset, chunk.Header.UncompressedSize));
             }
 
             return ByteArrayReader.CreateNew(data, start);
@@ -409,7 +409,7 @@ namespace UpkManager.Models.UpkFile
             {
                 UnrealNameTableEntry name = new UnrealNameTableEntry { TableIndex = i };
 
-                await name.ReadNameTableEntry(reader).ConfigureAwait(false);
+                await name.ReadNameTableEntry(reader);
 
                 NameTable.Add(name);
 
@@ -423,7 +423,7 @@ namespace UpkManager.Models.UpkFile
         {
             foreach (UnrealNameTableEntry entry in NameTable)
             {
-                await entry.WriteBuffer(writer, 0).ConfigureAwait(false);
+                await entry.WriteBuffer(writer, 0);
             }
         }
 
@@ -437,7 +437,7 @@ namespace UpkManager.Models.UpkFile
             {
                 UnrealImportTableEntry import = new UnrealImportTableEntry { TableIndex = -(i + 1) };
 
-                await import.ReadImportTableEntry(reader, this).ConfigureAwait(false);
+                await import.ReadImportTableEntry(reader, this);
 
                 ImportTable.Add(import);
 
@@ -452,14 +452,14 @@ namespace UpkManager.Models.UpkFile
 
             progress?.Invoke(message);
 
-            await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this))).ConfigureAwait(false);
+            await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
         }
 
         private async Task writeImportTable()
         {
             foreach (UnrealImportTableEntry entry in ImportTable)
             {
-                await entry.WriteBuffer(writer, 0).ConfigureAwait(false);
+                await entry.WriteBuffer(writer, 0);
             }
         }
 
@@ -473,7 +473,7 @@ namespace UpkManager.Models.UpkFile
             {
                 UnrealExportTableEntry export = new UnrealExportTableEntry { TableIndex = i + 1 };
 
-                await export.ReadExportTableEntry(reader, this).ConfigureAwait(false);
+                await export.ReadExportTableEntry(reader, this);
 
                 ExportTable.Add(export);
 
@@ -488,14 +488,14 @@ namespace UpkManager.Models.UpkFile
 
             progress?.Invoke(message);
 
-            await ExportTable.ForEachAsync(export => Task.Run(() => export.ExpandReferences(this))).ConfigureAwait(false);
+            await ExportTable.ForEachAsync(export => Task.Run(() => export.ExpandReferences(this)));
         }
 
         private async Task writeExportTable()
         {
             foreach (UnrealExportTableEntry entry in ExportTable)
             {
-                await entry.WriteBuffer(writer, 0).ConfigureAwait(false);
+                await entry.WriteBuffer(writer, 0);
             }
         }
 
@@ -503,14 +503,14 @@ namespace UpkManager.Models.UpkFile
         {
             reader.Seek(DependsTableOffset);
 
-            DependsTable = await reader.ReadBytes(ExportTableCount * sizeof(uint)).ConfigureAwait(false);
+            DependsTable = await reader.ReadBytes(ExportTableCount * sizeof(uint));
         }
 
         private async Task writeDependsTable()
         {
             byte[] bytes = Enumerable.Repeat((byte)0, ExportTable.Count * sizeof(uint)).ToArray();
 
-            await writer.WriteBytes(bytes).ConfigureAwait(false);
+            await writer.WriteBytes(bytes);
         }
 
         #region External Code
@@ -530,7 +530,7 @@ namespace UpkManager.Models.UpkFile
             await Task.Run(() =>
             {
                 for (int i = 0; i < ExportTable.Count; ++i) ExportTable[i].DecodePointer(code1, code2, i);
-            }).ConfigureAwait(false);
+            });
         }
 
         private async Task encodePointers()
@@ -545,7 +545,7 @@ namespace UpkManager.Models.UpkFile
             await Task.Run(() =>
             {
                 for (int i = 0; i < ExportTable.Count; ++i) ExportTable[i].EncodePointer(code1, code2, i);
-            }).ConfigureAwait(false);
+            });
         }
 
         #endregion External Code

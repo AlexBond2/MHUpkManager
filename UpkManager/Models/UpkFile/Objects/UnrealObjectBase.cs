@@ -52,21 +52,21 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public virtual async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            if (!skipProperties) await PropertyHeader.ReadPropertyHeader(reader, header).ConfigureAwait(false);
+            if (!skipProperties) await PropertyHeader.ReadPropertyHeader(reader, header);
 
             AdditionalDataOffset = export.SerialDataOffset + reader.CurrentOffset;
 
-            AdditionalDataReader = await reader.Splice().ConfigureAwait(false);
+            AdditionalDataReader = await reader.Splice();
         }
 
         public virtual async Task SaveObject(string filename, object configuration)
         {
-            await Task.CompletedTask.ConfigureAwait(false);
+            await Task.CompletedTask;
         }
 
         public virtual async Task SetObject(string filename, List<UnrealNameTableEntry> nameTable, object configuration)
         {
-            await Task.CompletedTask.ConfigureAwait(false);
+            await Task.CompletedTask;
         }
 
         public virtual Stream GetObjectStream()
@@ -88,9 +88,9 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PropertyHeader.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await PropertyHeader.WriteBuffer(Writer, CurrentOffset);
 
-            await Writer.WriteBytes(AdditionalDataReader?.GetBytes()).ConfigureAwait(false);
+            await Writer.WriteBytes(AdditionalDataReader?.GetBytes());
         }
 
         #endregion UnrealUpkBuilderBase Implementation

@@ -36,13 +36,13 @@ namespace UpkManager.Models.UpkFile
             {
                 int size = -Size * 2;
 
-                byte[] str = await reader.ReadBytes(size).ConfigureAwait(false);
+                byte[] str = await reader.ReadBytes(size);
 
                 String = Encoding.Unicode.GetString(str);
             }
             else
             {
-                byte[] str = await reader.ReadBytes(Size - 1).ConfigureAwait(false);
+                byte[] str = await reader.ReadBytes(Size - 1);
 
                 reader.Skip(1); // NULL Terminator
 
@@ -75,11 +75,11 @@ namespace UpkManager.Models.UpkFile
 
             if (Size < 0)
             {
-                await Writer.WriteBytes(Encoding.Unicode.GetBytes(String)).ConfigureAwait(false);
+                await Writer.WriteBytes(Encoding.Unicode.GetBytes(String));
             }
             else
             {
-                await Writer.WriteBytes(Encoding.ASCII.GetBytes(String)).ConfigureAwait(false);
+                await Writer.WriteBytes(Encoding.ASCII.GetBytes(String));
 
                 Writer.WriteByte(0);
             }

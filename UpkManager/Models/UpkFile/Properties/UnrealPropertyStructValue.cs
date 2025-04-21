@@ -38,9 +38,9 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
         {
-            await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header)).ConfigureAwait(false);
+            await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header));
 
-            await base.ReadPropertyValue(reader, size, header).ConfigureAwait(false);
+            await base.ReadPropertyValue(reader, size, header);
         }
 
         #endregion Unreal Methods
@@ -57,9 +57,9 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await StructNameIndex.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await StructNameIndex.WriteBuffer(Writer, CurrentOffset);
 
-            await base.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await base.WriteBuffer(Writer, CurrentOffset);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

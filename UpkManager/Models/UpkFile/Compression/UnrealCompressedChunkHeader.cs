@@ -71,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Compression
                 ];
             }
 
-            foreach (UnrealCompressedChunkBlock block in Blocks) await block.ReadCompressedChunkBlockData(reader).ConfigureAwait(false);
+            foreach (UnrealCompressedChunkBlock block in Blocks) await block.ReadCompressedChunkBlockData(reader);
         }
 
         public async Task<int> BuildCompressedChunkHeader(ByteArrayReader reader, uint flags)
@@ -92,9 +92,9 @@ namespace UpkManager.Models.UpkFile.Compression
             {
                 UnrealCompressedChunkBlock block = new UnrealCompressedChunkBlock();
 
-                ByteArrayReader uncompressed = await reader.ReadByteArray(Math.Min(BlockSize, reader.Remaining)).ConfigureAwait(false);
+                ByteArrayReader uncompressed = await reader.ReadByteArray(Math.Min(BlockSize, reader.Remaining));
 
-                builderSize += await block.BuildCompressedChunkBlockData(uncompressed).ConfigureAwait(false);
+                builderSize += await block.BuildCompressedChunkBlockData(uncompressed);
 
                 CompressedSize += block.CompressedSize;
 
@@ -142,10 +142,10 @@ namespace UpkManager.Models.UpkFile.Compression
             Writer.WriteInt32(UncompressedSize);
 
             foreach (UnrealCompressedChunkBlock block in Blocks) 
-                await block.WriteCompressedChunkBlock(Writer).ConfigureAwait(false);
+                await block.WriteCompressedChunkBlock(Writer);
 
             foreach (UnrealCompressedChunkBlock block in Blocks) 
-                await block.WriteCompressedChunkBlockData(Writer).ConfigureAwait(false);
+                await block.WriteCompressedChunkBlockData(Writer);
         }
 
         public async Task<ByteArrayReader> DecompressChunk()
@@ -158,11 +158,11 @@ namespace UpkManager.Models.UpkFile.Compression
                 byte[] decompressed;
 
                 // BulkDataCompressionTypes.LZO | BulkDataCompressionTypes.LZO_ENC;
-                decompressed = await block.CompressedData.Decompress(block.UncompressedSize).ConfigureAwait(false);
+                decompressed = await block.CompressedData.Decompress(block.UncompressedSize);
 
                 int offset = uncompressedOffset;
 
-                await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize)).ConfigureAwait(false);
+                await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize));
 
                 uncompressedOffset += block.UncompressedSize;
             }

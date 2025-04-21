@@ -88,14 +88,14 @@ namespace UpkManager.Helpers
 
             ByteArrayReader reader = new ByteArrayReader();
 
-            reader.Initialize(await ReadBytes(Length).ConfigureAwait(false), 0);
+            reader.Initialize(await ReadBytes(Length), 0);
 
             return reader;
         }
 
         public async Task<ByteArrayReader> Splice()
         {
-            return await Splice(index, data.Length - index).ConfigureAwait(false);
+            return await Splice(index, data.Length - index);
         }
 
         public async Task<ByteArrayReader> Splice(int Offset, int Length)
@@ -104,25 +104,25 @@ namespace UpkManager.Helpers
 
             ByteArrayReader reader = new ByteArrayReader();
 
-            reader.Initialize(await ReadBytes(Offset, Length).ConfigureAwait(false), 0);
+            reader.Initialize(await ReadBytes(Offset, Length), 0);
 
             return reader;
         }
 
         public async Task Encrypt()
         {
-            await Decrypt().ConfigureAwait(false);
+            await Decrypt();
         }
 
         public async Task Decrypt()
         {
             if (data.Length < 32) return;
-            await Task.Run(() => Console.WriteLine("Put here your decrypt algorythm ")).ConfigureAwait(false);
+            await Task.Run(() => Console.WriteLine("Put here your decrypt algorythm "));
         }
 
         public async Task<byte[]> Compress()
         {
-            byte[] compressed = await compression.Compress(data).ConfigureAwait(false);
+            byte[] compressed = await compression.Compress(data);
 
             return compressed;
         }
@@ -131,7 +131,7 @@ namespace UpkManager.Helpers
         {
             byte[] decompressed = new byte[UncompressedSize];
 
-            await compression.Decompress(data, decompressed).ConfigureAwait(false);
+            await compression.Decompress(data, decompressed);
 
             return decompressed;
         }
@@ -200,7 +200,7 @@ namespace UpkManager.Helpers
 
             byte[] value = new byte[Length];
 
-            await Task.Run(() => { Array.ConstrainedCopy(data, index, value, 0, Length); index += Length; }).ConfigureAwait(false);
+            await Task.Run(() => { Array.ConstrainedCopy(data, index, value, 0, Length); index += Length; });
 
             return value;
         }
@@ -211,7 +211,7 @@ namespace UpkManager.Helpers
 
             byte[] value = new byte[Length];
 
-            await Task.Run(() => Array.ConstrainedCopy(data, Offset, value, 0, Length)).ConfigureAwait(false);
+            await Task.Run(() => Array.ConstrainedCopy(data, Offset, value, 0, Length));
 
             return value;
         }

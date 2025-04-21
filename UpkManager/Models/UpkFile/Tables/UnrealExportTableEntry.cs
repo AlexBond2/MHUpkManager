@@ -93,11 +93,11 @@ namespace UpkManager.Models.UpkFile.Tables
 
             NetObjectCount = reader.ReadInt32();
 
-            Guid = await reader.ReadBytes(16).ConfigureAwait(false);
+            Guid = await reader.ReadBytes(16);
 
             Unknown1 = reader.ReadUInt32();
 
-            Unknown2 = await reader.ReadBytes(sizeof(uint) * NetObjectCount).ConfigureAwait(false);
+            Unknown2 = await reader.ReadBytes(sizeof(uint) * NetObjectCount);
         }
 
         internal void DecodePointer(uint code1, int code2, int index)
@@ -134,14 +134,14 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal async Task ReadUnrealObject(ByteArrayReader reader)
         {
-            UnrealObjectReader = await reader.Splice(SerialDataOffset, SerialDataSize).ConfigureAwait(false);
+            UnrealObjectReader = await reader.Splice(SerialDataOffset, SerialDataSize);
         }
 
         public async Task ParseUnrealObject(UnrealHeader header, bool skipProperties, bool skipParse)
         {
             UnrealObject = objectTypeFactory();
 
-            await UnrealObject.ReadUnrealObject(UnrealObjectReader, header, this, skipProperties, skipParse).ConfigureAwait(false);
+            await UnrealObject.ReadUnrealObject(UnrealObjectReader, header, this, skipProperties, skipParse);
         }
 
         #endregion Unreal Methods
@@ -176,7 +176,7 @@ namespace UpkManager.Models.UpkFile.Tables
             Writer.WriteInt32(ParentReference);
             Writer.WriteInt32(OwnerReference);
 
-            await NameTableIndex.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await NameTableIndex.WriteBuffer(Writer, 0);
 
             Writer.WriteInt32(ArchetypeReference);
 
@@ -190,18 +190,18 @@ namespace UpkManager.Models.UpkFile.Tables
 
             Writer.WriteInt32(NetObjectCount);
 
-            await Writer.WriteBytes(Guid).ConfigureAwait(false);
+            await Writer.WriteBytes(Guid);
 
             Writer.WriteUInt32(Unknown1);
 
-            await Writer.WriteBytes(Unknown2).ConfigureAwait(false);
+            await Writer.WriteBytes(Unknown2);
         }
 
         public override async Task<ByteArrayWriter> WriteObjectBuffer()
         {
             ByteArrayWriter writer = ByteArrayWriter.CreateNew(SerialDataSize);
 
-            await UnrealObject.WriteBuffer(writer, SerialDataOffset).ConfigureAwait(false);
+            await UnrealObject.WriteBuffer(writer, SerialDataOffset);
 
             return writer;
         }

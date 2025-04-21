@@ -30,25 +30,25 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public override async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse).ConfigureAwait(false);
+            await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
 
             if (skipParse) return;
 
             await ProcessCompressedBulkData(reader, async bulkChunk =>
             {
-                byte[] bik = (await bulkChunk.DecompressChunk(0).ConfigureAwait(false))?.GetBytes();
+                byte[] bik = (await bulkChunk.DecompressChunk(0))?.GetBytes();
 
                 if (bik == null || bik.Length == 0) return;
 
                 Movie = bik;
-            }).ConfigureAwait(false);
+            });
         }
 
         public override async Task SaveObject(string filename, object configuration)
         {
             if (Movie == null || Movie.Length == 0) return;
 
-            await Task.Run(() => File.WriteAllBytes(filename, Movie)).ConfigureAwait(false);
+            await Task.Run(() => File.WriteAllBytes(filename, Movie));
         }
 
         #endregion Unreal Methods

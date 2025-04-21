@@ -20,8 +20,8 @@ namespace MHUpkManager
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                UpkFile = await OpenUpkFile(openFileDialog.FileName).ConfigureAwait(false);
-                await LoadUpkFile(UpkFile).ConfigureAwait(false);
+                UpkFile = await OpenUpkFile(openFileDialog.FileName);
+                await LoadUpkFile(UpkFile);
             }
         }
 
@@ -35,7 +35,7 @@ namespace MHUpkManager
         private async Task<UnrealUpkFile> OpenUpkFile(string filePath)
         {
             var file = new FileInfo(filePath);
-            var fileHash = await Task.Run(() => file.OpenRead().GetHash<MD5>((int)file.Length)).ConfigureAwait(false);
+            var fileHash = await Task.Run(() => file.OpenRead().GetHash<MD5>((int)file.Length));
 
             return new UnrealUpkFile { 
                 GameFilename = Path.GetFileName(file.FullName),

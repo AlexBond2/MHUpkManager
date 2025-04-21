@@ -36,7 +36,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public async Task ReadNameTableEntry(ByteArrayReader reader)
         {
-            await Name.ReadString(reader).ConfigureAwait(false);
+            await Name.ReadString(reader);
 
             Flags = reader.ReadUInt64();
         }
@@ -64,7 +64,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await Name.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await Name.WriteBuffer(Writer, 0);
 
             Writer.WriteUInt64(Flags);
         }

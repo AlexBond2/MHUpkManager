@@ -41,18 +41,18 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public async Task ReadProperty(ByteArrayReader reader, UnrealHeader header)
         {
-            await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header)).ConfigureAwait(false);
+            await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header));
 
             if (NameIndex.Name == ObjectTypes.None.ToString()) return;
 
-            await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header)).ConfigureAwait(false);
+            await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
 
             Size = reader.ReadInt32();
             ArrayIndex = reader.ReadInt32();
 
             Value = propertyValueFactory();
 
-            await Value.ReadPropertyValue(reader, Size, header).ConfigureAwait(false);
+            await Value.ReadPropertyValue(reader, Size, header);
         }
 
         #endregion Unreal Methods
@@ -75,17 +75,17 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await NameIndex.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await NameIndex.WriteBuffer(Writer, 0);
 
             if (NameIndex.Name == ObjectTypes.None.ToString()) return;
 
-            await TypeNameIndex.WriteBuffer(Writer, 0).ConfigureAwait(false);
+            await TypeNameIndex.WriteBuffer(Writer, 0);
 
             Writer.WriteInt32(Size);
 
             Writer.WriteInt32(ArrayIndex);
 
-            await Value.WriteBuffer(Writer, CurrentOffset).ConfigureAwait(false);
+            await Value.WriteBuffer(Writer, CurrentOffset);
         }
 
         #endregion UnrealUpkBuilderBase Implementation
