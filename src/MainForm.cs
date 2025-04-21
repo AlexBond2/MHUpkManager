@@ -1,15 +1,20 @@
 using System.Security.Cryptography;
 using UpkManager.Models;
 using UpkManager.Extensions;
+using UpkManager.Contracts;
+using UpkManager.Repository;
 
 namespace MHUpkManager
 {
     public partial class MainForm : Form
     {
+        private readonly IUpkFileRepository repository;
         public UnrealUpkFile UpkFile { get; set; }
+
         public MainForm()
         {
             InitializeComponent();
+            repository = new UpkFileRepository();
         }
 
         private async void openMenuItem_Click(object sender, EventArgs e)
@@ -27,9 +32,22 @@ namespace MHUpkManager
 
         private async Task LoadUpkFile(UnrealUpkFile upkFile)
         {
-            //upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
+            upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
+            await Task.Run(() => upkFile.Header.ReadHeaderAsync(OnLoadProgress));
+        }
 
-            //await Task.Run(() => upkFile.Header.ReadHeaderAsync(onLoadProgress));
+        private void OnLoadProgress(UnrealLoadProgress progress)
+        {
+            totalStatus.Text = $"{progress.Current:N0}";
+
+            if (progress.IsComplete)
+            {
+                totalStatus.Text = $"{progress.Total:N0}";
+                progressStatus.Text = "";
+            }
+
+            if (!string.IsNullOrEmpty(progress.Text))
+                progressStatus.Text = progress.Text;
         }
 
         private async Task<UnrealUpkFile> OpenUpkFile(string filePath)

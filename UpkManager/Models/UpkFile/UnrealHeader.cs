@@ -73,6 +73,9 @@ namespace UpkManager.Models.UpkFile
 
         public int DependsTableOffset { get; private set; }
 
+        public int SizeData { get; private set; }
+        public byte[] UnknownData { get; private set; }
+
         public byte[] Guid { get; private set; }
 
         public int GenerationTableCount { get; private set; }
@@ -263,6 +266,9 @@ namespace UpkManager.Models.UpkFile
             ImportTableOffset = reader.ReadInt32();
 
             DependsTableOffset = reader.ReadInt32();
+
+            SizeData = reader.ReadInt32();
+            UnknownData = await reader.ReadBytes(12);
 
             Guid = await reader.ReadBytes(16);
 
