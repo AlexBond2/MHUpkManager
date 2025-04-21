@@ -1,10 +1,67 @@
+using System.Security.Cryptography;
+using UpkManager.Models;
+using UpkManager.Extensions;
+
 namespace MHUpkManager
 {
     public partial class MainForm : Form
     {
+        public UnrealUpkFile UpkFile { get; set; }
         public MainForm()
         {
             InitializeComponent();
+        }
+
+        private async void openMenuItem_Click(object sender, EventArgs e)
+        {
+            using var openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Unreal Package Files (*.upk)|*.upk";
+            openFileDialog.Title = "Open Upk file";
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                UpkFile = await OpenUpkFile(openFileDialog.FileName).ConfigureAwait(false);
+                await LoadUpkFile(UpkFile).ConfigureAwait(false);
+            }
+        }
+
+        private async Task LoadUpkFile(UnrealUpkFile upkFile)
+        {
+            //upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
+
+            //await Task.Run(() => upkFile.Header.ReadHeaderAsync(onLoadProgress));
+        }
+
+        private async Task<UnrealUpkFile> OpenUpkFile(string filePath)
+        {
+            var file = new FileInfo(filePath);
+            var fileHash = await Task.Run(() => file.OpenRead().GetHash<MD5>((int)file.Length)).ConfigureAwait(false);
+
+            return new UnrealUpkFile { 
+                GameFilename = Path.GetFileName(file.FullName),
+                Package = Path.GetFileNameWithoutExtension(file.Name).ToLowerInvariant(),
+                ContentsRoot = Path.GetDirectoryName(file.FullName),
+                Filesize = file.Length,
+                Filehash = fileHash
+            };
+        }
+
+        private void saveMenuItem_Click(object sender, EventArgs e)
+        {
+            using var saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Unreal Package Files (*.upk)|*.upk";
+            saveFileDialog.Title = "Save UPK file";
+
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string filename = saveFileDialog.FileName;
+                SaveUpkFile(filename);
+            }
+        }
+
+        private void SaveUpkFile(string filename)
+        {
+            MessageBox.Show("Save function not ready", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }
