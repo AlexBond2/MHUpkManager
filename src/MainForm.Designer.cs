@@ -44,24 +44,25 @@
             tabControl1 = new TabControl();
             propertyPage = new TabPage();
             propertyGrid1 = new PropertyGrid();
+            namePage = new TabPage();
+            nameGridView = new DataGridView();
             importPage = new TabPage();
             importGridView = new DataGridView();
-            IndexColumn = new DataGridViewTextBoxColumn();
-            importColumn1 = new DataGridViewTextBoxColumn();
-            importColumn2 = new DataGridViewTextBoxColumn();
-            importColumn3 = new DataGridViewTextBoxColumn();
-            importColum4 = new DataGridViewTextBoxColumn();
+            importIndex = new DataGridViewTextBoxColumn();
+            importObject = new DataGridViewTextBoxColumn();
+            importClass = new DataGridViewTextBoxColumn();
+            importPakage = new DataGridViewTextBoxColumn();
+            importGroup = new DataGridViewTextBoxColumn();
             exportPage = new TabPage();
             exportGridView = new DataGridView();
             IndexColumn1 = new DataGridViewTextBoxColumn();
             exportColumn1 = new DataGridViewTextBoxColumn();
             exportColumn2 = new DataGridViewTextBoxColumn();
+            exportPakage = new DataGridViewTextBoxColumn();
             exportColumn3 = new DataGridViewTextBoxColumn();
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             exportColumn6 = new DataGridViewTextBoxColumn();
-            namePage = new TabPage();
-            dataGridView1 = new DataGridView();
             nameTableIndex = new DataGridViewTextBoxColumn();
             nameTableName = new DataGridViewTextBoxColumn();
             nameTableFlags = new DataGridViewTextBoxColumn();
@@ -74,12 +75,12 @@
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             propertyPage.SuspendLayout();
+            namePage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nameGridView).BeginInit();
             importPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)importGridView).BeginInit();
             exportPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)exportGridView).BeginInit();
-            namePage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // menuStrip1
@@ -186,9 +187,9 @@
             // tabControl1
             // 
             tabControl1.Controls.Add(propertyPage);
+            tabControl1.Controls.Add(namePage);
             tabControl1.Controls.Add(importPage);
             tabControl1.Controls.Add(exportPage);
-            tabControl1.Controls.Add(namePage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
@@ -215,6 +216,32 @@
             propertyGrid1.Size = new Size(637, 407);
             propertyGrid1.TabIndex = 0;
             // 
+            // namePage
+            // 
+            namePage.Controls.Add(nameGridView);
+            namePage.Location = new Point(4, 24);
+            namePage.Name = "namePage";
+            namePage.Size = new Size(643, 413);
+            namePage.TabIndex = 3;
+            namePage.Text = "Name Table";
+            namePage.UseVisualStyleBackColor = true;
+            // 
+            // nameGridView
+            // 
+            nameGridView.AllowDrop = true;
+            nameGridView.AllowUserToAddRows = false;
+            nameGridView.AllowUserToDeleteRows = false;
+            nameGridView.AllowUserToResizeRows = false;
+            nameGridView.BackgroundColor = SystemColors.Control;
+            nameGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            nameGridView.Columns.AddRange(new DataGridViewColumn[] { nameTableIndex, nameTableName, nameTableFlags });
+            nameGridView.Dock = DockStyle.Fill;
+            nameGridView.Location = new Point(0, 0);
+            nameGridView.Name = "nameGridView";
+            nameGridView.RowHeadersVisible = false;
+            nameGridView.Size = new Size(643, 413);
+            nameGridView.TabIndex = 1;
+            // 
             // importPage
             // 
             importPage.Controls.Add(importGridView);
@@ -227,38 +254,59 @@
             // 
             // importGridView
             // 
+            importGridView.AllowUserToAddRows = false;
+            importGridView.AllowUserToDeleteRows = false;
+            importGridView.AllowUserToResizeRows = false;
+            importGridView.BackgroundColor = SystemColors.Control;
             importGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            importGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn, importColumn1, importColumn2, importColumn3, importColum4 });
+            importGridView.Columns.AddRange(new DataGridViewColumn[] { importIndex, importObject, importClass, importPakage, importGroup });
             importGridView.Dock = DockStyle.Fill;
             importGridView.Location = new Point(0, 0);
             importGridView.Name = "importGridView";
+            importGridView.ReadOnly = true;
+            importGridView.RowHeadersVisible = false;
             importGridView.Size = new Size(643, 413);
             importGridView.TabIndex = 0;
             // 
-            // IndexColumn
+            // importIndex
             // 
-            IndexColumn.HeaderText = "Index";
-            IndexColumn.Name = "IndexColumn";
+            importIndex.DataPropertyName = "Index";
+            importIndex.FillWeight = 50F;
+            importIndex.HeaderText = "Index";
+            importIndex.Name = "importIndex";
+            importIndex.ReadOnly = true;
+            importIndex.Width = 50;
             // 
-            // importColumn1
+            // importObject
             // 
-            importColumn1.HeaderText = "Object";
-            importColumn1.Name = "importColumn1";
+            importObject.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            importObject.DataPropertyName = "Object";
+            importObject.HeaderText = "Object";
+            importObject.Name = "importObject";
+            importObject.ReadOnly = true;
             // 
-            // importColumn2
+            // importClass
             // 
-            importColumn2.HeaderText = "Class";
-            importColumn2.Name = "importColumn2";
+            importClass.DataPropertyName = "Class";
+            importClass.HeaderText = "Class";
+            importClass.Name = "importClass";
+            importClass.ReadOnly = true;
             // 
-            // importColumn3
+            // importPakage
             // 
-            importColumn3.HeaderText = "Package";
-            importColumn3.Name = "importColumn3";
+            importPakage.DataPropertyName = "Package";
+            importPakage.HeaderText = "Package";
+            importPakage.Name = "importPakage";
+            importPakage.ReadOnly = true;
+            importPakage.Width = 80;
             // 
-            // importColum4
+            // importGroup
             // 
-            importColum4.HeaderText = "Group";
-            importColum4.Name = "importColum4";
+            importGroup.DataPropertyName = "Group";
+            importGroup.HeaderText = "Group";
+            importGroup.Name = "importGroup";
+            importGroup.ReadOnly = true;
+            importGroup.Width = 70;
             // 
             // exportPage
             // 
@@ -272,83 +320,95 @@
             // 
             // exportGridView
             // 
+            exportGridView.AllowUserToAddRows = false;
+            exportGridView.AllowUserToDeleteRows = false;
+            exportGridView.AllowUserToResizeRows = false;
+            exportGridView.BackgroundColor = SystemColors.Control;
             exportGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportColumn3, exportColumn4, exportColumn5, exportColumn6 });
+            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportPakage, exportColumn3, exportColumn4, exportColumn5, exportColumn6 });
             exportGridView.Dock = DockStyle.Fill;
             exportGridView.Location = new Point(0, 0);
             exportGridView.Name = "exportGridView";
+            exportGridView.RowHeadersVisible = false;
             exportGridView.Size = new Size(643, 413);
             exportGridView.TabIndex = 1;
             // 
             // IndexColumn1
             // 
+            IndexColumn1.DataPropertyName = "Index";
             IndexColumn1.HeaderText = "Index";
             IndexColumn1.Name = "IndexColumn1";
+            IndexColumn1.Width = 50;
             // 
             // exportColumn1
             // 
-            exportColumn1.HeaderText = "Class";
+            exportColumn1.DataPropertyName = "Object";
+            exportColumn1.HeaderText = "Object";
             exportColumn1.Name = "exportColumn1";
+            exportColumn1.Width = 180;
             // 
             // exportColumn2
             // 
-            exportColumn2.HeaderText = "Parent";
+            exportColumn2.DataPropertyName = "Class";
+            exportColumn2.HeaderText = "Class";
             exportColumn2.Name = "exportColumn2";
+            // 
+            // exportPakage
+            // 
+            exportPakage.DataPropertyName = "Pakage";
+            exportPakage.HeaderText = "Pakage";
+            exportPakage.Name = "exportPakage";
             // 
             // exportColumn3
             // 
+            exportColumn3.DataPropertyName = "Group";
             exportColumn3.HeaderText = "Group";
             exportColumn3.Name = "exportColumn3";
+            exportColumn3.Width = 80;
             // 
             // exportColumn4
             // 
+            exportColumn4.DataPropertyName = "Flags";
             exportColumn4.HeaderText = "Flags";
             exportColumn4.Name = "exportColumn4";
+            exportColumn4.Width = 120;
             // 
             // exportColumn5
             // 
+            exportColumn5.DataPropertyName = "Size";
             exportColumn5.HeaderText = "Size";
             exportColumn5.Name = "exportColumn5";
+            exportColumn5.Width = 50;
             // 
             // exportColumn6
             // 
+            exportColumn6.DataPropertyName = "Offset";
             exportColumn6.HeaderText = "Offset";
             exportColumn6.Name = "exportColumn6";
-            // 
-            // namePage
-            // 
-            namePage.Controls.Add(dataGridView1);
-            namePage.Location = new Point(4, 24);
-            namePage.Name = "namePage";
-            namePage.Size = new Size(643, 413);
-            namePage.TabIndex = 3;
-            namePage.Text = "Name Table";
-            namePage.UseVisualStyleBackColor = true;
-            // 
-            // dataGridView1
-            // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { nameTableIndex, nameTableName, nameTableFlags });
-            dataGridView1.Dock = DockStyle.Fill;
-            dataGridView1.Location = new Point(0, 0);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(643, 413);
-            dataGridView1.TabIndex = 1;
+            exportColumn6.Width = 50;
             // 
             // nameTableIndex
             // 
+            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableIndex.DataPropertyName = "Index";
             nameTableIndex.HeaderText = "Index";
             nameTableIndex.Name = "nameTableIndex";
+            nameTableIndex.Width = 50;
             // 
             // nameTableName
             // 
+            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            nameTableName.DataPropertyName = "Name";
             nameTableName.HeaderText = "Name";
             nameTableName.Name = "nameTableName";
             // 
             // nameTableFlags
             // 
+            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableFlags.DataPropertyName = "Flags";
             nameTableFlags.HeaderText = "Flags";
             nameTableFlags.Name = "nameTableFlags";
+            nameTableFlags.Width = 120;
             // 
             // MainForm
             // 
@@ -374,12 +434,12 @@
             panel1.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             propertyPage.ResumeLayout(false);
+            namePage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)nameGridView).EndInit();
             importPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)importGridView).EndInit();
             exportPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)exportGridView).EndInit();
-            namePage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -404,23 +464,24 @@
         private ToolStripMenuItem openFileMenuItem;
         private ToolStripMenuItem saveMenuItem;
         private TabPage namePage;
-        private DataGridView dataGridView1;
-        private DataGridViewTextBoxColumn nameTableIndex;
-        private DataGridViewTextBoxColumn nameTableName;
-        private DataGridViewTextBoxColumn nameTableFlags;
+        private DataGridView nameGridView;
         private PropertyGrid propertyGrid1;
-        private DataGridViewTextBoxColumn IndexColumn;
-        private DataGridViewTextBoxColumn importColumn1;
-        private DataGridViewTextBoxColumn importColumn2;
-        private DataGridViewTextBoxColumn importColumn3;
-        private DataGridViewTextBoxColumn importColum4;
+        private ToolStripStatusLabel progressStatus;
         private DataGridViewTextBoxColumn IndexColumn1;
         private DataGridViewTextBoxColumn exportColumn1;
         private DataGridViewTextBoxColumn exportColumn2;
+        private DataGridViewTextBoxColumn exportPakage;
         private DataGridViewTextBoxColumn exportColumn3;
         private DataGridViewTextBoxColumn exportColumn4;
         private DataGridViewTextBoxColumn exportColumn5;
         private DataGridViewTextBoxColumn exportColumn6;
-        private ToolStripStatusLabel progressStatus;
+        private DataGridViewTextBoxColumn importIndex;
+        private DataGridViewTextBoxColumn importObject;
+        private DataGridViewTextBoxColumn importClass;
+        private DataGridViewTextBoxColumn importPakage;
+        private DataGridViewTextBoxColumn importGroup;
+        private DataGridViewTextBoxColumn nameTableIndex;
+        private DataGridViewTextBoxColumn nameTableName;
+        private DataGridViewTextBoxColumn nameTableFlags;
     }
 }

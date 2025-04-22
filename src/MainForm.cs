@@ -34,6 +34,9 @@ namespace MHUpkManager
         {
             upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
             await Task.Run(() => upkFile.Header.ReadHeaderAsync(OnLoadProgress));
+            nameGridView.DataSource = ViewEntities.GetDataSource(upkFile.Header.NameTable);
+            importGridView.DataSource = ViewEntities.GetDataSource(upkFile.Header.ImportTable);
+            exportGridView.DataSource = ViewEntities.GetDataSource(upkFile.Header.ExportTable);
         }
 
         private void OnLoadProgress(UnrealLoadProgress progress)
@@ -44,6 +47,7 @@ namespace MHUpkManager
             {
                 totalStatus.Text = $"{progress.Total:N0}";
                 progressStatus.Text = "";
+                return;
             }
 
             if (!string.IsNullOrEmpty(progress.Text))
