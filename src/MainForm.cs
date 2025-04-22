@@ -3,6 +3,7 @@ using UpkManager.Models;
 using UpkManager.Extensions;
 using UpkManager.Contracts;
 using UpkManager.Repository;
+using System.Reflection;
 
 namespace MHUpkManager
 {
@@ -15,6 +16,17 @@ namespace MHUpkManager
         {
             InitializeComponent();
             repository = new UpkFileRepository();
+
+            EnableDoubleBuffering(nameGridView);
+            EnableDoubleBuffering(importGridView);
+            EnableDoubleBuffering(exportGridView);
+        }
+
+        private void EnableDoubleBuffering(DataGridView dgv)
+        {
+            typeof(DataGridView).InvokeMember("DoubleBuffered",
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty,
+                null, dgv, new object[] { true });
         }
 
         private async void openMenuItem_Click(object sender, EventArgs e)
@@ -36,9 +48,25 @@ namespace MHUpkManager
             var header = upkFile.Header;
             await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
             nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
+
+            importGridView.VirtualMode = false;
             importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
-            exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable); 
+            //importGridView.RowCount = header.ImportTableCount;
+
+            exportGridView.VirtualMode = false;
+            exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable);
+            //exportGridView.RowCount = header.ExportTableCount;
             propertyGrid.SelectedObject = new UnrealHeaderViewModel(header);
+        }
+
+        private void importGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+        {
+            ViewEntities.CellValueNeeded(UpkFile.Header.ImportTable, e);
+        }
+
+        private void exportGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+        {
+            ViewEntities.CellValueNeeded(UpkFile.Header.ExportTable, e);
         }
 
         private void OnLoadProgress(UnrealLoadProgress progress)
@@ -67,7 +95,8 @@ namespace MHUpkManager
             var file = new FileInfo(filePath);
             var fileHash = await Task.Run(() => file.OpenRead().GetHash<MD5>((int)file.Length));
 
-            return new UnrealUpkFile { 
+            return new UnrealUpkFile
+            {
                 GameFilename = Path.GetFileName(file.FullName),
                 Package = Path.GetFileNameWithoutExtension(file.Name).ToLowerInvariant(),
                 ContentsRoot = Path.GetDirectoryName(file.FullName),

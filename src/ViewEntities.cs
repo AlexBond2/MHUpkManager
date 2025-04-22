@@ -21,6 +21,24 @@ namespace MHUpkManager
             return data;
         }
 
+        public static void CellValueNeeded(List<UnrealImportTableEntry> importTable, DataGridViewCellValueEventArgs e)
+        {
+            if (importTable == null || e.RowIndex >= importTable.Count)
+                return;
+
+            var entry = importTable[e.RowIndex];
+
+            switch (e.ColumnIndex)
+            {
+                case 0: e.Value = entry.TableIndex; break;
+                case 1: e.Value = entry.NameTableIndex?.Name; break;
+                case 2: e.Value = entry.TypeNameIndex?.Name; break;
+                case 3: e.Value = entry.OwnerReferenceNameIndex?.Name; break;
+                case 4: e.Value = entry.PackageNameIndex?.Name; break;
+                case 5: e.Value = entry.OwnerReferenceNameIndex?.Name; break;
+            }
+        }
+
         public static object GetDataSource(List<UnrealExportTableEntry> exportTable)
         {
             var data = exportTable.Select(entry => new
@@ -36,6 +54,26 @@ namespace MHUpkManager
             }).ToList();
 
             return data;
+        }
+
+        public static void CellValueNeeded(List<UnrealExportTableEntry> exportTable, DataGridViewCellValueEventArgs e)
+        {
+            if (exportTable == null || e.RowIndex >= exportTable.Count)
+                return;
+
+            var entry = exportTable[e.RowIndex];
+
+            switch (e.ColumnIndex)
+            {
+                case 0: e.Value = entry.TableIndex; break;
+                case 1: e.Value = entry.NameTableIndex?.Name; break;
+                case 2: e.Value = entry.TypeReferenceNameIndex?.Name; break;
+                case 3: e.Value = entry.OwnerReferenceNameIndex?.Name; break;
+                case 4: e.Value = entry.ParentReferenceNameIndex?.Name; break;
+                case 5: e.Value = $"0x{entry.FlagsLow:X8}-0x{entry.FlagsHigh:X8}"; break;
+                case 6: e.Value = entry.SerialDataSize; break;
+                case 7: e.Value = entry.SerialDataOffset; break;
+            }
         }
 
         public static object GetDataSource(List<UnrealNameTableEntry> nameTable)

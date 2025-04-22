@@ -360,6 +360,7 @@
             importGridView.RowHeadersVisible = false;
             importGridView.Size = new Size(643, 413);
             importGridView.TabIndex = 0;
+            importGridView.CellValueNeeded += importGridView_CellValueNeeded;
             // 
             // importIndex
             // 
@@ -431,6 +432,7 @@
             exportGridView.RowHeadersVisible = false;
             exportGridView.Size = new Size(643, 413);
             exportGridView.TabIndex = 1;
+            exportGridView.CellValueNeeded += exportGridView_CellValueNeeded;
             // 
             // IndexColumn1
             // 
