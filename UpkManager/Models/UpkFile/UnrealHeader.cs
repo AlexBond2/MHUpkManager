@@ -41,6 +41,9 @@ namespace UpkManager.Models.UpkFile
 
             ExportTable = new List<UnrealExportTableEntry>();
             ImportTable = new List<UnrealImportTableEntry>();
+
+            AdditionalPackagesToCook = new List<UnrealString>();
+            TextureAllocations = new List<byte[]>();
         }
 
         #endregion Constructor
@@ -73,8 +76,11 @@ namespace UpkManager.Models.UpkFile
 
         public int DependsTableOffset { get; private set; }
 
-        public int SizeData { get; private set; }
-        public byte[] UnknownData { get; private set; }
+        public int ImportExportGuidsOffset { get; private set; }
+        public int ImportGuidsCount { get; private set; }
+        public int ExportGuidsCount { get; private set; }
+
+        public int ThumbnailTableOffset { get; private set; }
 
         public byte[] Guid { get; private set; }
 
@@ -92,9 +98,10 @@ namespace UpkManager.Models.UpkFile
 
         public List<UnrealCompressedChunk> CompressedChunks { get; private set; }
 
-        public uint Unknown1 { get; private set; }
+        public uint PackageSource { get; private set; }
 
-        public uint Unknown2 { get; private set; }
+        public List<UnrealString> AdditionalPackagesToCook { get; private set; }
+        public List<byte[]> TextureAllocations { get; private set; }
 
         public List<UnrealNameTableEntry> NameTable { get; }
 
@@ -267,8 +274,11 @@ namespace UpkManager.Models.UpkFile
 
             DependsTableOffset = reader.ReadInt32();
 
-            SizeData = reader.ReadInt32();
-            UnknownData = await reader.ReadBytes(12);
+            ImportExportGuidsOffset = reader.ReadInt32();
+            ImportGuidsCount = reader.ReadInt32();
+            ExportGuidsCount = reader.ReadInt32();
+
+            ThumbnailTableOffset = reader.ReadInt32();
 
             Guid = await reader.ReadBytes(16);
 
@@ -285,8 +295,33 @@ namespace UpkManager.Models.UpkFile
 
             CompressedChunks = await readCompressedChunksTable();
 
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
+            PackageSource = reader.ReadUInt32();
+
+            int count = reader.ReadInt32();
+            AdditionalPackagesToCook.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                var pakageToCook = new UnrealString();
+                await pakageToCook.ReadString(reader);
+                AdditionalPackagesToCook.Add(pakageToCook);
+            }
+
+            count = reader.ReadInt32();
+            TextureAllocations.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                // TODO TextureType ?
+
+                reader.ReadInt32();
+                reader.ReadInt32();
+                reader.ReadInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                int count2 = reader.ReadInt32();
+                byte[] pakageToCook = await reader.ReadBytes(count2 * 4);
+
+                TextureAllocations.Add(pakageToCook);
+            }
         }
 
         private async Task writeUpkHeader()
@@ -315,6 +350,12 @@ namespace UpkManager.Models.UpkFile
 
             writer.WriteInt32(BuilderDependsTableOffset);
 
+            writer.WriteInt32(ImportExportGuidsOffset); 
+            writer.WriteInt32(ImportGuidsCount);
+            writer.WriteInt32(ExportGuidsCount);
+
+            writer.WriteInt32(ThumbnailTableOffset);
+
             await writer.WriteBytes(Guid);
 
             writer.WriteInt32(GenerationTable.Count);
@@ -326,10 +367,15 @@ namespace UpkManager.Models.UpkFile
 
             writer.WriteUInt32(CompressionFlags);
 
-            writer.WriteInt32(CompressedChunks.Count);
+            writer.WriteInt32(CompressedChunks.Count); // ?
 
-            writer.WriteUInt32(Unknown1);
-            writer.WriteUInt32(Unknown2);
+            writer.WriteUInt32(PackageSource);
+
+            writer.WriteInt32(AdditionalPackagesToCook.Count);
+            // write AdditionalPackagesToCook ? 
+
+            writer.WriteInt32(TextureAllocations.Count);
+            // write TextureAllocations ? 
         }
 
         private async Task<List<UnrealGenerationTableEntry>> readGenerationTable()
