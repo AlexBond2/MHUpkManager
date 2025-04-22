@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
@@ -191,6 +193,8 @@
             // 
             propertyGrid.DisabledItemForeColor = SystemColors.ControlText;
             propertyGrid.Dock = DockStyle.Fill;
+            propertyGrid.HelpBackColor = SystemColors.GradientInactiveCaption;
+            propertyGrid.HelpBorderColor = SystemColors.GradientActiveCaption;
             propertyGrid.Location = new Point(3, 3);
             propertyGrid.Name = "propertyGrid";
             propertyGrid.Size = new Size(312, 407);
@@ -272,10 +276,30 @@
             nameGridView.AllowUserToAddRows = false;
             nameGridView.AllowUserToDeleteRows = false;
             nameGridView.AllowUserToResizeRows = false;
-            nameGridView.BackgroundColor = SystemColors.Control;
+            nameGridView.BackgroundColor = SystemColors.Window;
+            nameGridView.BorderStyle = BorderStyle.None;
+            nameGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.GradientInactiveCaption;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.GradientActiveCaption;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            nameGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             nameGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             nameGridView.Columns.AddRange(new DataGridViewColumn[] { nameTableIndex, nameTableName, nameTableFlags });
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.GradientInactiveCaption;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            nameGridView.DefaultCellStyle = dataGridViewCellStyle2;
             nameGridView.Dock = DockStyle.Fill;
+            nameGridView.EnableHeadersVisualStyles = false;
+            nameGridView.GridColor = SystemColors.GradientActiveCaption;
             nameGridView.Location = new Point(0, 0);
             nameGridView.Name = "nameGridView";
             nameGridView.RowHeadersVisible = false;
@@ -320,10 +344,16 @@
             importGridView.AllowUserToAddRows = false;
             importGridView.AllowUserToDeleteRows = false;
             importGridView.AllowUserToResizeRows = false;
-            importGridView.BackgroundColor = SystemColors.Control;
+            importGridView.BackgroundColor = SystemColors.Window;
+            importGridView.BorderStyle = BorderStyle.None;
+            importGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            importGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             importGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             importGridView.Columns.AddRange(new DataGridViewColumn[] { importIndex, importObject, importClass, importPakage, importGroup });
+            importGridView.DefaultCellStyle = dataGridViewCellStyle2;
             importGridView.Dock = DockStyle.Fill;
+            importGridView.EnableHeadersVisualStyles = false;
+            importGridView.GridColor = SystemColors.GradientActiveCaption;
             importGridView.Location = new Point(0, 0);
             importGridView.Name = "importGridView";
             importGridView.ReadOnly = true;
@@ -386,10 +416,16 @@
             exportGridView.AllowUserToAddRows = false;
             exportGridView.AllowUserToDeleteRows = false;
             exportGridView.AllowUserToResizeRows = false;
-            exportGridView.BackgroundColor = SystemColors.Control;
+            exportGridView.BackgroundColor = SystemColors.Window;
+            exportGridView.BorderStyle = BorderStyle.None;
+            exportGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            exportGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             exportGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportPakage, exportColumn3, exportColumn4, exportColumn5, exportColumn6 });
+            exportGridView.DefaultCellStyle = dataGridViewCellStyle2;
             exportGridView.Dock = DockStyle.Fill;
+            exportGridView.EnableHeadersVisualStyles = false;
+            exportGridView.GridColor = SystemColors.GradientActiveCaption;
             exportGridView.Location = new Point(0, 0);
             exportGridView.Name = "exportGridView";
             exportGridView.RowHeadersVisible = false;
@@ -533,12 +569,12 @@
         private DataGridViewTextBoxColumn importClass;
         private DataGridViewTextBoxColumn importPakage;
         private DataGridViewTextBoxColumn importGroup;
-        private DataGridViewTextBoxColumn nameTableIndex;
-        private DataGridViewTextBoxColumn nameTableName;
-        private DataGridViewTextBoxColumn nameTableFlags;
         private TabControl tabControl2;
         private TabPage objectsPage;
         private TabPage propertyFilePage;
         private Panel panel3;
+        private DataGridViewTextBoxColumn nameTableIndex;
+        private DataGridViewTextBoxColumn nameTableName;
+        private DataGridViewTextBoxColumn nameTableFlags;
     }
 }
