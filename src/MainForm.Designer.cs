@@ -38,12 +38,15 @@
             totalStatus = new ToolStripStatusLabel();
             progressStatus = new ToolStripStatusLabel();
             splitContainer1 = new SplitContainer();
-            panel2 = new Panel();
+            tabControl2 = new TabControl();
+            propertyFilePage = new TabPage();
+            propertyGrid = new PropertyGrid();
+            objectsPage = new TabPage();
             panel1 = new Panel();
+            panel3 = new Panel();
             treeView1 = new TreeView();
+            panel2 = new Panel();
             tabControl1 = new TabControl();
-            propertyPage = new TabPage();
-            propertyGrid1 = new PropertyGrid();
             namePage = new TabPage();
             nameGridView = new DataGridView();
             nameTableIndex = new DataGridViewTextBoxColumn();
@@ -66,15 +69,19 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             exportColumn6 = new DataGridViewTextBoxColumn();
+            propertyPage = new TabPage();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            tabControl2.SuspendLayout();
+            propertyFilePage.SuspendLayout();
+            objectsPage.SuspendLayout();
             panel1.SuspendLayout();
+            panel3.SuspendLayout();
             tabControl1.SuspendLayout();
-            propertyPage.SuspendLayout();
             namePage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nameGridView).BeginInit();
             importPage.SuspendLayout();
@@ -149,8 +156,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            splitContainer1.Panel1.Controls.Add(panel2);
-            splitContainer1.Panel1.Controls.Add(panel1);
+            splitContainer1.Panel1.Controls.Add(tabControl2);
             // 
             // splitContainer1.Panel2
             // 
@@ -159,30 +165,83 @@
             splitContainer1.SplitterDistance = 326;
             splitContainer1.TabIndex = 2;
             // 
-            // panel2
+            // tabControl2
             // 
-            panel2.Dock = DockStyle.Top;
-            panel2.Location = new Point(0, 0);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(326, 40);
-            panel2.TabIndex = 1;
+            tabControl2.Controls.Add(propertyFilePage);
+            tabControl2.Controls.Add(objectsPage);
+            tabControl2.Dock = DockStyle.Fill;
+            tabControl2.Location = new Point(0, 0);
+            tabControl2.Name = "tabControl2";
+            tabControl2.SelectedIndex = 0;
+            tabControl2.Size = new Size(326, 441);
+            tabControl2.TabIndex = 1;
+            // 
+            // propertyFilePage
+            // 
+            propertyFilePage.Controls.Add(propertyGrid);
+            propertyFilePage.Location = new Point(4, 24);
+            propertyFilePage.Name = "propertyFilePage";
+            propertyFilePage.Padding = new Padding(3);
+            propertyFilePage.Size = new Size(318, 413);
+            propertyFilePage.TabIndex = 1;
+            propertyFilePage.Text = "File Properties";
+            propertyFilePage.UseVisualStyleBackColor = true;
+            // 
+            // propertyGrid
+            // 
+            propertyGrid.DisabledItemForeColor = SystemColors.ControlText;
+            propertyGrid.Dock = DockStyle.Fill;
+            propertyGrid.Location = new Point(3, 3);
+            propertyGrid.Name = "propertyGrid";
+            propertyGrid.Size = new Size(312, 407);
+            propertyGrid.TabIndex = 0;
+            // 
+            // objectsPage
+            // 
+            objectsPage.Controls.Add(panel1);
+            objectsPage.Location = new Point(4, 24);
+            objectsPage.Name = "objectsPage";
+            objectsPage.Padding = new Padding(3);
+            objectsPage.Size = new Size(318, 413);
+            objectsPage.TabIndex = 0;
+            objectsPage.Text = "Objects";
+            objectsPage.UseVisualStyleBackColor = true;
             // 
             // panel1
             // 
-            panel1.Controls.Add(treeView1);
+            panel1.Controls.Add(panel3);
+            panel1.Controls.Add(panel2);
             panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(0, 0);
+            panel1.Location = new Point(3, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(326, 441);
+            panel1.Size = new Size(312, 407);
             panel1.TabIndex = 0;
+            // 
+            // panel3
+            // 
+            panel3.Controls.Add(treeView1);
+            panel3.Dock = DockStyle.Fill;
+            panel3.Location = new Point(0, 40);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(312, 367);
+            panel3.TabIndex = 2;
             // 
             // treeView1
             // 
             treeView1.Dock = DockStyle.Fill;
             treeView1.Location = new Point(0, 0);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(326, 441);
+            treeView1.Size = new Size(312, 367);
             treeView1.TabIndex = 0;
+            // 
+            // panel2
+            // 
+            panel2.BackColor = Color.Transparent;
+            panel2.Dock = DockStyle.Top;
+            panel2.Location = new Point(0, 0);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(312, 40);
+            panel2.TabIndex = 1;
             // 
             // tabControl1
             // 
@@ -196,25 +255,6 @@
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(651, 441);
             tabControl1.TabIndex = 0;
-            // 
-            // propertyPage
-            // 
-            propertyPage.Controls.Add(propertyGrid1);
-            propertyPage.Location = new Point(4, 24);
-            propertyPage.Name = "propertyPage";
-            propertyPage.Padding = new Padding(3);
-            propertyPage.Size = new Size(643, 413);
-            propertyPage.TabIndex = 0;
-            propertyPage.Text = "File Properties";
-            propertyPage.UseVisualStyleBackColor = true;
-            // 
-            // propertyGrid1
-            // 
-            propertyGrid1.Dock = DockStyle.Fill;
-            propertyGrid1.Location = new Point(3, 3);
-            propertyGrid1.Name = "propertyGrid1";
-            propertyGrid1.Size = new Size(637, 407);
-            propertyGrid1.TabIndex = 0;
             // 
             // namePage
             // 
@@ -410,6 +450,16 @@
             exportColumn6.Name = "exportColumn6";
             exportColumn6.Width = 50;
             // 
+            // propertyPage
+            // 
+            propertyPage.Location = new Point(4, 24);
+            propertyPage.Name = "propertyPage";
+            propertyPage.Padding = new Padding(3);
+            propertyPage.Size = new Size(643, 413);
+            propertyPage.TabIndex = 0;
+            propertyPage.Text = "Object Properties";
+            propertyPage.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -431,9 +481,12 @@
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            tabControl2.ResumeLayout(false);
+            propertyFilePage.ResumeLayout(false);
+            objectsPage.ResumeLayout(false);
             panel1.ResumeLayout(false);
+            panel3.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
-            propertyPage.ResumeLayout(false);
             namePage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)nameGridView).EndInit();
             importPage.ResumeLayout(false);
@@ -465,7 +518,7 @@
         private ToolStripMenuItem saveMenuItem;
         private TabPage namePage;
         private DataGridView nameGridView;
-        private PropertyGrid propertyGrid1;
+        private PropertyGrid propertyGrid;
         private ToolStripStatusLabel progressStatus;
         private DataGridViewTextBoxColumn IndexColumn1;
         private DataGridViewTextBoxColumn exportColumn1;
@@ -483,5 +536,9 @@
         private DataGridViewTextBoxColumn nameTableIndex;
         private DataGridViewTextBoxColumn nameTableName;
         private DataGridViewTextBoxColumn nameTableFlags;
+        private TabControl tabControl2;
+        private TabPage objectsPage;
+        private TabPage propertyFilePage;
+        private Panel panel3;
     }
 }

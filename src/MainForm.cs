@@ -33,14 +33,22 @@ namespace MHUpkManager
         private async Task LoadUpkFile(UnrealUpkFile upkFile)
         {
             upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
-            await Task.Run(() => upkFile.Header.ReadHeaderAsync(OnLoadProgress));
-            nameGridView.DataSource = ViewEntities.GetDataSource(upkFile.Header.NameTable);
-            importGridView.DataSource = ViewEntities.GetDataSource(upkFile.Header.ImportTable);
-            exportGridView.DataSource = ViewEntities.GetDataSource(upkFile.Header.ExportTable);
+            var header = upkFile.Header;
+            await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
+            nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
+            importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
+            exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable); 
+            propertyGrid.SelectedObject = new UnrealHeaderViewModel(header);
         }
 
         private void OnLoadProgress(UnrealLoadProgress progress)
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => OnLoadProgress(progress)));
+                return;
+            }
+
             totalStatus.Text = $"{progress.Current:N0}";
 
             if (progress.IsComplete)
