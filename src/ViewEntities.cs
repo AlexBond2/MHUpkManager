@@ -26,8 +26,8 @@ namespace MHUpkManager
                 Index = entry.TableIndex,
                 Object = entry.NameTableIndex?.Name,
                 Class = entry.TypeReferenceNameIndex?.Name,
-                Pakage = entry.ParentReferenceNameIndex?.Name,
-                Group = entry.OwnerReferenceNameIndex?.Name,
+                Pakage = entry.OwnerReferenceNameIndex?.Name,
+                Group = entry.ParentReferenceNameIndex?.Name,
                 Flags = $"0x{entry.FlagsLow:X8}-0x{entry.FlagsHigh:X8}",
                 Size = entry.SerialDataSize,
                 Offset = entry.SerialDataOffset

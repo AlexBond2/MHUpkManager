@@ -46,6 +46,9 @@
             propertyGrid1 = new PropertyGrid();
             namePage = new TabPage();
             nameGridView = new DataGridView();
+            nameTableIndex = new DataGridViewTextBoxColumn();
+            nameTableName = new DataGridViewTextBoxColumn();
+            nameTableFlags = new DataGridViewTextBoxColumn();
             importPage = new TabPage();
             importGridView = new DataGridView();
             importIndex = new DataGridViewTextBoxColumn();
@@ -63,9 +66,6 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             exportColumn6 = new DataGridViewTextBoxColumn();
-            nameTableIndex = new DataGridViewTextBoxColumn();
-            nameTableName = new DataGridViewTextBoxColumn();
-            nameTableFlags = new DataGridViewTextBoxColumn();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -186,10 +186,10 @@
             // 
             // tabControl1
             // 
-            tabControl1.Controls.Add(propertyPage);
             tabControl1.Controls.Add(namePage);
             tabControl1.Controls.Add(importPage);
             tabControl1.Controls.Add(exportPage);
+            tabControl1.Controls.Add(propertyPage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
@@ -241,6 +241,29 @@
             nameGridView.RowHeadersVisible = false;
             nameGridView.Size = new Size(643, 413);
             nameGridView.TabIndex = 1;
+            // 
+            // nameTableIndex
+            // 
+            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableIndex.DataPropertyName = "Index";
+            nameTableIndex.HeaderText = "Index";
+            nameTableIndex.Name = "nameTableIndex";
+            nameTableIndex.Width = 50;
+            // 
+            // nameTableName
+            // 
+            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            nameTableName.DataPropertyName = "Name";
+            nameTableName.HeaderText = "Name";
+            nameTableName.Name = "nameTableName";
+            // 
+            // nameTableFlags
+            // 
+            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableFlags.DataPropertyName = "Flags";
+            nameTableFlags.HeaderText = "Flags";
+            nameTableFlags.Name = "nameTableFlags";
+            nameTableFlags.Width = 120;
             // 
             // importPage
             // 
@@ -386,29 +409,6 @@
             exportColumn6.HeaderText = "Offset";
             exportColumn6.Name = "exportColumn6";
             exportColumn6.Width = 50;
-            // 
-            // nameTableIndex
-            // 
-            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            nameTableIndex.DataPropertyName = "Index";
-            nameTableIndex.HeaderText = "Index";
-            nameTableIndex.Name = "nameTableIndex";
-            nameTableIndex.Width = 50;
-            // 
-            // nameTableName
-            // 
-            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            nameTableName.DataPropertyName = "Name";
-            nameTableName.HeaderText = "Name";
-            nameTableName.Name = "nameTableName";
-            // 
-            // nameTableFlags
-            // 
-            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            nameTableFlags.DataPropertyName = "Flags";
-            nameTableFlags.HeaderText = "Flags";
-            nameTableFlags.Name = "nameTableFlags";
-            nameTableFlags.Width = 120;
             // 
             // MainForm
             // 

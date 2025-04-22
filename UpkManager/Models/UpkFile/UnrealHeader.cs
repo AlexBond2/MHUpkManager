@@ -163,7 +163,7 @@ namespace UpkManager.Models.UpkFile
             message.Total = ExportTableCount;
 
             progress?.Invoke(message);
-
+            /*
             await ExportTable.ForEachAsync(export =>
             {
                 return export.ReadUnrealObject(reader).ContinueWith(t =>
@@ -172,7 +172,7 @@ namespace UpkManager.Models.UpkFile
 
                     if (ExportTableCount > 100) progress?.Invoke(message);
                 });
-            });
+            });*/
 
             message.IsComplete = true;
 
@@ -504,7 +504,7 @@ namespace UpkManager.Models.UpkFile
 
             progress?.Invoke(message);
 
-            await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
+            // await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
         }
 
         private async Task writeImportTable()
