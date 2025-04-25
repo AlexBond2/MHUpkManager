@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
+using UpkManager.Models.UpkFile.Objects.Textures;
 using UpkManager.Models.UpkFile.Tables;
 
 
@@ -43,7 +44,7 @@ namespace UpkManager.Models.UpkFile
             ImportTable = new List<UnrealImportTableEntry>();
 
             AdditionalPackagesToCook = new List<UnrealString>();
-            TextureAllocations = new List<byte[]>();
+            TextureAllocations = new();
         }
 
         #endregion Constructor
@@ -63,20 +64,17 @@ namespace UpkManager.Models.UpkFile
         public uint Flags { get; private set; }
 
         public int NameTableCount { get; private set; }
-
         public int NameTableOffset { get; private set; }
 
         public int ExportTableCount { get; private set; }
-
         public int ExportTableOffset { get; private set; }
 
         public int ImportTableCount { get; private set; }
-
         public int ImportTableOffset { get; private set; }
 
         public int DependsTableOffset { get; private set; }
-
         public int ImportExportGuidsOffset { get; private set; }
+
         public int ImportGuidsCount { get; private set; }
         public int ExportGuidsCount { get; private set; }
 
@@ -89,19 +87,16 @@ namespace UpkManager.Models.UpkFile
         public List<UnrealGenerationTableEntry> GenerationTable { get; private set; }
 
         public uint EngineVersion { get; private set; }
-
         public uint CookerVersion { get; private set; }
 
         public uint CompressionFlags { get; private set; }
-
         public int CompressionTableCount { get; private set; }
-
         public List<UnrealCompressedChunk> CompressedChunks { get; private set; }
 
         public uint PackageSource { get; private set; }
 
         public List<UnrealString> AdditionalPackagesToCook { get; private set; }
-        public List<byte[]> TextureAllocations { get; private set; }
+        public UnrealTextureAllocations TextureAllocations { get; private set; }
 
         public List<UnrealNameTableEntry> NameTable { get; }
 
@@ -197,7 +192,7 @@ namespace UpkManager.Models.UpkFile
         {
             if (CompressedChunks.Any()) throw new NotSupportedException("Cannot rebuild compressed files. Yet.");
 
-            BuilderSize = sizeof(uint) * 7
+            BuilderSize = sizeof(uint) * 7 // TODO recalc
                         + sizeof(ushort) * 2
                         + sizeof(int) * 10
                         + Group.GetBuilderSize()
@@ -297,30 +292,30 @@ namespace UpkManager.Models.UpkFile
 
             PackageSource = reader.ReadUInt32();
 
-            int count = reader.ReadInt32();
+            await readAdditionalPackagesToCook();
+
+            TextureAllocations.ReadTextureAllocations(reader);
+        }
+
+        private async Task readAdditionalPackagesToCook()
+        {
             AdditionalPackagesToCook.Clear();
+
+            int count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
                 var pakageToCook = new UnrealString();
                 await pakageToCook.ReadString(reader);
                 AdditionalPackagesToCook.Add(pakageToCook);
             }
+        }
 
-            count = reader.ReadInt32();
-            TextureAllocations.Clear();
-            for (int i = 0; i < count; i++)
+        private async Task writeAdditionalPackagesToCook()
+        {
+            writer.WriteInt32(AdditionalPackagesToCook.Count);
+            foreach (var package in AdditionalPackagesToCook)
             {
-                // TODO TextureType ?
-
-                reader.ReadInt32();
-                reader.ReadInt32();
-                reader.ReadInt32();
-                reader.ReadUInt32();
-                reader.ReadUInt32();
-                int count2 = reader.ReadInt32();
-                byte[] pakageToCook = await reader.ReadBytes(count2 * 4);
-
-                TextureAllocations.Add(pakageToCook);
+                await package.WriteBuffer(writer, 0);
             }
         }
 
@@ -350,11 +345,11 @@ namespace UpkManager.Models.UpkFile
 
             writer.WriteInt32(BuilderDependsTableOffset);
 
-            writer.WriteInt32(ImportExportGuidsOffset); 
+            writer.WriteInt32(ImportExportGuidsOffset); // TODO BuilderOffset
             writer.WriteInt32(ImportGuidsCount);
             writer.WriteInt32(ExportGuidsCount);
 
-            writer.WriteInt32(ThumbnailTableOffset);
+            writer.WriteInt32(ThumbnailTableOffset); // TODO BuilderOffset
 
             await writer.WriteBytes(Guid);
 
@@ -371,20 +366,18 @@ namespace UpkManager.Models.UpkFile
 
             writer.WriteUInt32(PackageSource);
 
-            writer.WriteInt32(AdditionalPackagesToCook.Count);
-            // write AdditionalPackagesToCook ? 
+            await writeAdditionalPackagesToCook();
 
-            writer.WriteInt32(TextureAllocations.Count);
-            // write TextureAllocations ? 
+            await TextureAllocations.WriteBuffer(writer, 0);
         }
 
         private async Task<List<UnrealGenerationTableEntry>> readGenerationTable()
         {
-            List<UnrealGenerationTableEntry> generations = new List<UnrealGenerationTableEntry>();
+            List<UnrealGenerationTableEntry> generations = [];
 
             for (int i = 0; i < GenerationTableCount; ++i)
             {
-                UnrealGenerationTableEntry info = new UnrealGenerationTableEntry();
+                var info = new UnrealGenerationTableEntry();
 
                 await Task.Run(() => info.ReadGenerationTableEntry(reader));
 
@@ -404,11 +397,11 @@ namespace UpkManager.Models.UpkFile
 
         private async Task<List<UnrealCompressedChunk>> readCompressedChunksTable()
         {
-            List<UnrealCompressedChunk> chunks = new List<UnrealCompressedChunk>();
+            List<UnrealCompressedChunk> chunks = [];
 
             for (int i = 0; i < CompressionTableCount; ++i)
             {
-                UnrealCompressedChunk chunk = new UnrealCompressedChunk();
+                var chunk = new UnrealCompressedChunk();
 
                 await chunk.ReadCompressedChunk(reader);
 
