@@ -206,8 +206,8 @@ namespace MHUpkManager
         public string Size => $"{_entry.Width}x{_entry.Height}";
 
         public int MipMaps => _entry.MipMapsCount;
-        public uint Format => _entry.TextureFormat;
-        public uint CreateFlags => _entry.TextureCreateFlags;
+        public EPixelFormat Format => (EPixelFormat)_entry.TextureFormat;
+        public ETextureCreateFlags CreateFlags => (ETextureCreateFlags)_entry.TextureCreateFlags;
 
         [Editor(typeof(CollectionView), typeof(UITypeEditor))]
         public List<int> Indices => _entry.TextureIndices;
@@ -227,7 +227,7 @@ namespace MHUpkManager
     {
         private readonly Int32[] _indices = list.Select(i => new Int32(i)).ToArray();
         [Category("Collection")]
-        public Int32[] Indicies => _indices;
+        public Int32[] Indices => _indices;
     }
 
     public class CollectionView : UITypeEditor
