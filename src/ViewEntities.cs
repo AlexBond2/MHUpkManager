@@ -148,7 +148,7 @@ namespace MHUpkManager
 
         [Category("Unreal Extra")]
         [DisplayName("Generations")]
-        public int GenerationTableCount { get; }
+        public GenerationEntry[] Generations { get; }
 
         [Category("Unreal Extra")]
         [DisplayName("Packages to cook")]
@@ -174,7 +174,7 @@ namespace MHUpkManager
             EngineVersion = header.EngineVersion;
             DependsTableOffset = header.DependsTableOffset;
             ThumbnailTableOffset = header.ThumbnailTableOffset;
-            GenerationTableCount = header.GenerationTableCount;
+            Generations = header.GenerationTable.Select((e, i) => new GenerationEntry(e, i)).ToArray();
             AdditionalPackagesToCookCount = header.AdditionalPackagesToCook.Count;
             TextureAllocationsCount = header.TextureAllocations.Count;
 
@@ -183,4 +183,24 @@ namespace MHUpkManager
         }
     }
 
+    [TypeConverter(typeof(ExpandableObjectConverter))]
+    public class GenerationEntry
+    {
+        private readonly UnrealGenerationTableEntry _entry;
+        private readonly int _index;
+
+        public GenerationEntry(UnrealGenerationTableEntry entry, int index)
+        {
+            _entry = entry;
+            _index = index;
+        }
+
+        [DisplayName("Exports")]
+        public int ExportCount => _entry.ExportTableCount;
+        [DisplayName("Names")]
+        public int NameCount => _entry.NameTableCount;
+        public int NetObjects => _entry.NetObjectCount;
+
+        public override string ToString() => $"[{_index}] Generation Table";
+    }
 }
