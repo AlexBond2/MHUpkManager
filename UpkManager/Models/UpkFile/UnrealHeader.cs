@@ -235,7 +235,7 @@ namespace UpkManager.Models.UpkFile
 
             await writeImportTable();
 
-            await encodePointers();
+            //await encodePointers();
 
             await writeExportTable();
 
@@ -545,13 +545,14 @@ namespace UpkManager.Models.UpkFile
             }
         }
 
-        private async Task readDependsTable()
+        private Task readDependsTable()
         {
             reader.Seek(DependsTableOffset);
 
             DependsTable.Clear();
             for (int i = 0; i < ExportTableCount; i++)
                 DependsTable.Add(reader.ReadInt32());
+            return Task.CompletedTask;
         }
 
         private async Task writeDependsTable()

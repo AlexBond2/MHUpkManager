@@ -51,9 +51,6 @@
             tabControl1 = new TabControl();
             namePage = new TabPage();
             nameGridView = new DataGridView();
-            nameTableIndex = new DataGridViewTextBoxColumn();
-            nameTableName = new DataGridViewTextBoxColumn();
-            nameTableFlags = new DataGridViewTextBoxColumn();
             importPage = new TabPage();
             importGridView = new DataGridView();
             importIndex = new DataGridViewTextBoxColumn();
@@ -63,15 +60,17 @@
             importPakage = new DataGridViewTextBoxColumn();
             exportPage = new TabPage();
             exportGridView = new DataGridView();
-            propertyPage = new TabPage();
             IndexColumn1 = new DataGridViewTextBoxColumn();
             exportColumn1 = new DataGridViewTextBoxColumn();
             exportColumn2 = new DataGridViewTextBoxColumn();
             exportOuter = new DataGridViewTextBoxColumn();
-            exportArchetype = new DataGridViewTextBoxColumn();
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
-            exportColumn6 = new DataGridViewTextBoxColumn();
+            buttonColumn = new DataGridViewButtonColumn();
+            propertyPage = new TabPage();
+            nameTableIndex = new DataGridViewTextBoxColumn();
+            nameTableName = new DataGridViewTextBoxColumn();
+            nameTableFlags = new DataGridViewTextBoxColumn();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -97,7 +96,7 @@
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(981, 24);
+            menuStrip1.Size = new Size(1218, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -125,9 +124,9 @@
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, totalStatus, progressStatus });
-            statusStrip1.Location = new Point(0, 465);
+            statusStrip1.Location = new Point(0, 582);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(981, 22);
+            statusStrip1.Size = new Size(1218, 22);
             statusStrip1.TabIndex = 1;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -163,8 +162,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(tabControl1);
-            splitContainer1.Size = new Size(981, 441);
-            splitContainer1.SplitterDistance = 326;
+            splitContainer1.Size = new Size(1218, 558);
+            splitContainer1.SplitterDistance = 404;
             splitContainer1.TabIndex = 2;
             // 
             // tabControl2
@@ -175,7 +174,7 @@
             tabControl2.Location = new Point(0, 0);
             tabControl2.Name = "tabControl2";
             tabControl2.SelectedIndex = 0;
-            tabControl2.Size = new Size(326, 441);
+            tabControl2.Size = new Size(404, 558);
             tabControl2.TabIndex = 1;
             // 
             // propertyFilePage
@@ -184,7 +183,7 @@
             propertyFilePage.Location = new Point(4, 24);
             propertyFilePage.Name = "propertyFilePage";
             propertyFilePage.Padding = new Padding(3);
-            propertyFilePage.Size = new Size(318, 413);
+            propertyFilePage.Size = new Size(396, 530);
             propertyFilePage.TabIndex = 1;
             propertyFilePage.Text = "File Properties";
             propertyFilePage.UseVisualStyleBackColor = true;
@@ -197,7 +196,7 @@
             propertyGrid.HelpBorderColor = SystemColors.GradientActiveCaption;
             propertyGrid.Location = new Point(3, 3);
             propertyGrid.Name = "propertyGrid";
-            propertyGrid.Size = new Size(312, 407);
+            propertyGrid.Size = new Size(390, 524);
             propertyGrid.TabIndex = 0;
             // 
             // objectsPage
@@ -206,7 +205,7 @@
             objectsPage.Location = new Point(4, 24);
             objectsPage.Name = "objectsPage";
             objectsPage.Padding = new Padding(3);
-            objectsPage.Size = new Size(318, 413);
+            objectsPage.Size = new Size(396, 530);
             objectsPage.TabIndex = 0;
             objectsPage.Text = "Objects";
             objectsPage.UseVisualStyleBackColor = true;
@@ -218,7 +217,7 @@
             panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(3, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(312, 407);
+            panel1.Size = new Size(390, 524);
             panel1.TabIndex = 0;
             // 
             // panel3
@@ -227,7 +226,7 @@
             panel3.Dock = DockStyle.Fill;
             panel3.Location = new Point(0, 40);
             panel3.Name = "panel3";
-            panel3.Size = new Size(312, 367);
+            panel3.Size = new Size(390, 484);
             panel3.TabIndex = 2;
             // 
             // treeView1
@@ -235,7 +234,7 @@
             treeView1.Dock = DockStyle.Fill;
             treeView1.Location = new Point(0, 0);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(312, 367);
+            treeView1.Size = new Size(390, 484);
             treeView1.TabIndex = 0;
             // 
             // panel2
@@ -244,7 +243,7 @@
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 0);
             panel2.Name = "panel2";
-            panel2.Size = new Size(312, 40);
+            panel2.Size = new Size(390, 40);
             panel2.TabIndex = 1;
             // 
             // tabControl1
@@ -257,7 +256,7 @@
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(651, 441);
+            tabControl1.Size = new Size(810, 558);
             tabControl1.TabIndex = 0;
             // 
             // namePage
@@ -265,7 +264,7 @@
             namePage.Controls.Add(nameGridView);
             namePage.Location = new Point(4, 24);
             namePage.Name = "namePage";
-            namePage.Size = new Size(643, 413);
+            namePage.Size = new Size(802, 530);
             namePage.TabIndex = 3;
             namePage.Text = "Name Table";
             namePage.UseVisualStyleBackColor = true;
@@ -303,38 +302,15 @@
             nameGridView.Location = new Point(0, 0);
             nameGridView.Name = "nameGridView";
             nameGridView.RowHeadersVisible = false;
-            nameGridView.Size = new Size(643, 413);
+            nameGridView.Size = new Size(802, 530);
             nameGridView.TabIndex = 1;
-            // 
-            // nameTableIndex
-            // 
-            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            nameTableIndex.DataPropertyName = "Index";
-            nameTableIndex.HeaderText = "Index";
-            nameTableIndex.Name = "nameTableIndex";
-            nameTableIndex.Width = 50;
-            // 
-            // nameTableName
-            // 
-            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            nameTableName.DataPropertyName = "Name";
-            nameTableName.HeaderText = "Name";
-            nameTableName.Name = "nameTableName";
-            // 
-            // nameTableFlags
-            // 
-            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            nameTableFlags.DataPropertyName = "Flags";
-            nameTableFlags.HeaderText = "Flags";
-            nameTableFlags.Name = "nameTableFlags";
-            nameTableFlags.Width = 120;
             // 
             // importPage
             // 
             importPage.Controls.Add(importGridView);
             importPage.Location = new Point(4, 24);
             importPage.Name = "importPage";
-            importPage.Size = new Size(643, 413);
+            importPage.Size = new Size(802, 530);
             importPage.TabIndex = 1;
             importPage.Text = "Import Table";
             importPage.UseVisualStyleBackColor = true;
@@ -358,7 +334,7 @@
             importGridView.Name = "importGridView";
             importGridView.ReadOnly = true;
             importGridView.RowHeadersVisible = false;
-            importGridView.Size = new Size(643, 413);
+            importGridView.Size = new Size(802, 530);
             importGridView.TabIndex = 0;
             importGridView.CellValueNeeded += importGridView_CellValueNeeded;
             // 
@@ -407,7 +383,7 @@
             exportPage.Controls.Add(exportGridView);
             exportPage.Location = new Point(4, 24);
             exportPage.Name = "exportPage";
-            exportPage.Size = new Size(643, 413);
+            exportPage.Size = new Size(802, 530);
             exportPage.TabIndex = 2;
             exportPage.Text = "Export Table";
             exportPage.UseVisualStyleBackColor = true;
@@ -422,7 +398,7 @@
             exportGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             exportGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             exportGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportOuter, exportArchetype, exportColumn4, exportColumn5, exportColumn6 });
+            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportOuter, exportColumn4, exportColumn5, buttonColumn });
             exportGridView.DefaultCellStyle = dataGridViewCellStyle2;
             exportGridView.Dock = DockStyle.Fill;
             exportGridView.EnableHeadersVisualStyles = false;
@@ -430,19 +406,10 @@
             exportGridView.Location = new Point(0, 0);
             exportGridView.Name = "exportGridView";
             exportGridView.RowHeadersVisible = false;
-            exportGridView.Size = new Size(643, 413);
+            exportGridView.Size = new Size(802, 530);
             exportGridView.TabIndex = 1;
+            exportGridView.CellContentClick += exportGridView_CellContentClick;
             exportGridView.CellValueNeeded += exportGridView_CellValueNeeded;
-            // 
-            // propertyPage
-            // 
-            propertyPage.Location = new Point(4, 24);
-            propertyPage.Name = "propertyPage";
-            propertyPage.Padding = new Padding(3);
-            propertyPage.Size = new Size(643, 413);
-            propertyPage.TabIndex = 0;
-            propertyPage.Text = "Object Properties";
-            propertyPage.UseVisualStyleBackColor = true;
             // 
             // IndexColumn1
             // 
@@ -453,10 +420,10 @@
             // 
             // exportColumn1
             // 
+            exportColumn1.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             exportColumn1.DataPropertyName = "Object";
             exportColumn1.HeaderText = "Object";
             exportColumn1.Name = "exportColumn1";
-            exportColumn1.Width = 180;
             // 
             // exportColumn2
             // 
@@ -471,12 +438,6 @@
             exportOuter.HeaderText = "Outer";
             exportOuter.Name = "exportOuter";
             // 
-            // exportArchetype
-            // 
-            exportArchetype.DataPropertyName = "Archetype";
-            exportArchetype.HeaderText = "Archetype";
-            exportArchetype.Name = "exportArchetype";
-            // 
             // exportColumn4
             // 
             exportColumn4.DataPropertyName = "Flags";
@@ -489,20 +450,55 @@
             exportColumn5.DataPropertyName = "SerialSize";
             exportColumn5.HeaderText = "Size";
             exportColumn5.Name = "exportColumn5";
-            exportColumn5.Width = 50;
+            exportColumn5.Width = 70;
             // 
-            // exportColumn6
+            // buttonColumn
             // 
-            exportColumn6.DataPropertyName = "SerialOffset";
-            exportColumn6.HeaderText = "Offset";
-            exportColumn6.Name = "exportColumn6";
-            exportColumn6.Width = 50;
+            buttonColumn.DataPropertyName = "Details";
+            buttonColumn.HeaderText = "Details";
+            buttonColumn.Name = "buttonColumn";
+            buttonColumn.Text = "...";
+            buttonColumn.UseColumnTextForButtonValue = true;
+            buttonColumn.Width = 50;
+            // 
+            // propertyPage
+            // 
+            propertyPage.Location = new Point(4, 24);
+            propertyPage.Name = "propertyPage";
+            propertyPage.Padding = new Padding(3);
+            propertyPage.Size = new Size(802, 530);
+            propertyPage.TabIndex = 0;
+            propertyPage.Text = "Object Properties";
+            propertyPage.UseVisualStyleBackColor = true;
+            // 
+            // nameTableIndex
+            // 
+            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableIndex.DataPropertyName = "Index";
+            nameTableIndex.HeaderText = "Index";
+            nameTableIndex.Name = "nameTableIndex";
+            nameTableIndex.Width = 50;
+            // 
+            // nameTableName
+            // 
+            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            nameTableName.DataPropertyName = "Name";
+            nameTableName.HeaderText = "Name";
+            nameTableName.Name = "nameTableName";
+            // 
+            // nameTableFlags
+            // 
+            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableFlags.DataPropertyName = "Flags";
+            nameTableFlags.HeaderText = "Flags";
+            nameTableFlags.Name = "nameTableFlags";
+            nameTableFlags.Width = 150;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(981, 487);
+            ClientSize = new Size(1218, 604);
             Controls.Add(splitContainer1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
@@ -562,9 +558,6 @@
         private TabPage objectsPage;
         private TabPage propertyFilePage;
         private Panel panel3;
-        private DataGridViewTextBoxColumn nameTableIndex;
-        private DataGridViewTextBoxColumn nameTableName;
-        private DataGridViewTextBoxColumn nameTableFlags;
         private DataGridViewTextBoxColumn importIndex;
         private DataGridViewTextBoxColumn importObject;
         private DataGridViewTextBoxColumn importClass;
@@ -574,9 +567,11 @@
         private DataGridViewTextBoxColumn exportColumn1;
         private DataGridViewTextBoxColumn exportColumn2;
         private DataGridViewTextBoxColumn exportOuter;
-        private DataGridViewTextBoxColumn exportArchetype;
         private DataGridViewTextBoxColumn exportColumn4;
         private DataGridViewTextBoxColumn exportColumn5;
-        private DataGridViewTextBoxColumn exportColumn6;
+        private DataGridViewButtonColumn buttonColumn;
+        private DataGridViewTextBoxColumn nameTableIndex;
+        private DataGridViewTextBoxColumn nameTableName;
+        private DataGridViewTextBoxColumn nameTableFlags;
     }
 }

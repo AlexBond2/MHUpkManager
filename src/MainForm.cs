@@ -122,5 +122,22 @@ namespace MHUpkManager
         {
             MessageBox.Show("Save function not ready", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+
+        private void exportGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex > -1 && exportGridView.Columns[e.ColumnIndex].Name == "buttonColumn")
+            {
+                var boundItem = exportGridView.Rows[e.RowIndex].DataBoundItem;
+                var detailsProp = boundItem.GetType().GetProperty("Details");
+                var entry = detailsProp?.GetValue(boundItem);
+
+                if (entry != null)
+                {
+                    var grid = sender as DataGridView; 
+                    var parentForm = grid?.FindForm();
+                    ViewEntities.ShowPropertyGrid(entry, parentForm);
+                }
+            }
+        }
     }
 }

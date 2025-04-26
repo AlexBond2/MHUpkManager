@@ -1,15 +1,46 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Objects.Sounds;
 using UpkManager.Models.UpkFile.Objects.Textures;
 
-
 namespace UpkManager.Models.UpkFile.Tables
 {
+    [Flags]
+    public enum ExportFlags : uint
+    {
+        ForcedExport = 0x00000001U,
+    }
+
+    [Flags]
+    public enum EPackageFlags: uint
+    {
+        None = 0x00000000,
+        AllowDownload = 0x00000001,
+        ClientOptional = 0x00000002,
+        ServerSideOnly = 0x00000004,
+        Cooked = 0x00000008,
+        Unsecure = 0x00000010,
+        Encrypted = 0x00000020, 
+        Need = 0x00008000,
+        Compiling = 0x00010000,
+        ContainsMap = 0x00020000,
+        Trashcan = 0x00040000,
+        Loading = 0x00080000,
+        PlayInEditor = 0x00100000,
+        ContainsScript = 0x00200000,
+        ContainsDebugData = 0x00400000,
+        Imports = 0x00800000,
+        Compressed = 0x02000000,
+        FullyCompressed = 0x04000000,
+        DynamicImports = 0x10000000,
+        NoExportsData = 0x20000000,
+        Stripped = 0x40000000,
+        FilterEditorOnly = 0x80000000,
+    }
 
     public sealed class UnrealExportTableEntry : UnrealExportTableEntryBuilderBase
     {
@@ -19,6 +50,7 @@ namespace UpkManager.Models.UpkFile.Tables
         internal UnrealExportTableEntry()
         {
             ObjectNameIndex = new UnrealNameTableIndex();
+            NetObjects = [];
         }
 
         #endregion Constructor
@@ -35,9 +67,7 @@ namespace UpkManager.Models.UpkFile.Tables
         //
         public int ArchetypeReference { get; private set; }
 
-        public uint FlagsHigh { get; private set; }
-
-        public uint FlagsLow { get; private set; }
+        public ulong ObjectFlags { get; private set; }
 
         public int SerialDataSize { get; private set; }
 
@@ -47,11 +77,11 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public int NetObjectCount { get; private set; }
 
+        public List<int> NetObjects { get; private set; }
+
         public byte[] PackageGuid { get; private set; }
 
         public uint PackageFlags { get; private set; }
-
-        public byte[] Unknown2 { get; private set; } // 4 * NetObjectCount bytes
 
         #endregion Properties
 
@@ -83,22 +113,21 @@ namespace UpkManager.Models.UpkFile.Tables
 
             ArchetypeReference = reader.ReadInt32(); // ArchetypeIndex
 
-            FlagsHigh = reader.ReadUInt32(); // ObjectFlags
-            FlagsLow = reader.ReadUInt32();
+            ObjectFlags = reader.ReadUInt64(); // ObjectFlags
 
             SerialDataSize = reader.ReadInt32(); // SerialSize
             SerialDataOffset = reader.ReadInt32(); // SerialOffset
 
             ExportFlags = reader.ReadUInt32();
 
-            NetObjectCount = reader.ReadInt32();
+            NetObjects.Clear();
+            int netObjectCount = reader.ReadInt32();
+            for (int i = 0; i < netObjectCount; i++)
+                NetObjects.Add(reader.ReadInt32());
 
             PackageGuid = await reader.ReadBytes(16); // PackageGuid
 
             PackageFlags = reader.ReadUInt32(); // PackageFlags
-
-            if (NetObjectCount > 0)
-                Unknown2 = await reader.ReadBytes(sizeof(uint) * NetObjectCount);
         }
 
         internal void DecodePointer(uint code1, int code2, int index)
@@ -155,7 +184,7 @@ namespace UpkManager.Models.UpkFile.Tables
                         + sizeof(uint) * 4
                         + ObjectNameIndex.GetBuilderSize()
                         + PackageGuid.Length
-                        + Unknown2.Length;
+                        + NetObjects.Count * sizeof(int);
 
             return BuilderSize;
         }
@@ -171,31 +200,31 @@ namespace UpkManager.Models.UpkFile.Tables
             return BuilderSerialDataSize;
         }
 
-        public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
+        public override async Task WriteBuffer(ByteArrayWriter writer, int currentOffset)
         {
-            Writer.WriteInt32(ClassReference);
-            Writer.WriteInt32(SuperReference);
-            Writer.WriteInt32(OuterReference);
+            writer.WriteInt32(ClassReference);
+            writer.WriteInt32(SuperReference);
+            writer.WriteInt32(OuterReference);
 
-            await ObjectNameIndex.WriteBuffer(Writer, 0);
+            await ObjectNameIndex.WriteBuffer(writer, 0);
 
-            Writer.WriteInt32(ArchetypeReference);
+            writer.WriteInt32(ArchetypeReference);
 
-            Writer.WriteUInt32(FlagsHigh);
-            Writer.WriteUInt32(FlagsLow);
+            writer.WriteUInt64(ObjectFlags);
 
-            Writer.WriteInt32(BuilderSerialDataSize);
-            Writer.WriteInt32(BuilderSerialDataOffset);
+            writer.WriteInt32(BuilderSerialDataSize);
+            writer.WriteInt32(BuilderSerialDataOffset);
 
-            Writer.WriteUInt32(ExportFlags);
+            writer.WriteUInt32(ExportFlags);
 
-            Writer.WriteInt32(NetObjectCount);
+            writer.WriteInt32(NetObjects.Count);
+            foreach (var index in NetObjects)
+                writer.WriteInt32(index);
 
-            await Writer.WriteBytes(PackageGuid);
+            await writer.WriteBytes(PackageGuid);
 
-            Writer.WriteUInt32(PackageFlags);
+            writer.WriteUInt32(PackageFlags);
 
-            await Writer.WriteBytes(Unknown2);
         }
 
         public override async Task<ByteArrayWriter> WriteObjectBuffer()

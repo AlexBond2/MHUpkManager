@@ -43,9 +43,7 @@ namespace MHUpkManager
 
         public static string PrintFlags(UnrealExportTableEntry entry)
         {
-            string flags = string.Empty;
-            if (entry.FlagsHigh != 0) flags = $"{(ObjectFlagsHO)entry.FlagsHigh} | ";
-            flags += $"{(ObjectFlagsLO)entry.FlagsLow}";
+            string flags = $"{(EObjectFlags)entry.ObjectFlags}";
             if (entry.ExportFlags != 0) flags += $" | {(ExportFlags)entry.ExportFlags}";
             return flags;
         }
@@ -58,12 +56,9 @@ namespace MHUpkManager
                 Object = entry.ObjectNameIndex?.Name,
                 Class = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}",
                 Outer = entry.OuterReferenceNameIndex?.Name,
-                Archetype = entry.ArchetypeReferenceNameIndex?.Name,
                 Flags = PrintFlags(entry),
-               /* PackageGuid = new Guid(entry.PackageGuid).ToString(),
-                PackageFlags = $"0x{entry.PackageFlags:X8}",*/
                 SerialSize = entry.SerialDataSize,
-                SerialOffset = entry.SerialDataOffset
+                Details = entry
             }).ToList();
 
             return data;
@@ -83,9 +78,8 @@ namespace MHUpkManager
                 case 2: e.Value = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}"; break;
                 case 3: e.Value = entry.OuterReferenceNameIndex?.Name; break;
                 case 4: e.Value = entry.ArchetypeReferenceNameIndex?.Name; break;
-                case 5: e.Value = $"0x{entry.FlagsHigh:X8}-0x{entry.FlagsLow:X8}"; break;
-                case 6: e.Value = entry.SerialDataSize; break;
-                case 7: e.Value = entry.SerialDataOffset; break;
+                case 5: e.Value = $"0x{entry.ObjectFlags:X16}"; break;
+                case 6: e.Value = entry.SerialDataSize; break;               
             }
         }
 
@@ -95,10 +89,94 @@ namespace MHUpkManager
             {
                 Index = entry.TableIndex,
                 Name = entry.Name.String,
-                Flags = $"0x{entry.Flags:X16}"
+                Flags = (EObjectFlags)entry.Flags
             }).ToList();
 
             return data;
+        }
+
+        public static void ShowPropertyGrid(object entry, Form parent)
+        {
+            var gridControl = new PropertyGrid();
+
+            if (entry is UnrealExportTableEntry exportEntry)
+            {
+                gridControl.SelectedObject = new UnrealExportViewModel(exportEntry);
+            }
+
+            gridControl.DisabledItemForeColor = SystemColors.ControlText;
+            gridControl.ExpandAllGridItems();
+            gridControl.HelpVisible = false;
+
+            var popupForm = new Form
+            {
+                Text = "Properties View",
+                Size = new Size(440, 420),
+                StartPosition = FormStartPosition.CenterParent
+            };
+            popupForm.Controls.Add(gridControl);
+            gridControl.Dock = DockStyle.Fill;
+
+            popupForm.ShowDialog(parent);
+        }
+    }
+
+    public class UnrealExportViewModel
+    {
+        [Category("General")]
+        public int Index { get; }
+
+        [Category("General")]
+        public string Object { get; }
+
+        [Category("General")]
+        public string Class { get; }
+
+        [Category("General")]
+        public string Super { get; }
+
+        [Category("General")]
+        public string Outer { get; }
+
+        [Category("General")]
+        public string Archetype { get; }
+
+        [Category("Flags")]
+        public EObjectFlags ObjectFlags { get; }
+
+        [Category("Flags")]
+        public ExportFlags ExportFlags { get; }
+
+        [Category("Pakage")]
+        public int SerialSize { get; }
+
+        [Category("Pakage")]
+        public int SerialOffset { get; }
+
+        [Category("Pakage")]
+        public Guid PackageGuid { get; }
+
+        [Category("Pakage")]
+        public EPackageFlags PackageFlags { get; }
+
+        [Category("Pakage")]
+        public Int32[] NetObjects { get; }
+
+        public UnrealExportViewModel(UnrealExportTableEntry entry)
+        {
+            Index = entry.TableIndex;
+            Object = entry.ObjectNameIndex?.Name;
+            Class = entry.ClassReferenceNameIndex?.Name;
+            Super = entry.SuperReferenceNameIndex?.Name;
+            Outer = entry.OuterReferenceNameIndex?.Name;
+            Archetype = entry.ArchetypeReferenceNameIndex?.Name;
+            ObjectFlags = (EObjectFlags)entry.ObjectFlags;
+            ExportFlags = (ExportFlags)entry.ExportFlags;
+            SerialSize = entry.SerialDataSize;
+            SerialOffset = entry.SerialDataOffset;
+            PackageGuid = new (entry.PackageGuid);
+            PackageFlags = (EPackageFlags)entry.PackageFlags;
+            NetObjects = entry.NetObjects.Select(i => new Int32(i)).ToArray();
         }
     }
 
@@ -106,7 +184,7 @@ namespace MHUpkManager
     {
         [Category("General")]
         [DisplayName("GUID")]
-        public string Guid { get; }
+        public Guid Guid { get; }
 
         [Category("General")]
         [DisplayName("Package Source")]
@@ -189,9 +267,7 @@ namespace MHUpkManager
             Generations = header.GenerationTable.Select(e => new GenerationTable(e)).ToArray();
             AdditionalPackagesToCookCount = header.AdditionalPackagesToCook.Count;
             TextureAllocations = header.TextureAllocations.TextureTypes.Select(e => new TextureType(e)).ToArray();
-
-            var guid = new Guid(header.Guid);
-            Guid = guid.ToString();
+            Guid = new (header.Guid);
         }
     }
 

@@ -12,47 +12,57 @@ using UpkManager.Models.UpkFile.Tables;
 namespace UpkManager.Models.UpkFile.Objects
 {
     [Flags]
-    public enum ExportFlags : uint
+    public enum EObjectFlags : ulong
     {
-        ForcedExport = 0x00000001U,
-    }
+        InSingularFunc  = 1U << 1,  // 0x00000002
+        FinishDestroy   = 1U << 5,  // 0x00000020   UObject::ConditionalFinishDestroy
+        Final           = 1U << 7,  // 0x00000080
+        Protected       = 1U << 8,  // 0x00000100 
+        PropertiesObject = 1U << 9, // 0x00000200
+        ArchetypeObject = 1U << 10, // 0x00000400
+        TagForcedExport = 1U << 11, // 0x00000800
 
-    [Flags]
-    public enum ObjectFlagsLO : ulong
-    {
-        Transactional = 0x00000001U,
-        InSingularFunc = 0x00000002U,
-        Public = 0x00000004U,
+        // https://github.com/stephank/surreal/blob/master/Core/Inc/UnObjBas.h
 
-        Private = 0x00000080U,
-        Automated = 0x00000100U,
-        Protected = 0x00000800U,
+        Transactional   = 1UL << 32, // 0x00000001  Object is transactional.
+        Unreachable     = 1UL << 33, // 0x00000002  Object is not reachable on the object graph.
+        Public          = 1UL << 34, // 0x00000004  Object is visible outside its package.
+        TagImp          = 1UL << 35, // 0x00000008  Temporary import tag in load/save.
+        TagExp          = 1UL << 36, // 0x00000010	Temporary export tag in load/save.
+        SourceModified  = 1UL << 37, // 0x00000020  Modified relative to source files.
+        TagGarbage      = 1UL << 38, // 0x00000040	Check during garbage collection.
 
-        Transient = 0x00004000U,
+        f39             = 1UL << 39, // 0x00000080 
+        f40             = 1UL << 40, // 0x00000100
 
-        LoadForClient = 0x00010000U,
-        LoadForServer = 0x00020000U,
-        LoadForEdit = 0x00040000U,
-        Standalone = 0x00080000U,
-        NotForClient = 0x00100000U,
-        NotForServer = 0x00200000U,
-        NotForEdit = 0x00400000U,
+        NeedLoad        = 1UL << 41, // 0x00000200  During load, indicates object needs loading.
 
-        HasStack = 0x02000000U,
-        Native = 0x04000000U,
-        Marked = 0x08000000U,
-    }
+        f42             = 1UL << 42, // 0x00000400   
+        f43             = 1UL << 43, // 0x00000800   
 
-    [Flags]
-    public enum ObjectFlagsHO : ulong
-    {
-        Obsolete = 0x00000020U,
-        Final = 0x00000080U,
-        PerObjectLocalized = 0x00000100U,
-        Protected = 0x00000100U,
-        PropertiesObject = 0x00000200U,
-        ArchetypeObject = 0x00000400U,
-        RemappedName = 0x00000800U,
+        Suppress        = 1UL << 44, // 0x00001000	UnName.h. Suppressed log name.
+        InEndState      = 1UL << 45, // 0x00002000  Within an EndState call.
+        Transient       = 1UL << 46, // 0x00004000	Don't save object.
+        PreLoading      = 1UL << 47, // 0x00008000  Data is being preloaded from file.
+        LoadForClient   = 1UL << 48, // 0x00010000	In-file load for client.
+        LoadForServer   = 1UL << 49, // 0x00020000	In-file load for client.
+        LoadForEdit     = 1UL << 50, // 0x00040000	In-file load for client.
+        Standalone      = 1UL << 51, // 0x00080000  Keep object around for editing even if unreferenced.
+        NotForClient    = 1UL << 52, // 0x00100000  Don't load this object for the game client.
+        NotForServer    = 1UL << 53, // 0x00200000  Don't load this object for the game server.
+        NotForEdit      = 1UL << 54, // 0x00400000	Don't load this object for the editor.    
+        Destroyed       = 1UL << 55, // 0x00800000	Object Destroy has already been called.
+        NeedPostLoad    = 1UL << 56, // 0x01000000  Object needs to be postloaded.
+        HasStack        = 1UL << 57, // 0x02000000	Has execution stack.
+        Native          = 1UL << 58, // 0x04000000  Native (UClass only).
+        Marked          = 1UL << 59, // 0x08000000  Marked (for debugging).
+        ErrorShutdown   = 1UL << 60, // 0x10000000	ShutdownAfterError called.
+        DebugPostLoad   = 1UL << 61, // 0x20000000  For debugging Serialize calls.
+        DebugSerialize  = 1UL << 62, // 0x40000000  For debugging Serialize calls.
+        DebugDestroy    = 1UL << 63, // 0x80000000  For debugging Destroy calls.
+
+        ContextFlags    = NotForClient | NotForServer | NotForEdit, 
+        LoadContextFlags = LoadForClient | LoadForServer | LoadForEdit, 
     }
 
     public class UnrealObjectBase : UnrealUpkBuilderBase
