@@ -27,7 +27,7 @@ namespace UpkManager.Models.UpkFile.Properties
         {
             await base.ReadPropertyValue(reader, size, header);
 
-            ObjectIndexName = header.GetObjectTableEntry(IntValue)?.NameTableIndex;
+            ObjectIndexName = header.GetObjectTableEntry(IntValue)?.ObjectNameIndex;
         }
 
         #endregion Unreal Methods

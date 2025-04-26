@@ -31,7 +31,7 @@ namespace UpkManager.Models.UpkFile.Objects
         {
             ArchetypeObjectReference = reader.ReadInt32();
 
-            ArchetypeObjectNameIndex = header.GetObjectTableEntry(ArchetypeObjectReference)?.NameTableIndex;
+            ArchetypeObjectNameIndex = header.GetObjectTableEntry(ArchetypeObjectReference)?.ObjectNameIndex;
 
             await base.ReadUnrealObject(reader, header, export, skipProperties, skipParse);
         }

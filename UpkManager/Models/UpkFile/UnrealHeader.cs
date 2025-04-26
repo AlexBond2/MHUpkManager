@@ -122,7 +122,7 @@ namespace UpkManager.Models.UpkFile
 
         public async Task ReadHeaderAsync(Action<UnrealLoadProgress> progress)
         {
-            UnrealLoadProgress message = new UnrealLoadProgress { Text = "Parsing Header..." };
+            var message = new UnrealLoadProgress { Text = "Parsing Header..." };
 
             progress?.Invoke(message);
 
@@ -146,13 +146,17 @@ namespace UpkManager.Models.UpkFile
 
             await readExportTable(progress);
 
+            await ExportTable.ForEachAsync(export => Task.Run(() => export.ExpandReferences(this)));
+
+            await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
+
             message.Text = "Slicing and Dicing...";
 
             progress?.Invoke(message);
 
             await readDependsTable();
 
-            await decodePointers();
+            // await decodePointers();
 
             message.Text = "Reading Objects...";
             message.Total = ExportTableCount;
@@ -446,13 +450,13 @@ namespace UpkManager.Models.UpkFile
 
         private async Task readNameTable(Action<UnrealLoadProgress> progress)
         {
-            UnrealLoadProgress message = new UnrealLoadProgress { Text = "Reading Name Table...", Current = 0, Total = NameTableCount };
+            var message = new UnrealLoadProgress { Text = "Reading Name Table...", Current = 0, Total = NameTableCount };
 
             reader.Seek(NameTableOffset);
 
             for (int i = 0; i < NameTableCount; ++i)
             {
-                UnrealNameTableEntry name = new UnrealNameTableEntry { TableIndex = i };
+                var name = new UnrealNameTableEntry { TableIndex = i };
 
                 await name.ReadNameTableEntry(reader);
 
@@ -474,13 +478,13 @@ namespace UpkManager.Models.UpkFile
 
         private async Task readImportTable(Action<UnrealLoadProgress> progress)
         {
-            UnrealLoadProgress message = new UnrealLoadProgress { Text = "Reading Import Table...", Current = 0, Total = ImportTableCount };
+            var message = new UnrealLoadProgress { Text = "Reading Import Table...", Current = 0, Total = ImportTableCount };
 
             reader.Seek(ImportTableOffset);
 
             for (int i = 0; i < ImportTableCount; ++i)
             {
-                UnrealImportTableEntry import = new UnrealImportTableEntry { TableIndex = -(i + 1) };
+                var import = new UnrealImportTableEntry { TableIndex = -(i + 1) };
 
                 await import.ReadImportTableEntry(reader, this);
 
@@ -496,8 +500,6 @@ namespace UpkManager.Models.UpkFile
             message.Total = 0;
 
             progress?.Invoke(message);
-
-            // await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
         }
 
         private async Task writeImportTable()
@@ -510,13 +512,13 @@ namespace UpkManager.Models.UpkFile
 
         private async Task readExportTable(Action<UnrealLoadProgress> progress)
         {
-            UnrealLoadProgress message = new UnrealLoadProgress { Text = "Reading Export Table...", Current = 0, Total = ExportTableCount };
+            var message = new UnrealLoadProgress { Text = "Reading Export Table...", Current = 0, Total = ExportTableCount };
 
             reader.Seek(ExportTableOffset);
 
             for (int i = 0; i < ExportTableCount; ++i)
             {
-                UnrealExportTableEntry export = new UnrealExportTableEntry { TableIndex = i + 1 };
+                var export = new UnrealExportTableEntry { TableIndex = i + 1 };
 
                 await export.ReadExportTableEntry(reader, this);
 
@@ -531,9 +533,7 @@ namespace UpkManager.Models.UpkFile
             message.Current = 0;
             message.Total = 0;
 
-            progress?.Invoke(message);
-
-            await ExportTable.ForEachAsync(export => Task.Run(() => export.ExpandReferences(this)));
+            progress?.Invoke(message);            
         }
 
         private async Task writeExportTable()

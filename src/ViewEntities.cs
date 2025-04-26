@@ -14,10 +14,10 @@ namespace MHUpkManager
             var data = importTable.Select(entry => new
             {
                 Index = entry.TableIndex,
-                Object = entry.NameTableIndex?.Name,
-                Class = entry.TypeNameIndex?.Name,
+                Object = entry.ObjectNameIndex?.Name,
+                Class = entry.ClassNameIndex?.Name,
                 Package = entry.PackageNameIndex?.Name,
-                Group = entry.OwnerReferenceNameIndex?.Name
+                Outer = entry.OuterReferenceNameIndex?.Name
             }).ToList();
 
             return data;
@@ -33,11 +33,10 @@ namespace MHUpkManager
             switch (e.ColumnIndex)
             {
                 case 0: e.Value = entry.TableIndex; break;
-                case 1: e.Value = entry.NameTableIndex?.Name; break;
-                case 2: e.Value = entry.TypeNameIndex?.Name; break;
-                case 3: e.Value = entry.OwnerReferenceNameIndex?.Name; break;
+                case 1: e.Value = entry.ObjectNameIndex?.Name; break;
+                case 2: e.Value = entry.ClassNameIndex?.Name; break;
+                case 3: e.Value = entry.OuterReferenceNameIndex?.Name; break;
                 case 4: e.Value = entry.PackageNameIndex?.Name; break;
-                case 5: e.Value = entry.OwnerReferenceNameIndex?.Name; break;
             }
         }
 
@@ -46,13 +45,16 @@ namespace MHUpkManager
             var data = exportTable.Select(entry => new
             {
                 Index = entry.TableIndex,
-                Object = entry.NameTableIndex?.Name,
-                Class = entry.TypeReferenceNameIndex?.Name,
-                Pakage = entry.OwnerReferenceNameIndex?.Name,
-                Group = entry.ParentReferenceNameIndex?.Name,
+                Object = entry.ObjectNameIndex?.Name,
+                Class = entry.ClassReferenceNameIndex?.Name,
+                Super = entry.SuperReferenceNameIndex?.Name,
+                Outer = entry.OuterReferenceNameIndex?.Name,
+                Archetype = entry.ArchetypeReferenceNameIndex?.Name,
                 Flags = $"0x{entry.FlagsLow:X8}-0x{entry.FlagsHigh:X8}",
-                Size = entry.SerialDataSize,
-                Offset = entry.SerialDataOffset
+               /* PackageGuid = new Guid(entry.PackageGuid).ToString(),
+                PackageFlags = $"0x{entry.PackageFlags:X8}",*/
+                SerialSize = entry.SerialDataSize,
+                SerialOffset = entry.SerialDataOffset
             }).ToList();
 
             return data;
@@ -68,10 +70,10 @@ namespace MHUpkManager
             switch (e.ColumnIndex)
             {
                 case 0: e.Value = entry.TableIndex; break;
-                case 1: e.Value = entry.NameTableIndex?.Name; break;
-                case 2: e.Value = entry.TypeReferenceNameIndex?.Name; break;
-                case 3: e.Value = entry.OwnerReferenceNameIndex?.Name; break;
-                case 4: e.Value = entry.ParentReferenceNameIndex?.Name; break;
+                case 1: e.Value = entry.ObjectNameIndex?.Name; break;
+                case 2: e.Value = entry.ClassReferenceNameIndex?.Name; break;
+                case 3: e.Value = entry.OuterReferenceNameIndex?.Name; break;
+                case 4: e.Value = entry.SuperReferenceNameIndex?.Name; break;
                 case 5: e.Value = $"0x{entry.FlagsLow:X8}-0x{entry.FlagsHigh:X8}"; break;
                 case 6: e.Value = entry.SerialDataSize; break;
                 case 7: e.Value = entry.SerialDataOffset; break;

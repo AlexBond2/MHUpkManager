@@ -18,16 +18,16 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal UnrealExportTableEntry()
         {
-            NameTableIndex = new UnrealNameTableIndex();
+            ObjectNameIndex = new UnrealNameTableIndex();
         }
 
         #endregion Constructor
 
         #region Properties
 
-        public int TypeReference { get; private set; }
+        public int ClassReference { get; private set; }
 
-        public int ParentReference { get; private set; }
+        public int SuperReference { get; private set; }
         //
         // OwnerReference in ObjectTableEntryBase
         //
@@ -47,9 +47,9 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public int NetObjectCount { get; private set; }
 
-        public byte[] Guid { get; private set; }
+        public byte[] PackageGuid { get; private set; }
 
-        public uint Unknown1 { get; private set; }
+        public uint PackageFlags { get; private set; }
 
         public byte[] Unknown2 { get; private set; } // 4 * NetObjectCount bytes
 
@@ -61,11 +61,11 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public UnrealObjectBase UnrealObject { get; private set; }
 
-        public UnrealNameTableIndex TypeReferenceNameIndex { get; private set; }
+        public UnrealNameTableIndex ClassReferenceNameIndex { get; private set; }
 
-        public UnrealNameTableIndex ParentReferenceNameIndex { get; private set; }
+        public UnrealNameTableIndex SuperReferenceNameIndex { get; private set; }
 
-        public UnrealNameTableIndex OwnerReferenceNameIndex { get; private set; }
+        public UnrealNameTableIndex OuterReferenceNameIndex { get; private set; }
 
         public UnrealNameTableIndex ArchetypeReferenceNameIndex { get; private set; }
 
@@ -75,29 +75,30 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal async Task ReadExportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
-            TypeReference = reader.ReadInt32();
-            ParentReference = reader.ReadInt32();
-            OwnerReference = reader.ReadInt32();
+            ClassReference = reader.ReadInt32(); // ClassIndex
+            SuperReference = reader.ReadInt32(); // SuperIndex
+            OuterReference = reader.ReadInt32(); // OuterIndex
 
-            NameTableIndex.ReadNameTableIndex(reader, header);
+            ObjectNameIndex.ReadNameTableIndex(reader, header); // ObjectName
 
-            ArchetypeReference = reader.ReadInt32();
+            ArchetypeReference = reader.ReadInt32(); // ArchetypeIndex
 
-            FlagsHigh = reader.ReadUInt32();
+            FlagsHigh = reader.ReadUInt32(); // ObjectFlags
             FlagsLow = reader.ReadUInt32();
 
-            SerialDataSize = reader.ReadInt32();
-            SerialDataOffset = reader.ReadInt32();
+            SerialDataSize = reader.ReadInt32(); // SerialSize
+            SerialDataOffset = reader.ReadInt32(); // SerialOffset
 
             ExportFlags = reader.ReadUInt32();
 
             NetObjectCount = reader.ReadInt32();
 
-            Guid = await reader.ReadBytes(16);
+            PackageGuid = await reader.ReadBytes(16); // PackageGuid
 
-            Unknown1 = reader.ReadUInt32();
+            PackageFlags = reader.ReadUInt32(); // PackageFlags
 
-            Unknown2 = await reader.ReadBytes(sizeof(uint) * NetObjectCount);
+            if (NetObjectCount > 0)
+                Unknown2 = await reader.ReadBytes(sizeof(uint) * NetObjectCount);
         }
 
         internal void DecodePointer(uint code1, int code2, int index)
@@ -126,10 +127,10 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal void ExpandReferences(UnrealHeader header)
         {
-            TypeReferenceNameIndex = header.GetObjectTableEntry(TypeReference)?.NameTableIndex;
-            ParentReferenceNameIndex = header.GetObjectTableEntry(ParentReference)?.NameTableIndex;
-            OwnerReferenceNameIndex = header.GetObjectTableEntry(OwnerReference)?.NameTableIndex;
-            ArchetypeReferenceNameIndex = header.GetObjectTableEntry(ArchetypeReference)?.NameTableIndex;
+            ClassReferenceNameIndex = header.GetObjectTableEntry(ClassReference)?.ObjectNameIndex;
+            SuperReferenceNameIndex = header.GetObjectTableEntry(SuperReference)?.ObjectNameIndex;
+            OuterReferenceNameIndex = header.GetObjectTableEntry(OuterReference)?.ObjectNameIndex;
+            ArchetypeReferenceNameIndex = header.GetObjectTableEntry(ArchetypeReference)?.ObjectNameIndex;
         }
 
         internal async Task ReadUnrealObject(ByteArrayReader reader)
@@ -152,8 +153,8 @@ namespace UpkManager.Models.UpkFile.Tables
         {
             BuilderSize = sizeof(int) * 7
                         + sizeof(uint) * 4
-                        + NameTableIndex.GetBuilderSize()
-                        + Guid.Length
+                        + ObjectNameIndex.GetBuilderSize()
+                        + PackageGuid.Length
                         + Unknown2.Length;
 
             return BuilderSize;
@@ -172,11 +173,11 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            Writer.WriteInt32(TypeReference);
-            Writer.WriteInt32(ParentReference);
-            Writer.WriteInt32(OwnerReference);
+            Writer.WriteInt32(ClassReference);
+            Writer.WriteInt32(SuperReference);
+            Writer.WriteInt32(OuterReference);
 
-            await NameTableIndex.WriteBuffer(Writer, 0);
+            await ObjectNameIndex.WriteBuffer(Writer, 0);
 
             Writer.WriteInt32(ArchetypeReference);
 
@@ -190,9 +191,9 @@ namespace UpkManager.Models.UpkFile.Tables
 
             Writer.WriteInt32(NetObjectCount);
 
-            await Writer.WriteBytes(Guid);
+            await Writer.WriteBytes(PackageGuid);
 
-            Writer.WriteUInt32(Unknown1);
+            Writer.WriteUInt32(PackageFlags);
 
             await Writer.WriteBytes(Unknown2);
         }
@@ -212,14 +213,14 @@ namespace UpkManager.Models.UpkFile.Tables
 
         private UnrealObjectBase objectTypeFactory()
         {
-            Enum.TryParse(TypeReferenceNameIndex?.Name, true, out ObjectTypes type);
+            Enum.TryParse(ClassReferenceNameIndex?.Name, true, out ObjectTypes type);
 
-            if (type == ObjectTypes.Unknown && TypeReferenceNameIndex != null)
+            if (type == ObjectTypes.Unknown && ClassReferenceNameIndex != null)
             {
-                if (TypeReferenceNameIndex.Name.StartsWith("CustomUIComp", StringComparison.CurrentCultureIgnoreCase) ||
-                    TypeReferenceNameIndex.Name.StartsWith("Distribution", StringComparison.CurrentCultureIgnoreCase) ||
-                    TypeReferenceNameIndex.Name.StartsWith("UIComp", StringComparison.CurrentCultureIgnoreCase) ||
-                    TypeReferenceNameIndex.Name.EndsWith("Component", StringComparison.CurrentCultureIgnoreCase)) type = ObjectTypes.ArchetypeObjectReference;
+                if (ClassReferenceNameIndex.Name.StartsWith("CustomUIComp", StringComparison.CurrentCultureIgnoreCase) ||
+                    ClassReferenceNameIndex.Name.StartsWith("Distribution", StringComparison.CurrentCultureIgnoreCase) ||
+                    ClassReferenceNameIndex.Name.StartsWith("UIComp", StringComparison.CurrentCultureIgnoreCase) ||
+                    ClassReferenceNameIndex.Name.EndsWith("Component", StringComparison.CurrentCultureIgnoreCase)) type = ObjectTypes.ArchetypeObjectReference;
             }
 
             return type switch

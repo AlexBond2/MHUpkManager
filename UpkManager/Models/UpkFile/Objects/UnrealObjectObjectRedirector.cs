@@ -35,7 +35,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
             ObjectTableReference = reader.ReadInt32();
 
-            ObjectReferenceNameIndex = header.GetObjectTableEntry(ObjectTableReference)?.NameTableIndex;
+            ObjectReferenceNameIndex = header.GetObjectTableEntry(ObjectTableReference)?.ObjectNameIndex;
         }
 
         #endregion Unreal Methods

@@ -59,19 +59,20 @@
             importIndex = new DataGridViewTextBoxColumn();
             importObject = new DataGridViewTextBoxColumn();
             importClass = new DataGridViewTextBoxColumn();
+            importOuter = new DataGridViewTextBoxColumn();
             importPakage = new DataGridViewTextBoxColumn();
-            importGroup = new DataGridViewTextBoxColumn();
             exportPage = new TabPage();
             exportGridView = new DataGridView();
+            propertyPage = new TabPage();
             IndexColumn1 = new DataGridViewTextBoxColumn();
             exportColumn1 = new DataGridViewTextBoxColumn();
             exportColumn2 = new DataGridViewTextBoxColumn();
-            exportPakage = new DataGridViewTextBoxColumn();
             exportColumn3 = new DataGridViewTextBoxColumn();
+            exportOuter = new DataGridViewTextBoxColumn();
+            exportArchetype = new DataGridViewTextBoxColumn();
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             exportColumn6 = new DataGridViewTextBoxColumn();
-            propertyPage = new TabPage();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -349,7 +350,7 @@
             importGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             importGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             importGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            importGridView.Columns.AddRange(new DataGridViewColumn[] { importIndex, importObject, importClass, importPakage, importGroup });
+            importGridView.Columns.AddRange(new DataGridViewColumn[] { importIndex, importObject, importClass, importOuter, importPakage });
             importGridView.DefaultCellStyle = dataGridViewCellStyle2;
             importGridView.Dock = DockStyle.Fill;
             importGridView.EnableHeadersVisualStyles = false;
@@ -386,6 +387,14 @@
             importClass.Name = "importClass";
             importClass.ReadOnly = true;
             // 
+            // importOuter
+            // 
+            importOuter.DataPropertyName = "Outer";
+            importOuter.HeaderText = "Outer";
+            importOuter.Name = "importOuter";
+            importOuter.ReadOnly = true;
+            importOuter.Width = 150;
+            // 
             // importPakage
             // 
             importPakage.DataPropertyName = "Package";
@@ -393,14 +402,6 @@
             importPakage.Name = "importPakage";
             importPakage.ReadOnly = true;
             importPakage.Width = 80;
-            // 
-            // importGroup
-            // 
-            importGroup.DataPropertyName = "Group";
-            importGroup.HeaderText = "Group";
-            importGroup.Name = "importGroup";
-            importGroup.ReadOnly = true;
-            importGroup.Width = 70;
             // 
             // exportPage
             // 
@@ -422,7 +423,7 @@
             exportGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             exportGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             exportGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportPakage, exportColumn3, exportColumn4, exportColumn5, exportColumn6 });
+            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportColumn3, exportOuter, exportArchetype, exportColumn4, exportColumn5, exportColumn6 });
             exportGridView.DefaultCellStyle = dataGridViewCellStyle2;
             exportGridView.Dock = DockStyle.Fill;
             exportGridView.EnableHeadersVisualStyles = false;
@@ -433,6 +434,16 @@
             exportGridView.Size = new Size(643, 413);
             exportGridView.TabIndex = 1;
             exportGridView.CellValueNeeded += exportGridView_CellValueNeeded;
+            // 
+            // propertyPage
+            // 
+            propertyPage.Location = new Point(4, 24);
+            propertyPage.Name = "propertyPage";
+            propertyPage.Padding = new Padding(3);
+            propertyPage.Size = new Size(643, 413);
+            propertyPage.TabIndex = 0;
+            propertyPage.Text = "Object Properties";
+            propertyPage.UseVisualStyleBackColor = true;
             // 
             // IndexColumn1
             // 
@@ -454,18 +465,24 @@
             exportColumn2.HeaderText = "Class";
             exportColumn2.Name = "exportColumn2";
             // 
-            // exportPakage
-            // 
-            exportPakage.DataPropertyName = "Pakage";
-            exportPakage.HeaderText = "Pakage";
-            exportPakage.Name = "exportPakage";
-            // 
             // exportColumn3
             // 
-            exportColumn3.DataPropertyName = "Group";
-            exportColumn3.HeaderText = "Group";
+            exportColumn3.DataPropertyName = "Super";
+            exportColumn3.HeaderText = "Super";
             exportColumn3.Name = "exportColumn3";
             exportColumn3.Width = 80;
+            // 
+            // exportOuter
+            // 
+            exportOuter.DataPropertyName = "Outer";
+            exportOuter.HeaderText = "Outer";
+            exportOuter.Name = "exportOuter";
+            // 
+            // exportArchetype
+            // 
+            exportArchetype.DataPropertyName = "Archetype";
+            exportArchetype.HeaderText = "Archetype";
+            exportArchetype.Name = "exportArchetype";
             // 
             // exportColumn4
             // 
@@ -476,27 +493,17 @@
             // 
             // exportColumn5
             // 
-            exportColumn5.DataPropertyName = "Size";
+            exportColumn5.DataPropertyName = "SerialSize";
             exportColumn5.HeaderText = "Size";
             exportColumn5.Name = "exportColumn5";
             exportColumn5.Width = 50;
             // 
             // exportColumn6
             // 
-            exportColumn6.DataPropertyName = "Offset";
+            exportColumn6.DataPropertyName = "SerialOffset";
             exportColumn6.HeaderText = "Offset";
             exportColumn6.Name = "exportColumn6";
             exportColumn6.Width = 50;
-            // 
-            // propertyPage
-            // 
-            propertyPage.Location = new Point(4, 24);
-            propertyPage.Name = "propertyPage";
-            propertyPage.Padding = new Padding(3);
-            propertyPage.Size = new Size(643, 413);
-            propertyPage.TabIndex = 0;
-            propertyPage.Text = "Object Properties";
-            propertyPage.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -558,19 +565,6 @@
         private DataGridView nameGridView;
         private PropertyGrid propertyGrid;
         private ToolStripStatusLabel progressStatus;
-        private DataGridViewTextBoxColumn IndexColumn1;
-        private DataGridViewTextBoxColumn exportColumn1;
-        private DataGridViewTextBoxColumn exportColumn2;
-        private DataGridViewTextBoxColumn exportPakage;
-        private DataGridViewTextBoxColumn exportColumn3;
-        private DataGridViewTextBoxColumn exportColumn4;
-        private DataGridViewTextBoxColumn exportColumn5;
-        private DataGridViewTextBoxColumn exportColumn6;
-        private DataGridViewTextBoxColumn importIndex;
-        private DataGridViewTextBoxColumn importObject;
-        private DataGridViewTextBoxColumn importClass;
-        private DataGridViewTextBoxColumn importPakage;
-        private DataGridViewTextBoxColumn importGroup;
         private TabControl tabControl2;
         private TabPage objectsPage;
         private TabPage propertyFilePage;
@@ -578,5 +572,19 @@
         private DataGridViewTextBoxColumn nameTableIndex;
         private DataGridViewTextBoxColumn nameTableName;
         private DataGridViewTextBoxColumn nameTableFlags;
+        private DataGridViewTextBoxColumn importIndex;
+        private DataGridViewTextBoxColumn importObject;
+        private DataGridViewTextBoxColumn importClass;
+        private DataGridViewTextBoxColumn importOuter;
+        private DataGridViewTextBoxColumn importPakage;
+        private DataGridViewTextBoxColumn IndexColumn1;
+        private DataGridViewTextBoxColumn exportColumn1;
+        private DataGridViewTextBoxColumn exportColumn2;
+        private DataGridViewTextBoxColumn exportColumn3;
+        private DataGridViewTextBoxColumn exportOuter;
+        private DataGridViewTextBoxColumn exportArchetype;
+        private DataGridViewTextBoxColumn exportColumn4;
+        private DataGridViewTextBoxColumn exportColumn5;
+        private DataGridViewTextBoxColumn exportColumn6;
     }
 }

@@ -14,8 +14,8 @@ namespace UpkManager.Models.UpkFile.Tables
         public UnrealImportTableEntry()
         {
             PackageNameIndex = new UnrealNameTableIndex();
-            TypeNameIndex = new UnrealNameTableIndex();
-            NameTableIndex = new UnrealNameTableIndex();
+            ClassNameIndex = new UnrealNameTableIndex();
+            ObjectNameIndex = new UnrealNameTableIndex();
         }
 
         #endregion Constructor
@@ -24,7 +24,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public UnrealNameTableIndex PackageNameIndex { get; }
 
-        public UnrealNameTableIndex TypeNameIndex { get; }
+        public UnrealNameTableIndex ClassNameIndex { get; }
         //
         // OwnerReference in ObjectTableEntryBase
         //
@@ -34,7 +34,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Unreal Properties
 
-        public UnrealNameTableIndex OwnerReferenceNameIndex { get; set; }
+        public UnrealNameTableIndex OuterReferenceNameIndex { get; set; }
 
         #endregion Unreal Properties
 
@@ -42,18 +42,18 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public async Task ReadImportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
-            await Task.Run(() => PackageNameIndex.ReadNameTableIndex(reader, header));
+            await Task.Run(() => PackageNameIndex.ReadNameTableIndex(reader, header)); // PackageName
 
-            await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
+            await Task.Run(() => ClassNameIndex.ReadNameTableIndex(reader, header)); // ClassName
 
-            OwnerReference = reader.ReadInt32();
+            OuterReference = reader.ReadInt32(); // OuterIndex
 
-            await Task.Run(() => NameTableIndex.ReadNameTableIndex(reader, header));
+            await Task.Run(() => ObjectNameIndex.ReadNameTableIndex(reader, header)); // ObjectName
         }
 
         public void ExpandReferences(UnrealHeader header)
         {
-            OwnerReferenceNameIndex = header.GetObjectTableEntry(OwnerReference)?.NameTableIndex;
+            OuterReferenceNameIndex = header.GetObjectTableEntry(OuterReference)?.ObjectNameIndex;
         }
 
         #endregion Unreal Methods
@@ -63,9 +63,9 @@ namespace UpkManager.Models.UpkFile.Tables
         public override int GetBuilderSize()
         {
             BuilderSize = PackageNameIndex.GetBuilderSize()
-                        + TypeNameIndex.GetBuilderSize()
+                        + ClassNameIndex.GetBuilderSize()
                         + sizeof(int)
-                        + NameTableIndex.GetBuilderSize();
+                        + ObjectNameIndex.GetBuilderSize();
 
             return BuilderSize;
         }
@@ -74,11 +74,11 @@ namespace UpkManager.Models.UpkFile.Tables
         {
             await PackageNameIndex.WriteBuffer(Writer, 0);
 
-            await TypeNameIndex.WriteBuffer(Writer, 0);
+            await ClassNameIndex.WriteBuffer(Writer, 0);
 
-            Writer.WriteInt32(OwnerReference);
+            Writer.WriteInt32(OuterReference);
 
-            await NameTableIndex.WriteBuffer(Writer, 0);
+            await ObjectNameIndex.WriteBuffer(Writer, 0);
         }
 
         #endregion UnrealUpkBuilderBase Implementation

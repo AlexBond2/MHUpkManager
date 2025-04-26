@@ -8,9 +8,9 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Properties
 
-        public int OwnerReference { get; protected set; }
+        public int OuterReference { get; protected set; }
 
-        public UnrealNameTableIndex NameTableIndex { get; protected set; }
+        public UnrealNameTableIndex ObjectNameIndex { get; protected set; }
 
         #endregion Properties
 
