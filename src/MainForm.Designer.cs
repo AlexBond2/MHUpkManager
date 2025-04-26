@@ -67,7 +67,6 @@
             IndexColumn1 = new DataGridViewTextBoxColumn();
             exportColumn1 = new DataGridViewTextBoxColumn();
             exportColumn2 = new DataGridViewTextBoxColumn();
-            exportColumn3 = new DataGridViewTextBoxColumn();
             exportOuter = new DataGridViewTextBoxColumn();
             exportArchetype = new DataGridViewTextBoxColumn();
             exportColumn4 = new DataGridViewTextBoxColumn();
@@ -423,7 +422,7 @@
             exportGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             exportGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             exportGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportColumn3, exportOuter, exportArchetype, exportColumn4, exportColumn5, exportColumn6 });
+            exportGridView.Columns.AddRange(new DataGridViewColumn[] { IndexColumn1, exportColumn1, exportColumn2, exportOuter, exportArchetype, exportColumn4, exportColumn5, exportColumn6 });
             exportGridView.DefaultCellStyle = dataGridViewCellStyle2;
             exportGridView.Dock = DockStyle.Fill;
             exportGridView.EnableHeadersVisualStyles = false;
@@ -462,15 +461,9 @@
             // exportColumn2
             // 
             exportColumn2.DataPropertyName = "Class";
-            exportColumn2.HeaderText = "Class";
+            exportColumn2.HeaderText = "Super :: Class";
             exportColumn2.Name = "exportColumn2";
-            // 
-            // exportColumn3
-            // 
-            exportColumn3.DataPropertyName = "Super";
-            exportColumn3.HeaderText = "Super";
-            exportColumn3.Name = "exportColumn3";
-            exportColumn3.Width = 80;
+            exportColumn2.Width = 150;
             // 
             // exportOuter
             // 
@@ -580,7 +573,6 @@
         private DataGridViewTextBoxColumn IndexColumn1;
         private DataGridViewTextBoxColumn exportColumn1;
         private DataGridViewTextBoxColumn exportColumn2;
-        private DataGridViewTextBoxColumn exportColumn3;
         private DataGridViewTextBoxColumn exportOuter;
         private DataGridViewTextBoxColumn exportArchetype;
         private DataGridViewTextBoxColumn exportColumn4;

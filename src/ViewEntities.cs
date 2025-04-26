@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using UpkManager.Models.UpkFile;
 using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Objects.Textures;
 using UpkManager.Constants;
 using System.Drawing.Design;
@@ -40,17 +41,25 @@ namespace MHUpkManager
             }
         }
 
+        public static string PrintFlags(UnrealExportTableEntry entry)
+        {
+            string flags = string.Empty;
+            if (entry.FlagsHigh != 0) flags = $"{(ObjectFlagsHO)entry.FlagsHigh} | ";
+            flags += $"{(ObjectFlagsLO)entry.FlagsLow}";
+            if (entry.ExportFlags != 0) flags += $" | {(ExportFlags)entry.ExportFlags}";
+            return flags;
+        }
+
         public static object GetDataSource(List<UnrealExportTableEntry> exportTable)
         {
             var data = exportTable.Select(entry => new
             {
                 Index = entry.TableIndex,
                 Object = entry.ObjectNameIndex?.Name,
-                Class = entry.ClassReferenceNameIndex?.Name,
-                Super = entry.SuperReferenceNameIndex?.Name,
+                Class = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}",
                 Outer = entry.OuterReferenceNameIndex?.Name,
                 Archetype = entry.ArchetypeReferenceNameIndex?.Name,
-                Flags = $"0x{entry.FlagsLow:X8}-0x{entry.FlagsHigh:X8}",
+                Flags = PrintFlags(entry),
                /* PackageGuid = new Guid(entry.PackageGuid).ToString(),
                 PackageFlags = $"0x{entry.PackageFlags:X8}",*/
                 SerialSize = entry.SerialDataSize,
@@ -71,10 +80,10 @@ namespace MHUpkManager
             {
                 case 0: e.Value = entry.TableIndex; break;
                 case 1: e.Value = entry.ObjectNameIndex?.Name; break;
-                case 2: e.Value = entry.ClassReferenceNameIndex?.Name; break;
+                case 2: e.Value = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}"; break;
                 case 3: e.Value = entry.OuterReferenceNameIndex?.Name; break;
-                case 4: e.Value = entry.SuperReferenceNameIndex?.Name; break;
-                case 5: e.Value = $"0x{entry.FlagsLow:X8}-0x{entry.FlagsHigh:X8}"; break;
+                case 4: e.Value = entry.ArchetypeReferenceNameIndex?.Name; break;
+                case 5: e.Value = $"0x{entry.FlagsHigh:X8}-0x{entry.FlagsLow:X8}"; break;
                 case 6: e.Value = entry.SerialDataSize; break;
                 case 7: e.Value = entry.SerialDataOffset; break;
             }
@@ -146,9 +155,9 @@ namespace MHUpkManager
         public int ThumbnailTableOffset { get; }
 
         [Category("Unreal Extra")]
-        [DisplayName("Depends")]
-        [Description("Depends Table Offset")]
-        public int DependsTableOffset { get; }
+        [Description("Depends Table")]
+        [Editor(typeof(CollectionView), typeof(UITypeEditor))]
+        public List<int> Depends { get; }
 
         [Category("Unreal Extra")]
         [DisplayName("Generations")]
@@ -175,7 +184,7 @@ namespace MHUpkManager
             CompressionFlags = (CompressionTypes)header.CompressionFlags;
             CookerVersion = header.CookerVersion;
             EngineVersion = header.EngineVersion;
-            DependsTableOffset = header.DependsTableOffset;
+            Depends = header.DependsTable;
             ThumbnailTableOffset = header.ThumbnailTableOffset;
             Generations = header.GenerationTable.Select(e => new GenerationTable(e)).ToArray();
             AdditionalPackagesToCookCount = header.AdditionalPackagesToCook.Count;

@@ -34,16 +34,17 @@ namespace UpkManager.Models.UpkFile
 
             Group = new UnrealString();
 
-            GenerationTable = new List<UnrealGenerationTableEntry>();
+            GenerationTable = [];
 
-            CompressedChunks = new List<UnrealCompressedChunk>();
+            CompressedChunks = [];
 
-            NameTable = new List<UnrealNameTableEntry>();
+            NameTable = [];
 
-            ExportTable = new List<UnrealExportTableEntry>();
-            ImportTable = new List<UnrealImportTableEntry>();
+            ExportTable = [];
+            ImportTable = [];
+            DependsTable = [];
 
-            AdditionalPackagesToCook = new List<UnrealString>();
+            AdditionalPackagesToCook = [];
             TextureAllocations = new();
         }
 
@@ -104,7 +105,7 @@ namespace UpkManager.Models.UpkFile
 
         public List<UnrealImportTableEntry> ImportTable { get; }
 
-        public byte[] DependsTable { get; private set; } // (Size - DependsOffset) bytes; or ExportTableCount * 4 bytes;
+        public List<int> DependsTable { get; private set; } // (Size - DependsOffset) bytes; or ExportTableCount * 4 bytes;
 
         #endregion Properties
 
@@ -217,7 +218,7 @@ namespace UpkManager.Models.UpkFile
 
             BuilderDependsTableOffset = BuilderSize;
 
-            BuilderSize += DependsTable.Length;
+            BuilderSize += DependsTable.Count * 4;
 
             ExportTable.Aggregate(BuilderSize, (current, export) => current + export.GetObjectSize(current));
 
@@ -548,7 +549,9 @@ namespace UpkManager.Models.UpkFile
         {
             reader.Seek(DependsTableOffset);
 
-            DependsTable = await reader.ReadBytes(ExportTableCount * sizeof(uint));
+            DependsTable.Clear();
+            for (int i = 0; i < ExportTableCount; i++)
+                DependsTable.Add(reader.ReadInt32());
         }
 
         private async Task writeDependsTable()
