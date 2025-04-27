@@ -41,16 +41,21 @@
             progressStatus = new ToolStripStatusLabel();
             splitContainer1 = new SplitContainer();
             tabControl2 = new TabControl();
-            propertyFilePage = new TabPage();
-            propertyGrid = new PropertyGrid();
             objectsPage = new TabPage();
             panel1 = new Panel();
-            panel3 = new Panel();
             objectsTree = new TreeView();
-            panel2 = new Panel();
+            panel4 = new Panel();
+            filterClear = new Button();
+            label1 = new Label();
+            filterBox = new TextBox();
+            propertyFilePage = new TabPage();
+            propertyGrid = new PropertyGrid();
             tabControl1 = new TabControl();
             namePage = new TabPage();
             nameGridView = new DataGridView();
+            nameTableIndex = new DataGridViewTextBoxColumn();
+            nameTableName = new DataGridViewTextBoxColumn();
+            nameTableFlags = new DataGridViewTextBoxColumn();
             importPage = new TabPage();
             importGridView = new DataGridView();
             importIndex = new DataGridViewTextBoxColumn();
@@ -68,9 +73,6 @@
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
             propertyPage = new TabPage();
-            nameTableIndex = new DataGridViewTextBoxColumn();
-            nameTableName = new DataGridViewTextBoxColumn();
-            nameTableFlags = new DataGridViewTextBoxColumn();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -78,10 +80,10 @@
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
             tabControl2.SuspendLayout();
-            propertyFilePage.SuspendLayout();
             objectsPage.SuspendLayout();
             panel1.SuspendLayout();
-            panel3.SuspendLayout();
+            panel4.SuspendLayout();
+            propertyFilePage.SuspendLayout();
             tabControl1.SuspendLayout();
             namePage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nameGridView).BeginInit();
@@ -133,8 +135,8 @@
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            toolStripStatusLabel1.Size = new Size(77, 17);
-            toolStripStatusLabel1.Text = "Total classes: ";
+            toolStripStatusLabel1.Size = new Size(79, 17);
+            toolStripStatusLabel1.Text = "Total objects: ";
             // 
             // totalStatus
             // 
@@ -168,14 +170,89 @@
             // 
             // tabControl2
             // 
-            tabControl2.Controls.Add(propertyFilePage);
             tabControl2.Controls.Add(objectsPage);
+            tabControl2.Controls.Add(propertyFilePage);
             tabControl2.Dock = DockStyle.Fill;
             tabControl2.Location = new Point(0, 0);
             tabControl2.Name = "tabControl2";
             tabControl2.SelectedIndex = 0;
             tabControl2.Size = new Size(404, 558);
             tabControl2.TabIndex = 1;
+            // 
+            // objectsPage
+            // 
+            objectsPage.Controls.Add(panel1);
+            objectsPage.Location = new Point(4, 24);
+            objectsPage.Name = "objectsPage";
+            objectsPage.Padding = new Padding(3);
+            objectsPage.Size = new Size(396, 530);
+            objectsPage.TabIndex = 0;
+            objectsPage.Text = "Objects";
+            objectsPage.UseVisualStyleBackColor = true;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(objectsTree);
+            panel1.Controls.Add(panel4);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(390, 524);
+            panel1.TabIndex = 0;
+            // 
+            // objectsTree
+            // 
+            objectsTree.Dock = DockStyle.Fill;
+            objectsTree.Location = new Point(0, 32);
+            objectsTree.Name = "objectsTree";
+            objectsTree.Size = new Size(390, 492);
+            objectsTree.TabIndex = 0;
+            // 
+            // panel4
+            // 
+            panel4.Controls.Add(filterClear);
+            panel4.Controls.Add(label1);
+            panel4.Controls.Add(filterBox);
+            panel4.Dock = DockStyle.Top;
+            panel4.Location = new Point(0, 0);
+            panel4.Name = "panel4";
+            panel4.Size = new Size(390, 32);
+            panel4.TabIndex = 2;
+            // 
+            // filterClear
+            // 
+            filterClear.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            filterClear.BackColor = SystemColors.GradientActiveCaption;
+            filterClear.FlatAppearance.BorderSize = 0;
+            filterClear.FlatStyle = FlatStyle.Flat;
+            filterClear.Font = new Font("Segoe UI", 9F);
+            filterClear.ForeColor = Color.Black;
+            filterClear.ImageAlign = ContentAlignment.MiddleLeft;
+            filterClear.Location = new Point(360, 4);
+            filterClear.Name = "filterClear";
+            filterClear.Size = new Size(24, 23);
+            filterClear.TabIndex = 2;
+            filterClear.Text = "X";
+            filterClear.UseVisualStyleBackColor = false;
+            filterClear.Click += filterClear_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(3, 7);
+            label1.Name = "label1";
+            label1.Size = new Size(33, 15);
+            label1.TabIndex = 1;
+            label1.Text = "Filter";
+            // 
+            // filterBox
+            // 
+            filterBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            filterBox.Location = new Point(42, 4);
+            filterBox.Name = "filterBox";
+            filterBox.Size = new Size(312, 23);
+            filterBox.TabIndex = 0;
+            filterBox.KeyDown += filterBox_KeyDown;
             // 
             // propertyFilePage
             // 
@@ -198,53 +275,6 @@
             propertyGrid.Name = "propertyGrid";
             propertyGrid.Size = new Size(390, 524);
             propertyGrid.TabIndex = 0;
-            // 
-            // objectsPage
-            // 
-            objectsPage.Controls.Add(panel1);
-            objectsPage.Location = new Point(4, 24);
-            objectsPage.Name = "objectsPage";
-            objectsPage.Padding = new Padding(3);
-            objectsPage.Size = new Size(396, 530);
-            objectsPage.TabIndex = 0;
-            objectsPage.Text = "Objects";
-            objectsPage.UseVisualStyleBackColor = true;
-            // 
-            // panel1
-            // 
-            panel1.Controls.Add(panel3);
-            panel1.Controls.Add(panel2);
-            panel1.Dock = DockStyle.Fill;
-            panel1.Location = new Point(3, 3);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(390, 524);
-            panel1.TabIndex = 0;
-            // 
-            // panel3
-            // 
-            panel3.Controls.Add(objectsTree);
-            panel3.Dock = DockStyle.Fill;
-            panel3.Location = new Point(0, 40);
-            panel3.Name = "panel3";
-            panel3.Size = new Size(390, 484);
-            panel3.TabIndex = 2;
-            // 
-            // objectsTree
-            // 
-            objectsTree.Dock = DockStyle.Fill;
-            objectsTree.Location = new Point(0, 0);
-            objectsTree.Name = "objectsTree";
-            objectsTree.Size = new Size(390, 484);
-            objectsTree.TabIndex = 0;
-            // 
-            // panel2
-            // 
-            panel2.BackColor = Color.Transparent;
-            panel2.Dock = DockStyle.Top;
-            panel2.Location = new Point(0, 0);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(390, 40);
-            panel2.TabIndex = 1;
             // 
             // tabControl1
             // 
@@ -304,6 +334,29 @@
             nameGridView.RowHeadersVisible = false;
             nameGridView.Size = new Size(802, 530);
             nameGridView.TabIndex = 1;
+            // 
+            // nameTableIndex
+            // 
+            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableIndex.DataPropertyName = "Index";
+            nameTableIndex.HeaderText = "Index";
+            nameTableIndex.Name = "nameTableIndex";
+            nameTableIndex.Width = 50;
+            // 
+            // nameTableName
+            // 
+            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            nameTableName.DataPropertyName = "Name";
+            nameTableName.HeaderText = "Name";
+            nameTableName.Name = "nameTableName";
+            // 
+            // nameTableFlags
+            // 
+            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            nameTableFlags.DataPropertyName = "Flags";
+            nameTableFlags.HeaderText = "Flags";
+            nameTableFlags.Name = "nameTableFlags";
+            nameTableFlags.Width = 150;
             // 
             // importPage
             // 
@@ -469,29 +522,6 @@
             propertyPage.Text = "Object Properties";
             propertyPage.UseVisualStyleBackColor = true;
             // 
-            // nameTableIndex
-            // 
-            nameTableIndex.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            nameTableIndex.DataPropertyName = "Index";
-            nameTableIndex.HeaderText = "Index";
-            nameTableIndex.Name = "nameTableIndex";
-            nameTableIndex.Width = 50;
-            // 
-            // nameTableName
-            // 
-            nameTableName.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            nameTableName.DataPropertyName = "Name";
-            nameTableName.HeaderText = "Name";
-            nameTableName.Name = "nameTableName";
-            // 
-            // nameTableFlags
-            // 
-            nameTableFlags.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            nameTableFlags.DataPropertyName = "Flags";
-            nameTableFlags.HeaderText = "Flags";
-            nameTableFlags.Name = "nameTableFlags";
-            nameTableFlags.Width = 150;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -514,10 +544,11 @@
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
             tabControl2.ResumeLayout(false);
-            propertyFilePage.ResumeLayout(false);
             objectsPage.ResumeLayout(false);
             panel1.ResumeLayout(false);
-            panel3.ResumeLayout(false);
+            panel4.ResumeLayout(false);
+            panel4.PerformLayout();
+            propertyFilePage.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             namePage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)nameGridView).EndInit();
@@ -541,7 +572,6 @@
         private TabControl tabControl1;
         private TabPage propertyPage;
         private TabPage importPage;
-        private Panel panel2;
         private TreeView objectsTree;
         private TabPage exportPage;
         private DataGridView importGridView;
@@ -555,7 +585,6 @@
         private TabControl tabControl2;
         private TabPage objectsPage;
         private TabPage propertyFilePage;
-        private Panel panel3;
         private DataGridViewTextBoxColumn importIndex;
         private DataGridViewTextBoxColumn importObject;
         private DataGridViewTextBoxColumn importClass;
@@ -571,5 +600,9 @@
         private DataGridViewTextBoxColumn nameTableIndex;
         private DataGridViewTextBoxColumn nameTableName;
         private DataGridViewTextBoxColumn nameTableFlags;
+        private Panel panel4;
+        private Button filterClear;
+        private Label label1;
+        private TextBox filterBox;
     }
 }

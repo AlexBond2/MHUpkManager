@@ -62,11 +62,16 @@ namespace MHUpkManager
 
         private void UpdateObjectsTree()
         {
+            filterBox.Text = "";
+            if (rootNodes.Count == 0) return;
+
             objectsTree.Nodes.Clear();
             objectsTree.BeginUpdate();
             objectsTree.Nodes.AddRange([.. rootNodes]);
             foreach (TreeNode node in objectsTree.Nodes) node.Expand();
             objectsTree.EndUpdate();
+
+            totalStatus.Text = objectsTree.Nodes.Count.ToString();
         }
 
         private void OnLoadProgress(UnrealLoadProgress progress)
@@ -133,11 +138,77 @@ namespace MHUpkManager
 
                 if (entry != null)
                 {
-                    var grid = sender as DataGridView; 
+                    var grid = sender as DataGridView;
                     var parentForm = grid?.FindForm();
                     ViewEntities.ShowPropertyGrid(entry, parentForm);
                 }
             }
+        }
+
+        private void filterClear_Click(object sender, EventArgs e)
+        {
+            UpdateObjectsTree();
+        }
+
+        private void filterBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (FilterTree(filterBox.Text))
+                {
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                }
+                totalStatus.Text = objectsTree.Nodes.Count.ToString();
+            }
+        }
+
+        private bool FilterTree(string filterText)
+        {
+            filterText = filterText.Trim().ToLower();
+            if (filterText.Length < 3 || rootNodes.Count == 0) return false;
+
+            objectsTree.BeginUpdate();
+            objectsTree.Nodes.Clear();
+
+            foreach (TreeNode rootNode in rootNodes)
+            {
+                TreeNode filteredNode = FilterNode(rootNode, filterText);
+                if (filteredNode != null)
+                    objectsTree.Nodes.Add(filteredNode);
+            }
+
+            objectsTree.ExpandAll();
+            objectsTree.EndUpdate();
+
+            return objectsTree.Nodes.Count > 0;
+        }
+
+        private static TreeNode? FilterNode(TreeNode node, string filterText)
+        {
+            List<TreeNode> matchingChildren = new();
+
+            foreach (TreeNode child in node.Nodes)
+            {
+                TreeNode? filteredChild = FilterNode(child, filterText);
+                if (filteredChild != null)
+                    matchingChildren.Add(filteredChild);
+            }
+
+            if (node.Text.ToLower().Contains(filterText) || matchingChildren.Count > 0)
+            {
+                TreeNode newNode = new TreeNode(node.Text)
+                {
+                    Tag = node.Tag,
+                    ImageIndex = node.ImageIndex,
+                    SelectedImageIndex = node.SelectedImageIndex
+                };
+
+                newNode.Nodes.AddRange(matchingChildren.ToArray());
+                return newNode;
+            }
+
+            return null;
         }
     }
 }
