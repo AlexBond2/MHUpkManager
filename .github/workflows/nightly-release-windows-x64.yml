@@ -1,0 +1,30 @@
+name: Nightly Release (Windows x64)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore MHUpkManager.sln
+    - name: Build
+      run: dotnet build MHUpkManager.sln --no-restore --configuration Release
+    - name: Get current date
+      run: echo "DATE=$(date +'%Y%m%d')" >> $env:GITHUB_ENV
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MHUpkManager-nightly-${{ env.DATE }}-Release-windows-x64
+        path: |
+          ./src/bin/x64/Release/net8.0-windows
+          !./src/bin/x64/Release/net8.0-windows/*.pdb
+          !./src/bin/x64/Release/net8.0-windows/*.xml
