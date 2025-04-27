@@ -10,6 +10,7 @@ namespace MHUpkManager
     public partial class MainForm : Form
     {
         private readonly IUpkFileRepository repository;
+        public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
         public UnrealUpkFile UpkFile { get; set; }
 
         public MainForm()
@@ -38,6 +39,7 @@ namespace MHUpkManager
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 UpkFile = await OpenUpkFile(openFileDialog.FileName);
+                Text = $"{AppName} - [{UpkFile.GameFilename}]";
                 await LoadUpkFile(UpkFile);
             }
         }
@@ -49,24 +51,14 @@ namespace MHUpkManager
             await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
             nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
 
-            importGridView.VirtualMode = false;
             importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
-            //importGridView.RowCount = header.ImportTableCount;
-
-            exportGridView.VirtualMode = false;
             exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable);
-            //exportGridView.RowCount = header.ExportTableCount;
             propertyGrid.SelectedObject = new UnrealHeaderViewModel(header);
-        }
 
-        private void importGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
-        {
-            ViewEntities.CellValueNeeded(UpkFile.Header.ImportTable, e);
-        }
-
-        private void exportGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
-        {
-            ViewEntities.CellValueNeeded(UpkFile.Header.ExportTable, e);
+            objectsTree.Nodes.Clear();
+            objectsTree.BeginUpdate();
+            objectsTree.Nodes.AddRange([.. ViewEntities.BuildObjectTree(header)]);
+            objectsTree.EndUpdate();
         }
 
         private void OnLoadProgress(UnrealLoadProgress progress)

@@ -46,7 +46,7 @@
             objectsPage = new TabPage();
             panel1 = new Panel();
             panel3 = new Panel();
-            treeView1 = new TreeView();
+            objectsTree = new TreeView();
             panel2 = new Panel();
             tabControl1 = new TabControl();
             namePage = new TabPage();
@@ -222,20 +222,20 @@
             // 
             // panel3
             // 
-            panel3.Controls.Add(treeView1);
+            panel3.Controls.Add(objectsTree);
             panel3.Dock = DockStyle.Fill;
             panel3.Location = new Point(0, 40);
             panel3.Name = "panel3";
             panel3.Size = new Size(390, 484);
             panel3.TabIndex = 2;
             // 
-            // treeView1
+            // objectsTree
             // 
-            treeView1.Dock = DockStyle.Fill;
-            treeView1.Location = new Point(0, 0);
-            treeView1.Name = "treeView1";
-            treeView1.Size = new Size(390, 484);
-            treeView1.TabIndex = 0;
+            objectsTree.Dock = DockStyle.Fill;
+            objectsTree.Location = new Point(0, 0);
+            objectsTree.Name = "objectsTree";
+            objectsTree.Size = new Size(390, 484);
+            objectsTree.TabIndex = 0;
             // 
             // panel2
             // 
@@ -336,7 +336,6 @@
             importGridView.RowHeadersVisible = false;
             importGridView.Size = new Size(802, 530);
             importGridView.TabIndex = 0;
-            importGridView.CellValueNeeded += importGridView_CellValueNeeded;
             // 
             // importIndex
             // 
@@ -409,7 +408,6 @@
             exportGridView.Size = new Size(802, 530);
             exportGridView.TabIndex = 1;
             exportGridView.CellContentClick += exportGridView_CellContentClick;
-            exportGridView.CellValueNeeded += exportGridView_CellValueNeeded;
             // 
             // IndexColumn1
             // 
@@ -544,7 +542,7 @@
         private TabPage propertyPage;
         private TabPage importPage;
         private Panel panel2;
-        private TreeView treeView1;
+        private TreeView objectsTree;
         private TabPage exportPage;
         private DataGridView importGridView;
         private DataGridView exportGridView;

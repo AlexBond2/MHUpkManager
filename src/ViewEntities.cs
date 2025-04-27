@@ -15,30 +15,13 @@ namespace MHUpkManager
             var data = importTable.Select(entry => new
             {
                 Index = entry.TableIndex,
-                Object = entry.ObjectNameIndex?.Name,
-                Class = entry.ClassNameIndex?.Name,
+                Object = entry.ObjectNameIndex.Name,
+                Class = $"::{entry.ClassNameIndex.Name}",
                 Package = entry.PackageNameIndex?.Name,
                 Outer = entry.OuterReferenceNameIndex?.Name
             }).ToList();
 
             return data;
-        }
-
-        public static void CellValueNeeded(List<UnrealImportTableEntry> importTable, DataGridViewCellValueEventArgs e)
-        {
-            if (importTable == null || e.RowIndex >= importTable.Count)
-                return;
-
-            var entry = importTable[e.RowIndex];
-
-            switch (e.ColumnIndex)
-            {
-                case 0: e.Value = entry.TableIndex; break;
-                case 1: e.Value = entry.ObjectNameIndex?.Name; break;
-                case 2: e.Value = entry.ClassNameIndex?.Name; break;
-                case 3: e.Value = entry.OuterReferenceNameIndex?.Name; break;
-                case 4: e.Value = entry.PackageNameIndex?.Name; break;
-            }
         }
 
         public static string PrintFlags(UnrealExportTableEntry entry)
@@ -53,7 +36,7 @@ namespace MHUpkManager
             var data = exportTable.Select(entry => new
             {
                 Index = entry.TableIndex,
-                Object = entry.ObjectNameIndex?.Name,
+                Object = entry.ObjectNameIndex.Name,
                 Class = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}",
                 Outer = entry.OuterReferenceNameIndex?.Name,
                 Flags = PrintFlags(entry),
@@ -62,25 +45,6 @@ namespace MHUpkManager
             }).ToList();
 
             return data;
-        }
-
-        public static void CellValueNeeded(List<UnrealExportTableEntry> exportTable, DataGridViewCellValueEventArgs e)
-        {
-            if (exportTable == null || e.RowIndex >= exportTable.Count)
-                return;
-
-            var entry = exportTable[e.RowIndex];
-
-            switch (e.ColumnIndex)
-            {
-                case 0: e.Value = entry.TableIndex; break;
-                case 1: e.Value = entry.ObjectNameIndex?.Name; break;
-                case 2: e.Value = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}"; break;
-                case 3: e.Value = entry.OuterReferenceNameIndex?.Name; break;
-                case 4: e.Value = entry.ArchetypeReferenceNameIndex?.Name; break;
-                case 5: e.Value = $"0x{entry.ObjectFlags:X16}"; break;
-                case 6: e.Value = entry.SerialDataSize; break;               
-            }
         }
 
         public static object GetDataSource(List<UnrealNameTableEntry> nameTable)
@@ -118,6 +82,57 @@ namespace MHUpkManager
             gridControl.Dock = DockStyle.Fill;
 
             popupForm.ShowDialog(parent);
+        }
+
+        public static List<TreeNode> BuildObjectTree(UnrealHeader header)
+        {
+            Dictionary<int, TreeNode> nodes = [];
+
+            foreach (var entry in header.ImportTable)
+            {
+                var className = $"::{entry.ClassNameIndex.Name}";
+                var name = $"{entry.ObjectNameIndex.Name} [{entry.TableIndex}] {className}";
+                var node = new TreeNode(name);
+                node.Tag = entry;
+                nodes[entry.TableIndex] = node;
+            }
+
+            foreach (var entry in header.ExportTable)
+            {
+                var className = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}";
+                var name = $"{entry.ObjectNameIndex.Name} [{entry.TableIndex}] {className}";
+                var node = new TreeNode(name);
+                node.Tag = entry;
+                nodes[entry.TableIndex] = node;
+            }
+
+            List<TreeNode> rootNodes = [];
+
+            var importsRoot = new TreeNode("Imports");
+            BuildBranch(header.ImportTable, importsRoot, nodes);
+
+            var exportsRoot = new TreeNode("Exports");
+            BuildBranch(header.ExportTable, exportsRoot, nodes);
+
+            rootNodes.Add(exportsRoot);
+            rootNodes.Add(importsRoot);
+            return rootNodes;
+        }
+
+        private static void BuildBranch<T>(IEnumerable<T> table, TreeNode root, Dictionary<int, TreeNode> nodes)
+            where T : UnrealObjectTableEntryBase
+        {
+            foreach (var entry in table)
+            {
+                var node = nodes[entry.TableIndex];
+
+                if (entry.OuterReference == 0)
+                    root.Nodes.Add(node);
+                else if (nodes.TryGetValue(entry.OuterReference, out var parent))
+                    parent.Nodes.Add(node);
+                else
+                    root.Nodes.Add(node);
+            }
         }
     }
 
@@ -192,6 +207,10 @@ namespace MHUpkManager
         public string PackageSource { get; }
 
         [Category("General")]
+        [DisplayName("Package Flags")]
+        public EPackageFlags PackageFlags { get; }
+
+        [Category("General")]
         [DisplayName("Game Version")]
         public ushort Version { get; }
 
@@ -254,6 +273,7 @@ namespace MHUpkManager
         {
             Version = header.Version;
             Licensee = header.Licensee;
+            PackageFlags = (EPackageFlags)header.Flags;
             PackageSource = $"{header.PackageSource:X8}";
             NameTableCount = header.NameTableCount;
             ExportTableCount = header.ExportTableCount;

@@ -157,13 +157,11 @@ namespace UpkManager.Models.UpkFile
 
             await readDependsTable();
 
-            // await decodePointers();
-
             message.Text = "Reading Objects...";
             message.Total = ExportTableCount;
 
             progress?.Invoke(message);
-            /*
+            
             await ExportTable.ForEachAsync(export =>
             {
                 return export.ReadUnrealObject(reader).ContinueWith(t =>
@@ -172,7 +170,7 @@ namespace UpkManager.Models.UpkFile
 
                     if (ExportTableCount > 100) progress?.Invoke(message);
                 });
-            });*/
+            });
 
             message.IsComplete = true;
 
@@ -234,8 +232,6 @@ namespace UpkManager.Models.UpkFile
             await writeNameTable();
 
             await writeImportTable();
-
-            //await encodePointers();
 
             await writeExportTable();
 
@@ -552,52 +548,17 @@ namespace UpkManager.Models.UpkFile
             DependsTable.Clear();
             for (int i = 0; i < ExportTableCount; i++)
                 DependsTable.Add(reader.ReadInt32());
+
             return Task.CompletedTask;
         }
 
-        private async Task writeDependsTable()
+        private Task writeDependsTable()
         {
-            byte[] bytes = Enumerable.Repeat((byte)0, ExportTable.Count * sizeof(uint)).ToArray();
+            foreach (var value in DependsTable)
+                writer.WriteInt32(value);
 
-            await writer.WriteBytes(bytes);
+            return Task.CompletedTask;
         }
-
-        #region External Code
-
-        /// <summary>
-        /// https://github.com/gildor2/UModel/blob/c871f9d534e0bd42a17b4d4268c0ecc59dd7191e/Unreal/UnPackage.cpp#L1274
-        /// </summary>
-        private async Task decodePointers()
-        {
-            uint code1 = (((uint)Size & 0xffu) << 24)
-                       | (((uint)NameTableCount & 0xffu) << 16)
-                       | (((uint)NameTableOffset & 0xffu) << 8)
-                       | ((uint)ExportTableCount & 0xffu);
-
-            int code2 = (ExportTableOffset + ImportTableCount + ImportTableOffset) & 0x1f;
-
-            await Task.Run(() =>
-            {
-                for (int i = 0; i < ExportTable.Count; ++i) ExportTable[i].DecodePointer(code1, code2, i);
-            });
-        }
-
-        private async Task encodePointers()
-        {
-            uint code1 = (((uint)BuilderSize & 0xffu) << 24)
-                       | (((uint)NameTable.Count & 0xffu) << 16)
-                       | (((uint)BuilderNameTableOffset & 0xffu) << 8)
-                       | ((uint)ExportTable.Count & 0xffu);
-
-            int code2 = (BuilderExportTableOffset + ImportTable.Count + BuilderImportTableOffset) & 0x1f;
-
-            await Task.Run(() =>
-            {
-                for (int i = 0; i < ExportTable.Count; ++i) ExportTable[i].EncodePointer(code1, code2, i);
-            });
-        }
-
-        #endregion External Code
 
         #endregion Private Methods
 

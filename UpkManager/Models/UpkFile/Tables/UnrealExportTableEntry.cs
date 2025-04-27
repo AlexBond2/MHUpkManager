@@ -130,30 +130,6 @@ namespace UpkManager.Models.UpkFile.Tables
             PackageFlags = reader.ReadUInt32(); // PackageFlags
         }
 
-        internal void DecodePointer(uint code1, int code2, int index)
-        {
-            uint size = (uint)SerialDataSize;
-            uint offset = (uint)SerialDataOffset;
-
-            decodePointer(ref size, code1, code2, index);
-            decodePointer(ref offset, code1, code2, index);
-
-            SerialDataSize = (int)size;
-            SerialDataOffset = (int)offset;
-        }
-
-        internal void EncodePointer(uint code1, int code2, int index)
-        {
-            uint size = (uint)SerialDataSize;
-            uint offset = (uint)SerialDataOffset;
-
-            encodePointer(ref size, code1, code2, index);
-            encodePointer(ref offset, code1, code2, index);
-
-            BuilderSerialDataSize = (int)size;
-            BuilderSerialDataOffset = (int)offset;
-        }
-
         internal void ExpandReferences(UnrealHeader header)
         {
             ClassReferenceNameIndex = header.GetObjectTableEntry(ClassReference)?.ObjectNameIndex;
@@ -262,33 +238,6 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),
                 _ => new UnrealObjectBase(),
             };
-        }
-
-        private static void decodePointer(ref uint value, uint code1, int code2, int index)
-        {
-            uint tmp1 = ror32(value, (index + code2) & 0x1f);
-            uint tmp2 = ror32(code1, index % 32);
-
-            value = tmp2 ^ tmp1;
-        }
-
-        private static void encodePointer(ref uint value, uint code1, int code2, int index)
-        {
-            uint tmp2 = ror32(code1, index % 32);
-
-            uint tmp1 = value ^ tmp2;
-
-            value = rol32(tmp1, (index + code2) & 0x1f);
-        }
-
-        private static uint ror32(uint val, int shift)
-        {
-            return (val >> shift) | (val << (32 - shift));
-        }
-
-        private static uint rol32(uint val, int shift)
-        {
-            return (val >> (32 - shift)) | (val << shift);
         }
 
         #endregion Private Methods
