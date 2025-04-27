@@ -237,16 +237,18 @@
             iconList.Images.SetKeyName(16, "animseq");
             iconList.Images.SetKeyName(17, "Layers");
             iconList.Images.SetKeyName(18, "Media");
-            iconList.Images.SetKeyName(19, "Perf");
+            iconList.Images.SetKeyName(19, "partfx");
             iconList.Images.SetKeyName(20, "Refr");
             iconList.Images.SetKeyName(21, "ref");
-            iconList.Images.SetKeyName(22, "Outliner");
+            iconList.Images.SetKeyName(22, "powerfx");
             iconList.Images.SetKeyName(23, "Collsion");
             iconList.Images.SetKeyName(24, "Sphere");
             iconList.Images.SetKeyName(25, "box");
             iconList.Images.SetKeyName(26, "blueBox");
             iconList.Images.SetKeyName(27, "phys");
             iconList.Images.SetKeyName(28, "Sphyl");
+            iconList.Images.SetKeyName(29, "bank");
+            iconList.Images.SetKeyName(30, "play");
             // 
             // panel4
             // 

@@ -94,12 +94,17 @@ namespace MHUpkManager
             particlesystem = 8,
             skeletalmesh = 9,
             staticmesh = 10,
+            entityfxsound = 11,
             animset = 15,
             animsequence = 16,
-            objectreferencer = 21,
+            entityfxparticle = 19,
             materialfunction = 20,
-            physicalmaterial = 28,
+            objectreferencer = 21,
+            powerfxanimation = 22,
             physicsasset = 27,
+            physicalmaterial = 28,
+            akbank = 29,
+            akevent = 30,
         }
 
         public static void BuildObjectTree(List<TreeNode> rootNodes, UnrealHeader header)
