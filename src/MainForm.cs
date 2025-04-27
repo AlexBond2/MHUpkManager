@@ -173,7 +173,7 @@ namespace MHUpkManager
 
             foreach (TreeNode rootNode in rootNodes)
             {
-                TreeNode filteredNode = FilterNode(rootNode, filterText);
+                var filteredNode = FilterNode(rootNode, filterText);
                 if (filteredNode != null)
                     objectsTree.Nodes.Add(filteredNode);
             }
@@ -184,20 +184,20 @@ namespace MHUpkManager
             return objectsTree.Nodes.Count > 0;
         }
 
-        private static TreeNode? FilterNode(TreeNode node, string filterText)
+        private static TreeNode FilterNode(TreeNode node, string filterText)
         {
-            List<TreeNode> matchingChildren = new();
+            List<TreeNode> matchingChildren = [];
 
             foreach (TreeNode child in node.Nodes)
             {
-                TreeNode? filteredChild = FilterNode(child, filterText);
+                var filteredChild = FilterNode(child, filterText);
                 if (filteredChild != null)
                     matchingChildren.Add(filteredChild);
             }
 
             if (node.Text.ToLower().Contains(filterText) || matchingChildren.Count > 0)
             {
-                TreeNode newNode = new TreeNode(node.Text)
+                var newNode = new TreeNode(node.Text)
                 {
                     Tag = node.Tag,
                     ImageIndex = node.ImageIndex,

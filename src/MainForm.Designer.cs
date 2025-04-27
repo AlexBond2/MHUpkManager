@@ -28,9 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openFileMenuItem = new ToolStripMenuItem();
@@ -44,6 +45,7 @@
             objectsPage = new TabPage();
             panel1 = new Panel();
             objectsTree = new TreeView();
+            iconList = new ImageList(components);
             panel4 = new Panel();
             filterClear = new Button();
             label1 = new Label();
@@ -203,10 +205,48 @@
             // objectsTree
             // 
             objectsTree.Dock = DockStyle.Fill;
+            objectsTree.ImageIndex = 0;
+            objectsTree.ImageList = iconList;
             objectsTree.Location = new Point(0, 32);
             objectsTree.Name = "objectsTree";
+            objectsTree.SelectedImageIndex = 0;
             objectsTree.Size = new Size(390, 492);
             objectsTree.TabIndex = 0;
+            // 
+            // iconList
+            // 
+            iconList.ColorDepth = ColorDepth.Depth32Bit;
+            iconList.ImageStream = (ImageListStreamer)resources.GetObject("iconList.ImageStream");
+            iconList.TransparentColor = Color.Transparent;
+            iconList.Images.SetKeyName(0, "actor");
+            iconList.Images.SetKeyName(1, "import");
+            iconList.Images.SetKeyName(2, "export");
+            iconList.Images.SetKeyName(3, "package");
+            iconList.Images.SetKeyName(4, "MatEd");
+            iconList.Images.SetKeyName(5, "Material");
+            iconList.Images.SetKeyName(6, "texture2d");
+            iconList.Images.SetKeyName(7, "Emitter");
+            iconList.Images.SetKeyName(8, "ParticleSystem");
+            iconList.Images.SetKeyName(9, "SkeletalMeshes");
+            iconList.Images.SetKeyName(10, "StaticMeshes");
+            iconList.Images.SetKeyName(11, "SoundActor");
+            iconList.Images.SetKeyName(12, "CameraActor");
+            iconList.Images.SetKeyName(13, "Lighting");
+            iconList.Images.SetKeyName(14, "flash");
+            iconList.Images.SetKeyName(15, "anim");
+            iconList.Images.SetKeyName(16, "animseq");
+            iconList.Images.SetKeyName(17, "Layers");
+            iconList.Images.SetKeyName(18, "Media");
+            iconList.Images.SetKeyName(19, "Perf");
+            iconList.Images.SetKeyName(20, "Refr");
+            iconList.Images.SetKeyName(21, "ref");
+            iconList.Images.SetKeyName(22, "Outliner");
+            iconList.Images.SetKeyName(23, "Collsion");
+            iconList.Images.SetKeyName(24, "Sphere");
+            iconList.Images.SetKeyName(25, "box");
+            iconList.Images.SetKeyName(26, "blueBox");
+            iconList.Images.SetKeyName(27, "phys");
+            iconList.Images.SetKeyName(28, "Sphyl");
             // 
             // panel4
             // 
@@ -604,5 +644,6 @@
         private Button filterClear;
         private Label label1;
         private TextBox filterBox;
+        private ImageList iconList;
     }
 }

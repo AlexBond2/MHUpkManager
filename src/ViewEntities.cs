@@ -84,38 +84,76 @@ namespace MHUpkManager
             popupForm.ShowDialog(parent);
         }
 
+        public enum UClassIndex
+        {
+            package = 3,
+            material = 4,
+            materialinstanceconstant = 5,
+            texture2d = 6,
+            particlespriteemitter = 7,
+            particlesystem = 8,
+            skeletalmesh = 9,
+            staticmesh = 10,
+            animset = 15,
+            animsequence = 16,
+            objectreferencer = 21,
+            materialfunction = 20,
+            physicalmaterial = 28,
+            physicsasset = 27,
+        }
+
         public static void BuildObjectTree(List<TreeNode> rootNodes, UnrealHeader header)
         {
             Dictionary<int, TreeNode> nodes = [];
 
             foreach (var entry in header.ImportTable)
             {
-                var className = $"::{entry.ClassNameIndex.Name}";
+                var className = entry.ClassNameIndex.Name;
+                int imageIndex = GetImageIndex(className);
+                className = $"::{className}";
                 var name = $"{entry.ObjectNameIndex.Name} [{entry.TableIndex}] {className}";
                 var node = new TreeNode(name);
                 node.Tag = entry;
+                node.ImageIndex = imageIndex;
+                node.SelectedImageIndex = imageIndex;
                 nodes[entry.TableIndex] = node;
             }
 
             foreach (var entry in header.ExportTable)
             {
-                var className = $"{entry.SuperReferenceNameIndex?.Name}::{entry.ClassReferenceNameIndex?.Name}";
+                var className = entry.ClassReferenceNameIndex?.Name;
+                int imageIndex = GetImageIndex(className);
+                className = $"{entry.SuperReferenceNameIndex?.Name}::{className}";
                 var name = $"{entry.ObjectNameIndex.Name} [{entry.TableIndex}] {className}";
                 var node = new TreeNode(name);
                 node.Tag = entry;
+                node.ImageIndex = imageIndex;
+                node.SelectedImageIndex = imageIndex;
                 nodes[entry.TableIndex] = node;
             }
 
             rootNodes.Clear();
 
             var importsRoot = new TreeNode("Imports");
+            importsRoot.ImageIndex = 1;
+            importsRoot.SelectedImageIndex = 1;
             BuildBranch(header.ImportTable, importsRoot, nodes);
 
             var exportsRoot = new TreeNode("Exports");
+            exportsRoot.ImageIndex = 2;
+            exportsRoot.SelectedImageIndex = 2;
             BuildBranch(header.ExportTable, exportsRoot, nodes);
 
             rootNodes.Add(exportsRoot);
             rootNodes.Add(importsRoot);
+        }
+
+        private static int GetImageIndex(string className)
+        {
+            if (string.IsNullOrEmpty(className)) return 0;
+            if (Enum.TryParse(typeof(UClassIndex), className, out var index))
+                return (int)index;
+            return 0;
         }
 
         private static void BuildBranch<T>(IEnumerable<T> table, TreeNode root, Dictionary<int, TreeNode> nodes)
