@@ -12,11 +12,13 @@ namespace MHUpkManager
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
         public UnrealUpkFile UpkFile { get; set; }
+        private List<TreeNode> rootNodes;
 
         public MainForm()
         {
             InitializeComponent();
             repository = new UpkFileRepository();
+            rootNodes = [];
 
             EnableDoubleBuffering(nameGridView);
             EnableDoubleBuffering(importGridView);
@@ -50,14 +52,20 @@ namespace MHUpkManager
             var header = upkFile.Header;
             await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
             nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
-
             importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
             exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable);
             propertyGrid.SelectedObject = new UnrealHeaderViewModel(header);
 
+            ViewEntities.BuildObjectTree(rootNodes, header);
+            UpdateObjectsTree();
+        }
+
+        private void UpdateObjectsTree()
+        {
             objectsTree.Nodes.Clear();
             objectsTree.BeginUpdate();
-            objectsTree.Nodes.AddRange([.. ViewEntities.BuildObjectTree(header)]);
+            objectsTree.Nodes.AddRange([.. rootNodes]);
+            foreach (TreeNode node in objectsTree.Nodes) node.Expand();
             objectsTree.EndUpdate();
         }
 

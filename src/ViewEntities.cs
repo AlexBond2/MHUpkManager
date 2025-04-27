@@ -84,7 +84,7 @@ namespace MHUpkManager
             popupForm.ShowDialog(parent);
         }
 
-        public static List<TreeNode> BuildObjectTree(UnrealHeader header)
+        public static void BuildObjectTree(List<TreeNode> rootNodes, UnrealHeader header)
         {
             Dictionary<int, TreeNode> nodes = [];
 
@@ -106,7 +106,7 @@ namespace MHUpkManager
                 nodes[entry.TableIndex] = node;
             }
 
-            List<TreeNode> rootNodes = [];
+            rootNodes.Clear();
 
             var importsRoot = new TreeNode("Imports");
             BuildBranch(header.ImportTable, importsRoot, nodes);
@@ -116,7 +116,6 @@ namespace MHUpkManager
 
             rootNodes.Add(exportsRoot);
             rootNodes.Add(importsRoot);
-            return rootNodes;
         }
 
         private static void BuildBranch<T>(IEnumerable<T> table, TreeNode root, Dictionary<int, TreeNode> nodes)
