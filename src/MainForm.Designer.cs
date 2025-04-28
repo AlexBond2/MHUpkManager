@@ -75,12 +75,7 @@
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
             propertyPage = new TabPage();
-            propertyGridView = new DataGridView();
-            dataGridViewTextBoxColumn1 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn2 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn3 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn4 = new DataGridViewTextBoxColumn();
-            dataGridViewTextBoxColumn5 = new DataGridViewTextBoxColumn();
+            propertiesView = new TreeView();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -100,7 +95,6 @@
             exportPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)exportGridView).BeginInit();
             propertyPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)propertyGridView).BeginInit();
             SuspendLayout();
             // 
             // menuStrip1
@@ -565,7 +559,7 @@
             // 
             // propertyPage
             // 
-            propertyPage.Controls.Add(propertyGridView);
+            propertyPage.Controls.Add(propertiesView);
             propertyPage.Location = new Point(4, 24);
             propertyPage.Name = "propertyPage";
             propertyPage.Padding = new Padding(3);
@@ -574,68 +568,13 @@
             propertyPage.Text = "Object Properties";
             propertyPage.UseVisualStyleBackColor = true;
             // 
-            // propertyGridView
+            // propertiesView
             // 
-            propertyGridView.AllowUserToAddRows = false;
-            propertyGridView.AllowUserToDeleteRows = false;
-            propertyGridView.AllowUserToResizeRows = false;
-            propertyGridView.BackgroundColor = SystemColors.Window;
-            propertyGridView.BorderStyle = BorderStyle.None;
-            propertyGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            propertyGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            propertyGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            propertyGridView.Columns.AddRange(new DataGridViewColumn[] { dataGridViewTextBoxColumn1, dataGridViewTextBoxColumn2, dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4, dataGridViewTextBoxColumn5 });
-            propertyGridView.DefaultCellStyle = dataGridViewCellStyle2;
-            propertyGridView.Dock = DockStyle.Fill;
-            propertyGridView.EnableHeadersVisualStyles = false;
-            propertyGridView.GridColor = SystemColors.GradientActiveCaption;
-            propertyGridView.Location = new Point(3, 3);
-            propertyGridView.Name = "propertyGridView";
-            propertyGridView.ReadOnly = true;
-            propertyGridView.RowHeadersVisible = false;
-            propertyGridView.Size = new Size(796, 524);
-            propertyGridView.TabIndex = 1;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            dataGridViewTextBoxColumn1.DataPropertyName = "Index";
-            dataGridViewTextBoxColumn1.FillWeight = 50F;
-            dataGridViewTextBoxColumn1.HeaderText = "Index";
-            dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            dataGridViewTextBoxColumn1.ReadOnly = true;
-            dataGridViewTextBoxColumn1.Width = 50;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            dataGridViewTextBoxColumn2.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            dataGridViewTextBoxColumn2.DataPropertyName = "Name";
-            dataGridViewTextBoxColumn2.HeaderText = "Name";
-            dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            dataGridViewTextBoxColumn2.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            dataGridViewTextBoxColumn3.DataPropertyName = "Class";
-            dataGridViewTextBoxColumn3.HeaderText = "Class";
-            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            dataGridViewTextBoxColumn3.ReadOnly = true;
-            dataGridViewTextBoxColumn3.Width = 200;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            dataGridViewTextBoxColumn4.DataPropertyName = "Value";
-            dataGridViewTextBoxColumn4.HeaderText = "Value";
-            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            dataGridViewTextBoxColumn4.ReadOnly = true;
-            dataGridViewTextBoxColumn4.Width = 150;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            dataGridViewTextBoxColumn5.DataPropertyName = "Size";
-            dataGridViewTextBoxColumn5.HeaderText = "Size";
-            dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            dataGridViewTextBoxColumn5.ReadOnly = true;
-            dataGridViewTextBoxColumn5.Width = 80;
+            propertiesView.Dock = DockStyle.Fill;
+            propertiesView.Location = new Point(3, 3);
+            propertiesView.Name = "propertiesView";
+            propertiesView.Size = new Size(796, 524);
+            propertiesView.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -672,7 +611,6 @@
             exportPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)exportGridView).EndInit();
             propertyPage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)propertyGridView).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -722,11 +660,6 @@
         private Label label1;
         private TextBox filterBox;
         private ImageList iconList;
-        private DataGridView propertyGridView;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private TreeView propertiesView;
     }
 }

@@ -5,8 +5,8 @@ using UpkManager.Contracts;
 using UpkManager.Repository;
 using System.Reflection;
 using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Models.UpkFile.Properties;
 using MHUpkManager.Models;
-using System.Data;
 
 namespace MHUpkManager
 {
@@ -26,7 +26,6 @@ namespace MHUpkManager
             EnableDoubleBuffering(nameGridView);
             EnableDoubleBuffering(importGridView);
             EnableDoubleBuffering(exportGridView);
-            EnableDoubleBuffering(propertyGridView);
         }
 
         private void EnableDoubleBuffering(DataGridView dgv)
@@ -224,13 +223,33 @@ namespace MHUpkManager
                 if (export.UnrealObject == null)
                     await export.ParseUnrealObject(UpkFile.Header, false, false);
 
-                propertyGridView.DataSource = ViewEntities.GetDataSource(export.UnrealObject.PropertyHeader);
+                BuildPropertyTree(export.UnrealObject.PropertyHeader);
             }
             else if (e.Node.Tag is UnrealImportTableEntry importEntry)
             {
-                var dt = (DataTable)propertyGridView.DataSource;
-                dt.Rows.Clear();
+                propertiesView.Nodes.Clear();
             }
+        }
+
+        private void BuildPropertyTree(UnrealPropertyHeader propertyHeader)
+        {
+            propertiesView.BeginUpdate();
+            propertiesView.Nodes.Clear();
+
+            foreach (var property in propertyHeader.Properties)
+                propertiesView.Nodes.Add(CreateRealNode(property.VirtualTree));
+
+            propertiesView.ExpandAll();
+            propertiesView.EndUpdate();
+        }
+
+        private static TreeNode CreateRealNode(VirtualNode virtualNode)
+        {
+            var node = new TreeNode(virtualNode.Text);
+            foreach (var child in virtualNode.Children)
+                node.Nodes.Add(CreateRealNode(child));
+
+            return node;
         }
     }
 }

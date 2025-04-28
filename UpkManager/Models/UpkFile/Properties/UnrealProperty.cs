@@ -35,6 +35,10 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public UnrealPropertyValueBase Value { get; private set; }
 
+        private VirtualNode propertyNode;
+        public VirtualNode VirtualTree { get => GetVirtualTree(); }
+
+
         #endregion Properties
 
         #region Unreal Methods
@@ -107,6 +111,18 @@ namespace UpkManager.Models.UpkFile.Properties
         #endregion UnrealUpkBuilderBase Implementation
 
         #region Private Methods
+
+        private VirtualNode GetVirtualTree()
+        {
+            if (propertyNode == null)
+            {
+                string name = $"{NameIndex.Name} ::{TypeNameIndex.Name}";
+                propertyNode = new VirtualNode(name);
+                propertyNode.Children.Add(Value.VirtualTree);
+            }
+
+            return propertyNode;
+        }
 
         private UnrealPropertyValueBase propertyValueFactory()
         {

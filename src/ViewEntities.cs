@@ -2,7 +2,6 @@
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Objects;
 using MHUpkManager.Models;
-using UpkManager.Models.UpkFile.Properties;
 
 namespace MHUpkManager
 {
@@ -40,20 +39,6 @@ namespace MHUpkManager
                 Flags = PrintFlags(entry),
                 SerialSize = entry.SerialDataSize,
                 Details = entry
-            }).ToList();
-
-            return data;
-        }
-
-        public static object GetDataSource(UnrealPropertyHeader propertyHeader)
-        {
-            var data = propertyHeader.Properties.Select(entry => new
-            {
-                Index = entry.ArrayIndex,
-                entry.NameIndex.Name,
-                Class = $"::{entry.TypeNameIndex.Name}",
-                entry.Value,
-                entry.Size
             }).ToList();
 
             return data;

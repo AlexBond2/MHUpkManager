@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using UpkManager.Constants;
 using UpkManager.Helpers;
@@ -23,6 +24,13 @@ namespace UpkManager.Models.UpkFile.Properties
         public virtual object PropertyValue => DataReader.GetBytes();
 
         public virtual string PropertyString => $"{DataReader.GetBytes().Length:N0} Bytes of Data";
+
+        public VirtualNode VirtualTree { get => GetVirtualTree(); }
+
+        protected virtual VirtualNode GetVirtualTree()
+        {
+            return new(ToString());
+        }
 
         public override string ToString()
         {
