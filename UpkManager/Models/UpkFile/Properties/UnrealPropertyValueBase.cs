@@ -24,6 +24,11 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public virtual string PropertyString => $"{DataReader.GetBytes().Length:N0} Bytes of Data";
 
+        public override string ToString()
+        {
+            return PropertyString;
+        }
+
         #endregion Unreal Properties
 
         #region Unreal Methods

@@ -11,6 +11,7 @@
     <Platforms>x64</Platforms>
     <Copyright>AlexBond (c) 2025</Copyright>
     <AssemblyVersion>1.0</AssemblyVersion>
+    <GenerateResourceWarnOnBinaryFormatterUse>false</GenerateResourceWarnOnBinaryFormatterUse>
   </PropertyGroup>
   
   <ItemGroup>

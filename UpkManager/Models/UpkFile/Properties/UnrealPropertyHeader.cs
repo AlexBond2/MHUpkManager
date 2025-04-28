@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using UpkManager.Constants;
 using UpkManager.Helpers;
 
 
@@ -34,19 +32,34 @@ namespace UpkManager.Models.UpkFile.Properties
 
         internal async Task ReadPropertyHeader(ByteArrayReader reader, UnrealHeader header)
         {
-            TypeIndex = reader.ReadInt32();
-
-            do
+            try
             {
-                UnrealProperty property = new UnrealProperty();
+                TypeIndex = reader.ReadInt32();
+                int max = 100;
+                do
+                {
+                    var property = new UnrealProperty();
+                    try
+                    {
+                        await property.ReadProperty(reader, header);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error reading property: {ex.Message}");
+                        return;
+                    }
 
-                await property.ReadProperty(reader, header);
+                    if (property.Size == 0) break;
 
-                Properties.Add(property);
-
-                if (property.NameIndex.Name == ObjectTypes.None.ToString()) break;
+                    Properties.Add(property);
+                    max--;
+                }
+                while (max > 0);
             }
-            while (true);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading property header: {ex.Message}");
+            }
         }
 
         internal List<UnrealProperty> GetProperty(string name)

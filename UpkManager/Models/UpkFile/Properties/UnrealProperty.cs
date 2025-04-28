@@ -41,18 +41,34 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public async Task ReadProperty(ByteArrayReader reader, UnrealHeader header)
         {
-            await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header));
+            try
+            {
+                await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header));
 
-            if (NameIndex.Name == ObjectTypes.None.ToString()) return;
+                if (NameIndex.Name == "none"|| NameIndex.Name == null) return;
 
-            await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
+                await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
 
-            Size = reader.ReadInt32();
-            ArrayIndex = reader.ReadInt32();
+                Size = reader.ReadInt32();
+                if (Size == 0) return;
 
-            Value = propertyValueFactory();
-
-            await Value.ReadPropertyValue(reader, Size, header);
+                ArrayIndex = reader.ReadInt32();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading property '{NameIndex.Name}': {ex.Message}");
+                return;
+            }
+ 
+            try
+            {
+                Value = propertyValueFactory();
+                await Value.ReadPropertyValue(reader, Size, header);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading property value '{NameIndex.Name}': {ex.Message}");
+            }
         }
 
         #endregion Unreal Methods

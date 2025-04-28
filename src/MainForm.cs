@@ -4,6 +4,9 @@ using UpkManager.Extensions;
 using UpkManager.Contracts;
 using UpkManager.Repository;
 using System.Reflection;
+using UpkManager.Models.UpkFile.Tables;
+using MHUpkManager.Models;
+using System.Data;
 
 namespace MHUpkManager
 {
@@ -23,6 +26,7 @@ namespace MHUpkManager
             EnableDoubleBuffering(nameGridView);
             EnableDoubleBuffering(importGridView);
             EnableDoubleBuffering(exportGridView);
+            EnableDoubleBuffering(propertyGridView);
         }
 
         private void EnableDoubleBuffering(DataGridView dgv)
@@ -209,6 +213,24 @@ namespace MHUpkManager
             }
 
             return null;
+        }
+
+        private async void objectsTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node?.Tag is null) return;
+
+            if (e.Node.Tag is UnrealExportTableEntry export)
+            {
+                if (export.UnrealObject == null)
+                    await export.ParseUnrealObject(UpkFile.Header, false, false);
+
+                propertyGridView.DataSource = ViewEntities.GetDataSource(export.UnrealObject.PropertyHeader);
+            }
+            else if (e.Node.Tag is UnrealImportTableEntry importEntry)
+            {
+                var dt = (DataTable)propertyGridView.DataSource;
+                dt.Rows.Clear();
+            }
         }
     }
 }

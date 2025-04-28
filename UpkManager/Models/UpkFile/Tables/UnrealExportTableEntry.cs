@@ -219,23 +219,23 @@ namespace UpkManager.Models.UpkFile.Tables
         private UnrealObjectBase objectTypeFactory()
         {
             Enum.TryParse(ClassReferenceNameIndex?.Name, true, out ObjectTypes type);
-
+            /*
             if (type == ObjectTypes.Unknown && ClassReferenceNameIndex != null)
             {
                 if (ClassReferenceNameIndex.Name.StartsWith("CustomUIComp", StringComparison.CurrentCultureIgnoreCase) ||
                     ClassReferenceNameIndex.Name.StartsWith("Distribution", StringComparison.CurrentCultureIgnoreCase) ||
                     ClassReferenceNameIndex.Name.StartsWith("UIComp", StringComparison.CurrentCultureIgnoreCase) ||
                     ClassReferenceNameIndex.Name.EndsWith("Component", StringComparison.CurrentCultureIgnoreCase)) type = ObjectTypes.ArchetypeObjectReference;
-            }
+            }*/
 
             return type switch
             {
-                ObjectTypes.ArchetypeObjectReference => new UnrealObjectArchetypeBase(),
+ /*               ObjectTypes.ArchetypeObjectReference => new UnrealObjectArchetypeBase(),
                 ObjectTypes.ObjectRedirector => new UnrealObjectObjectRedirector(),
                 ObjectTypes.ShadowMapTexture2D => new UnrealObjectShadowMapTexture2D(),
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),
                 ObjectTypes.Texture2D => new UnrealObjectTexture2D(),
-                ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),
+                ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
                 _ => new UnrealObjectBase(),
             };
         }
