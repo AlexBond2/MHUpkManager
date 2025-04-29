@@ -9,6 +9,13 @@ using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
+    public enum PropertyCollectionStruct
+    {
+        ColorMaterialInput,
+        ScalarMaterialInput,
+        RawDistributionVector,
+        RawDistributionFloat
+    }
 
     public sealed class UnrealPropertyStructValue : UnrealPropertyValueBase
     {
@@ -77,7 +84,7 @@ namespace UpkManager.Models.UpkFile.Properties
                     valueTree.Children.Add(new($"{guid}"));
                 }
 
-                if (structType == "colormaterialinput" || structType == "scalarmaterialinput")
+                if (Enum.TryParse(structType, true, out PropertyCollectionStruct type))
                 {
                     foreach (var prop in PropertyCollection)
                         valueTree.Children.Add(prop.VirtualTree);
@@ -96,7 +103,7 @@ namespace UpkManager.Models.UpkFile.Properties
             await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header));
             int offset = reader.CurrentOffset;
             var structType = StructNameIndex.Name;
-            if (structType == "colormaterialinput" || structType == "scalarmaterialinput")
+            if (Enum.TryParse(structType, true, out PropertyCollectionStruct type))
             {
                 PropertyCollection.Clear();
                 Result = ResultProperty.Success;
