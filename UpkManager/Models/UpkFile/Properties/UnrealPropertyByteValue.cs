@@ -20,11 +20,13 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Properties
 
+        public UnrealNameTableIndex EnumNameIndex { get; set; } = new();
+        public UnrealNameTableIndex EnumValueIndex { get; set; } = new();
         public override PropertyTypes PropertyType => PropertyTypes.ByteProperty;
 
         public override object PropertyValue => byteValue ?? base.PropertyValue;
 
-        public override string PropertyString => byteValue.HasValue ? $"{byteValue.Value}" : base.PropertyString;
+        public override string PropertyString => byteValue.HasValue ? $"{byteValue.Value}" : $"({EnumNameIndex?.Name}){EnumValueIndex?.Name}";
 
         #endregion Unreal Properties
 
@@ -32,7 +34,11 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
         {
-            if (size == 8) await base.ReadPropertyValue(reader, size, header);
+            if (size == 8)
+            {
+                await Task.Run(() => EnumNameIndex.ReadNameTableIndex(reader, header));
+                await Task.Run(() => EnumValueIndex.ReadNameTableIndex(reader, header));
+            }
             else byteValue = reader.ReadByte();
         }
 
