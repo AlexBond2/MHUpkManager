@@ -239,6 +239,9 @@ namespace MHUpkManager
             foreach (var property in propertyHeader.Properties)
                 propertiesView.Nodes.Add(CreateRealNode(property.VirtualTree));
 
+            if (propertyHeader.Result != ResultProperty.None || propertyHeader.RemainingData != 0)
+                propertiesView.Nodes.Add(new TreeNode($"Data [{propertyHeader.Result}][{propertyHeader.RemainingData}]"));
+
             propertiesView.ExpandAll();
             propertiesView.EndUpdate();
         }

@@ -8,6 +8,14 @@ using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
+    public enum ResultProperty
+    {
+        None,
+        Success,
+        Null,
+        Size,
+        Error
+    }
 
     public sealed class UnrealProperty : UnrealUpkBuilderBase
     {
@@ -43,25 +51,26 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Methods
 
-        public async Task ReadProperty(ByteArrayReader reader, UnrealHeader header)
+        public async Task<ResultProperty> ReadProperty(ByteArrayReader reader, UnrealHeader header)
         {
             try
             {
                 await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header));
 
-                if (NameIndex.Name == "none"|| NameIndex.Name == null) return;
+                if (NameIndex.Name == "none") return ResultProperty.None;
+                if (NameIndex.Name == null) return ResultProperty.Null;
 
                 await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
 
                 Size = reader.ReadInt32();
-                if (Size == 0) return;
+                if (Size == 0) return ResultProperty.Size;
 
                 ArrayIndex = reader.ReadInt32();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error reading property '{NameIndex.Name}': {ex.Message}");
-                return;
+                return ResultProperty.Error;
             }
  
             try
@@ -72,7 +81,9 @@ namespace UpkManager.Models.UpkFile.Properties
             catch (Exception ex)
             {
                 Console.WriteLine($"Error reading property value '{NameIndex.Name}': {ex.Message}");
+                return ResultProperty.Error;
             }
+            return ResultProperty.Success;
         }
 
         #endregion Unreal Methods

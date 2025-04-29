@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using UpkManager.Constants;
@@ -17,18 +18,20 @@ namespace UpkManager.Models.UpkFile.Properties
         public UnrealPropertyStructValue()
         {
             StructNameIndex = new UnrealNameTableIndex();
+            PropertyCollection = [];
         }
 
         #endregion Constructor
 
         #region Properties
-
+        private List<UnrealProperty> PropertyCollection { get; set; }
         public UnrealNameTableIndex StructNameIndex { get; set; }
 
         #endregion Properties
 
         #region Unreal Properties
-
+        public ResultProperty Result { get; private set; }
+        public int RemainingData { get; private set; }
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
 
         public override string PropertyString => StructNameIndex.Name;
@@ -40,10 +43,10 @@ namespace UpkManager.Models.UpkFile.Properties
         protected override VirtualNode GetVirtualTree()
         {
             var valueTree = base.GetVirtualTree();
-
+            var structType = StructNameIndex.Name;
             if (PropertyType == PropertyTypes.StructProperty)
             {
-                if (PropertyString == "vector")
+                if (structType == "vector")
                 {
                     byte[] data = DataReader.GetBytes();
                     
@@ -53,6 +56,36 @@ namespace UpkManager.Models.UpkFile.Properties
 
                     valueTree.Children.Add(new ($"[{x:F4}; {y:F4}; {z:F4}]"));                    
                 }
+
+                if (structType == "rotator")
+                {
+                    byte[] data = DataReader.GetBytes();
+
+                    float pitch = BitConverter.ToInt32(data, 0) / 32768.0f * 180.0f;
+                    float yaw = BitConverter.ToInt32(data, 4) / 32768.0f * 180.0f;
+                    float roll = BitConverter.ToInt32(data, 8) / 32768.0f * 180.0f;
+
+                    valueTree.Children.Add(new($"[{pitch:F4}; {yaw:F4}; {roll:F4}]"));
+                }
+
+                if (structType == "guid")
+                {
+                    byte[] data = DataReader.GetBytes();
+
+                    var guid = new Guid(data);
+
+                    valueTree.Children.Add(new($"{guid}"));
+                }
+
+                if (structType == "colormaterialinput" || structType == "scalarmaterialinput")
+                {
+                    foreach (var prop in PropertyCollection)
+                        valueTree.Children.Add(prop.VirtualTree);
+
+                    if (Result != ResultProperty.None || RemainingData != 0)
+                        valueTree.Children.Add(new ($"Data [{Result}][{RemainingData}]"));
+                }
+
             }
 
             return valueTree;
@@ -61,6 +94,37 @@ namespace UpkManager.Models.UpkFile.Properties
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
         {
             await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header));
+            int offset = reader.CurrentOffset;
+            var structType = StructNameIndex.Name;
+            if (structType == "colormaterialinput" || structType == "scalarmaterialinput")
+            {
+                PropertyCollection.Clear();
+                Result = ResultProperty.Success;
+
+                do
+                {
+                    var property = new UnrealProperty();
+                    try
+                    {
+                        Result = await property.ReadProperty(reader, header);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error reading property: {ex.Message}");
+                        Result = ResultProperty.Error;
+                        RemainingData = size - (reader.CurrentOffset - offset);
+                        return;
+                    }
+
+                    if (Result != ResultProperty.Success) break;
+
+                    PropertyCollection.Add(property);
+                }
+                while (Result == ResultProperty.Success);
+
+                RemainingData = size - (reader.CurrentOffset - offset);
+                return;
+            }
 
             await base.ReadPropertyValue(reader, size, header);
         }

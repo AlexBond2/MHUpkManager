@@ -17,7 +17,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override PropertyTypes PropertyType => PropertyTypes.ObjectProperty;
 
-        public override string PropertyString => ObjectIndexName.Name;
+        public override string PropertyString => ObjectIndexName != null ? ObjectIndexName.Name : "null";
 
         #endregion Properties
 

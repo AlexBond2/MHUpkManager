@@ -26,6 +26,9 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public List<UnrealProperty> Properties { get; }
 
+        public ResultProperty Result {  get; private set; }
+        public int RemainingData { get; private set; }
+
         #endregion Properties
 
         #region Unreal Methods
@@ -35,31 +38,35 @@ namespace UpkManager.Models.UpkFile.Properties
             try
             {
                 TypeIndex = reader.ReadInt32();
-                int max = 100;
+                Result = ResultProperty.Success;
                 do
                 {
                     var property = new UnrealProperty();
                     try
                     {
-                        await property.ReadProperty(reader, header);
+                        Result = await property.ReadProperty(reader, header);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Error reading property: {ex.Message}");
+                        Result = ResultProperty.Error;
+                        RemainingData = reader.Remaining;
                         return;
                     }
 
-                    if (property.Size == 0) break;
+                    if (Result != ResultProperty.Success) break;
 
                     Properties.Add(property);
-                    max--;
                 }
-                while (max > 0);
+                while (Result == ResultProperty.Success);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error reading property header: {ex.Message}");
+                Result = ResultProperty.Error;
             }
+
+            RemainingData = reader.Remaining;
         }
 
         internal List<UnrealProperty> GetProperty(string name)
