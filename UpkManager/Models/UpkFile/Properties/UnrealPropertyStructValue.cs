@@ -35,7 +35,7 @@ namespace UpkManager.Models.UpkFile.Properties
         #region Unreal Properties
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
         public override string PropertyString => StructNameIndex.Name;
-        public UnrealPropertyStructFields CustomStruct { get; private set; }
+        public UnrealPropertyCustomStructValue CustomStruct { get; private set; }
 
         #endregion Unreal Properties
 
@@ -90,10 +90,10 @@ namespace UpkManager.Models.UpkFile.Properties
             await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header));
 
             var structType = StructNameIndex.Name;
-            if (UnrealPropertyStructFields.CastCustomStruct(structType, out CustomPropertyStruct type))
+            if (UnrealPropertyCustomStructValue.CastCustomStruct(structType, out CustomPropertyStruct type))
             {
-                CustomStruct = new UnrealPropertyStructFields(type);
-                await CustomStruct.ReadPropertyValue(reader, size, header);                
+                CustomStruct = new UnrealPropertyCustomStructValue(type);
+                await CustomStruct.ReadPropertyValue(reader, size, header, property);                
             } 
             else
             {

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using UpkManager.Constants;
 using UpkManager.Helpers;
-using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
@@ -35,15 +36,14 @@ namespace UpkManager.Models.UpkFile.Properties
 
     public sealed class UnrealPropertyArrayValue : UnrealPropertyValueBase
     {
-        private UnrealNameTableIndex nameTableIndex = new();
         private bool showArray;
         private string itemType;
 
         #region Properties
-        public object[] Array { get; private set; }
-        public int Size { get; private set; }
+        public UnrealPropertyValueBase[] Array { get; private set; }
+        public int ArraySize { get; private set; }
         public override PropertyTypes PropertyType => PropertyTypes.ArrayProperty;
-        public override string PropertyString => $"{itemType} [{Size}]";
+        public override string PropertyString => $"{itemType} [{ArraySize}]";
 
         #endregion Properties
 
@@ -51,17 +51,16 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
-            Size = await Task.Run(() => reader.ReadInt32());
+            ArraySize = await Task.Run(() => reader.ReadInt32());
             size -= 4;
             await base.ReadPropertyValue(reader, size, header, property);
 
             int itemSize = 0;
-            if (Size != 0) itemSize = size / Size;
+            if (ArraySize != 0) itemSize = size / ArraySize;
 
             itemType = $"{itemSize}byte";
             showArray = false;
 
-            Array = new object[Size];
             await BuildArrayFactory(property, DataReader, header, itemSize);
         }
 
@@ -70,12 +69,12 @@ namespace UpkManager.Models.UpkFile.Properties
             var arrayNone = base.GetVirtualTree();
 
             if (showArray)
-                for (int i = 0; i < Size; i++) 
+                for (int i = 0; i < ArraySize; i++) 
                 {
                     var item = Array[i];
                     var itemNode = new VirtualNode($"[{i}] {item}");
 
-                    if (item is UnrealPropertyStructFields value)
+                    if (item is UnrealPropertyCustomStructValue value)
                         value.BuildVirtualTree(itemNode);
 
                     arrayNone.Children.Add(itemNode);
@@ -84,28 +83,25 @@ namespace UpkManager.Models.UpkFile.Properties
             return arrayNone;
         }
 
-        private static CustomPropertyStruct GetCustomProperty(PropertyArrayTypes type)
+        private static readonly Dictionary<PropertyArrayTypes, CustomPropertyStruct> CustomPropertyCache = new()
         {
-            return type switch { 
-                PropertyArrayTypes.Notifies => CustomPropertyStruct.FAnimNotifyEvent,
-                PropertyArrayTypes.LODInfo => CustomPropertyStruct.FSkeletalMeshLODInfo,
-                PropertyArrayTypes.TriangleSortSettings => CustomPropertyStruct.FTriangleSortSettings,
-                PropertyArrayTypes.ScalarParameterValues => CustomPropertyStruct.FScalarParameterValue,
-                PropertyArrayTypes.TextureParameterValues => CustomPropertyStruct.FTextureParameterValue,
-                _ => 0
-            };
-        }
+            { PropertyArrayTypes.Notifies, CustomPropertyStruct.FAnimNotifyEvent },
+            { PropertyArrayTypes.LODInfo, CustomPropertyStruct.FSkeletalMeshLODInfo },
+            { PropertyArrayTypes.TriangleSortSettings, CustomPropertyStruct.FTriangleSortSettings },
+            { PropertyArrayTypes.ScalarParameterValues, CustomPropertyStruct.FScalarParameterValue },
+            { PropertyArrayTypes.TextureParameterValues, CustomPropertyStruct.FTextureParameterValue }
+        };
 
         private async Task BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
         {
             string name = property.NameIndex.Name;
-            Func<Task<object>> readFunc = null;
+            Func<UnrealPropertyValueBase> factory = null;
 
             if (Enum.TryParse(name, true, out PropertyArrayTypes type))
-            {                        
+            {
                 itemType = $"{type}";
 
-                switch (type) 
+                switch (type)
                 {
                     case PropertyArrayTypes.ReferencedObjects:
                     case PropertyArrayTypes.Sequences:
@@ -116,41 +112,25 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.Sockets:
                     case PropertyArrayTypes.ModelMesh:
                     case PropertyArrayTypes.AnimationSet:
-                        readFunc = () =>
-                        {
-                            int index = dataReader.ReadInt32();
-                            var obj = header.GetObjectTableEntry(index);
-                            return Task.FromResult<object>(obj?.ObjectNameIndex?.Name);
-                        };
+                        factory = () => new UnrealPropertyObjectValue();
                         break;
 
                     case PropertyArrayTypes.bEnableShadowCasting:
-                        readFunc = () =>
-                        {
-                            byte index = dataReader.ReadByte();
-                            return Task.FromResult<object>(index != 0);
-                        };
+                        factory = () => new UnrealPropertyBoolValue();
                         break;
 
                     case PropertyArrayTypes.BoundsBodies:
                     case PropertyArrayTypes.ClothingAssets:
                     case PropertyArrayTypes.LODMaterialMap:
                     case PropertyArrayTypes.CompressedTrackOffsets:
-                        readFunc = () =>
-                        {
-                            int index = dataReader.ReadInt32();
-                            return Task.FromResult<object>(index);
-                        };
+                        factory = () => new UnrealPropertyIntValue();
                         break;
 
                     case PropertyArrayTypes.TrackBoneNames:
                     case PropertyArrayTypes.UseTranslationBoneNames:
                     case PropertyArrayTypes.AttachmentBones:
                     case PropertyArrayTypes.WeaponSlot:
-                        readFunc = () => { 
-                            nameTableIndex.ReadNameTableIndex(dataReader, header); 
-                            return Task.FromResult<object>(nameTableIndex?.Name); 
-                        };
+                        factory = () => new UnrealPropertyNameValue();
                         break;
 
                     case PropertyArrayTypes.Notifies:
@@ -159,25 +139,25 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.ScalarParameterValues:
                     case PropertyArrayTypes.TextureParameterValues:
 
-                        readFunc = async () => 
-                        {
-                            var propStruct = new UnrealPropertyStructFields(GetCustomProperty(type));
-                            await propStruct.ReadPropertyValue(dataReader, size, header);
-                            return propStruct;
-                        };
+                        if (CustomPropertyCache.TryGetValue(type, out var structType))
+                            factory = () => new UnrealPropertyCustomStructValue(structType);
                         break;
                 }
             }
 
-            if (readFunc == null) return;
+            Array = new UnrealPropertyValueBase[ArraySize];
+
+            if (factory == null) return;
 
             showArray = true;
 
-            for (int i = 0; i < Size; i++)
+            for (int i = 0; i < ArraySize; i++)
             {
                 try
                 {
-                    Array[i] = await readFunc();
+                    var value = factory();
+                    await value.ReadPropertyValue(dataReader, size, header, property);
+                    Array[i] = value;
                 }
                 catch (Exception ex)
                 {

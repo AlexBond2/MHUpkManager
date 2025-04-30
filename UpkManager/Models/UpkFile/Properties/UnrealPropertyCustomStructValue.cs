@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using UpkManager.Helpers;
 
 namespace UpkManager.Models.UpkFile.Properties
@@ -10,6 +11,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
     public enum CustomPropertyStruct
     {
+        None,
         ColorMaterialInput,
         ScalarMaterialInput,
         RawDistributionVector,
@@ -21,11 +23,11 @@ namespace UpkManager.Models.UpkFile.Properties
         FTextureParameterValue
     }
 
-    public class UnrealPropertyStructFields
+    public class UnrealPropertyCustomStructValue : UnrealPropertyValueBase
     {
         #region Constructor
 
-        public UnrealPropertyStructFields(CustomPropertyStruct type)
+        public UnrealPropertyCustomStructValue(CustomPropertyStruct type)
         {
             StructType = type;
             Fields = [];
@@ -63,7 +65,7 @@ namespace UpkManager.Models.UpkFile.Properties
             return Enum.TryParse(structType, true, out type);
         }
 
-        public async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
+        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
             int offset = reader.CurrentOffset;
             Fields.Clear();
