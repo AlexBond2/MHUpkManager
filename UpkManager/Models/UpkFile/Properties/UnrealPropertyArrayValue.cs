@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
@@ -18,12 +19,12 @@ namespace UpkManager.Models.UpkFile.Properties
         ConstraintSetup,
         Constraints,
         ClothingAssets,
-        Sockets
+        Sockets,
+        Notifies
     }
 
     public sealed class UnrealPropertyArrayValue : UnrealPropertyValueBase
     {
-
         private UnrealNameTableIndex nameTableIndex = new();
         private bool showArray;
         private string itemType;
@@ -50,7 +51,7 @@ namespace UpkManager.Models.UpkFile.Properties
             showArray = false;
 
             Array = new object[Size];
-            BuildArrayFactory(property.NameIndex.Name, DataReader, header, Size);
+            await BuildArrayFactory(property, DataReader, header, itemSize);
         }
 
         protected override VirtualNode GetVirtualTree()
@@ -58,15 +59,24 @@ namespace UpkManager.Models.UpkFile.Properties
             var arrayNone = base.GetVirtualTree();
 
             if (showArray)
-                for (int i = 0; i < Size; i++)
-                    arrayNone.Children.Add(new($"[{i}] {Array[i]}"));
+                for (int i = 0; i < Size; i++) 
+                {
+                    var item = Array[i];
+                    var itemNode = new VirtualNode($"[{i}] {item}");
+
+                    if (item is UnrealPropertyStructFields value)
+                        value.BuildVirtualTree(itemNode);
+
+                    arrayNone.Children.Add(itemNode);
+                }
 
             return arrayNone;
         }
 
-        private void BuildArrayFactory(string name, ByteArrayReader dataReader, UnrealHeader header, int size)
+        private async Task BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
         {
-            Func<object> readFunc = null;
+            string name = property.NameIndex.Name;
+            Func<Task<object>> readFunc = null;
 
             if (Enum.TryParse(name, true, out PropertyArrayTypes type))
             {                        
@@ -81,19 +91,27 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.ConstraintSetup:
                     case PropertyArrayTypes.Constraints:
                     case PropertyArrayTypes.Sockets:
-                        readFunc = () => header.GetObjectTableEntry(dataReader.ReadInt32())?.ObjectNameIndex?.Name;
+                        readFunc = () => Task.FromResult<object>(header.GetObjectTableEntry(dataReader.ReadInt32())?.ObjectNameIndex?.Name);
                         break;
 
                     case PropertyArrayTypes.BoundsBodies:
                     case PropertyArrayTypes.ClothingAssets:
-                        readFunc = () => dataReader.ReadInt32();
+                        readFunc = () => Task.FromResult<object>(dataReader.ReadInt32());
                         break;
 
                     case PropertyArrayTypes.TrackBoneNames:
                     case PropertyArrayTypes.UseTranslationBoneNames:
                         readFunc = () => { 
                             nameTableIndex.ReadNameTableIndex(dataReader, header); 
-                            return nameTableIndex?.Name; 
+                            return Task.FromResult<object>(nameTableIndex?.Name); 
+                        };
+                        break;
+                    case PropertyArrayTypes.Notifies:
+                        readFunc = async () => 
+                        {
+                            var propStruct = new UnrealPropertyStructFields(CustomPropertyStruct.AnimNotifyEvent);
+                            await propStruct.ReadPropertyValue(dataReader, size, header);
+                            return propStruct;
                         };
                         break;
                 }
@@ -101,10 +119,21 @@ namespace UpkManager.Models.UpkFile.Properties
 
             if (readFunc == null) return;
 
-            for (int i = 0; i < size; i++)
-                Array[i] = readFunc();
-
             showArray = true;
+
+            for (int i = 0; i < Size; i++)
+            {
+                try
+                {
+                    Array[i] = await readFunc();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[BuildArrayFactory] Error at index {i}: {ex.Message}");
+                    Console.WriteLine(ex.StackTrace);
+                    break;
+                }
+            }
         }
 
         #endregion Unreal Methods
