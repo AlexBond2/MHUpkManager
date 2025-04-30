@@ -99,9 +99,17 @@ namespace MHUpkManager
             objectreferencer = 21,
             powerfxanimation = 22,
             physicsasset = 27,
+            physicsassetinstance = 27,
             physicalmaterial = 28,
             akbank = 29,
             akevent = 30,
+            skeletalmeshsocket = 31,
+            rb_bodysetup = 32,
+            rb_bodyinstance = 32,
+            rb_constraintsetup = 33,
+            rb_constraintinstance = 33,
+            level = 34,
+            world = 35
         }
 
         public static void BuildObjectTree(List<TreeNode> rootNodes, UnrealHeader header)

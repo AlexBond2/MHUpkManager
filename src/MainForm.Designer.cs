@@ -53,6 +53,8 @@
             propertyFilePage = new TabPage();
             propertyGrid = new PropertyGrid();
             tabControl1 = new TabControl();
+            propertyPage = new TabPage();
+            propertiesView = new TreeView();
             namePage = new TabPage();
             nameGridView = new DataGridView();
             nameTableIndex = new DataGridViewTextBoxColumn();
@@ -74,8 +76,6 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
-            propertyPage = new TabPage();
-            propertiesView = new TreeView();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -88,13 +88,13 @@
             panel4.SuspendLayout();
             propertyFilePage.SuspendLayout();
             tabControl1.SuspendLayout();
+            propertyPage.SuspendLayout();
             namePage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nameGridView).BeginInit();
             importPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)importGridView).BeginInit();
             exportPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)exportGridView).BeginInit();
-            propertyPage.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -252,6 +252,11 @@
             iconList.Images.SetKeyName(28, "Sphyl");
             iconList.Images.SetKeyName(29, "bank");
             iconList.Images.SetKeyName(30, "play");
+            iconList.Images.SetKeyName(31, "socket");
+            iconList.Images.SetKeyName(32, "rbbody");
+            iconList.Images.SetKeyName(33, "setup");
+            iconList.Images.SetKeyName(34, "level");
+            iconList.Images.SetKeyName(35, "world");
             // 
             // panel4
             // 
@@ -333,6 +338,25 @@
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(810, 558);
             tabControl1.TabIndex = 0;
+            // 
+            // propertyPage
+            // 
+            propertyPage.Controls.Add(propertiesView);
+            propertyPage.Location = new Point(4, 24);
+            propertyPage.Name = "propertyPage";
+            propertyPage.Padding = new Padding(3);
+            propertyPage.Size = new Size(802, 530);
+            propertyPage.TabIndex = 0;
+            propertyPage.Text = "Object Properties";
+            propertyPage.UseVisualStyleBackColor = true;
+            // 
+            // propertiesView
+            // 
+            propertiesView.Dock = DockStyle.Fill;
+            propertiesView.Location = new Point(3, 3);
+            propertiesView.Name = "propertiesView";
+            propertiesView.Size = new Size(796, 524);
+            propertiesView.TabIndex = 0;
             // 
             // namePage
             // 
@@ -557,25 +581,6 @@
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
-            // propertyPage
-            // 
-            propertyPage.Controls.Add(propertiesView);
-            propertyPage.Location = new Point(4, 24);
-            propertyPage.Name = "propertyPage";
-            propertyPage.Padding = new Padding(3);
-            propertyPage.Size = new Size(802, 530);
-            propertyPage.TabIndex = 0;
-            propertyPage.Text = "Object Properties";
-            propertyPage.UseVisualStyleBackColor = true;
-            // 
-            // propertiesView
-            // 
-            propertiesView.Dock = DockStyle.Fill;
-            propertiesView.Location = new Point(3, 3);
-            propertiesView.Name = "propertiesView";
-            propertiesView.Size = new Size(796, 524);
-            propertiesView.TabIndex = 0;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -604,13 +609,13 @@
             panel4.PerformLayout();
             propertyFilePage.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
+            propertyPage.ResumeLayout(false);
             namePage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)nameGridView).EndInit();
             importPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)importGridView).EndInit();
             exportPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)exportGridView).EndInit();
-            propertyPage.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
