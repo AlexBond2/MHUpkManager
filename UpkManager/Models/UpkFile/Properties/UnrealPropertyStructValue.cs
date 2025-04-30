@@ -8,14 +8,14 @@ using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
-
     public sealed class UnrealPropertyStructValue : UnrealPropertyValueBase
     {
         public enum UStructTypes
         {
             Vector,
             Rotator,
-            Guid
+            Guid,
+            Box
         }
 
         #region Constructor
@@ -35,7 +35,7 @@ namespace UpkManager.Models.UpkFile.Properties
         #region Unreal Properties
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
         public override string PropertyString => StructNameIndex.Name;
-        public UnrealPropertyCustomStructValue CustomStruct { get; private set; }
+        public UnrealPropertyValueBase StructValue { get; private set; }
 
         #endregion Unreal Properties
 
@@ -44,43 +44,8 @@ namespace UpkManager.Models.UpkFile.Properties
         protected override VirtualNode GetVirtualTree()
         {
             var valueTree = base.GetVirtualTree();
-            var structType = StructNameIndex.Name;
 
-            if (Enum.TryParse(structType, true, out UStructTypes type))
-            {
-                byte[] data = DataReader.GetBytes();
-                switch (type)
-                {
-                    case UStructTypes.Vector:
-
-                        float x = BitConverter.ToSingle(data, 0);
-                        float y = BitConverter.ToSingle(data, 4);
-                        float z = BitConverter.ToSingle(data, 8);
-
-                        valueTree.Children.Add(new($"[{x:F4}; {y:F4}; {z:F4}]"));
-                        break;
-
-                    case UStructTypes.Rotator:
-
-                        float pitch = BitConverter.ToInt32(data, 0) / 32768.0f * 180.0f;
-                        float yaw = BitConverter.ToInt32(data, 4) / 32768.0f * 180.0f;
-                        float roll = BitConverter.ToInt32(data, 8) / 32768.0f * 180.0f;
-
-                        valueTree.Children.Add(new($"[{pitch:F4}; {yaw:F4}; {roll:F4}]"));
-                        break;
-
-                    case UStructTypes.Guid:
-
-                        var guid = new Guid(data);
-
-                        valueTree.Children.Add(new($"{guid}"));
-                        break;
-                }
-            }
-            else
-            {
-                CustomStruct?.BuildVirtualTree(valueTree);
-            }
+            StructValue?.BuildVirtualTree(valueTree);
 
             return valueTree;
         }
@@ -92,12 +57,28 @@ namespace UpkManager.Models.UpkFile.Properties
             var structType = StructNameIndex.Name;
             if (UnrealPropertyCustomStructValue.CastCustomStruct(structType, out CustomPropertyStruct type))
             {
-                CustomStruct = new UnrealPropertyCustomStructValue(type);
-                await CustomStruct.ReadPropertyValue(reader, size, header, property);                
+                StructValue = new UnrealPropertyCustomStructValue(type);
+                await StructValue.ReadPropertyValue(reader, size, header, property);                
             } 
             else
             {
-                await base.ReadPropertyValue(reader, size, header, property);
+                if (Enum.TryParse(structType, true, out UStructTypes uType))
+                {
+                    StructValue = uType switch
+                    {
+                        UStructTypes.Vector => new UnrealPropertyVectorValue(),
+                        UStructTypes.Box => new UnrealPropertyBoxValue(),
+                        UStructTypes.Guid => new UnrealPropertyGuidValue(),
+                        UStructTypes.Rotator => new UnrealPropertyRotatorValue(),
+                        _ => new UnrealPropertyValueBase()
+                    };
+
+                    await StructValue.ReadPropertyValue(reader, size, header, property);
+                }
+                else
+                {
+                    await base.ReadPropertyValue(reader, size, header, property);
+                }
             }
         }
 

@@ -13,7 +13,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override PropertyTypes PropertyType => PropertyTypes.GuidProperty;
 
-        public override string PropertyString => $"{new Guid(DataReader.GetBytes()):B}";
+        public override string PropertyString => $"{new Guid(DataReader.GetBytes())}";
 
         #endregion Unreal Properties
 

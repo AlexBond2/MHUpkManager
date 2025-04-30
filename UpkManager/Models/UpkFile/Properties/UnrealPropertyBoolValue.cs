@@ -4,13 +4,10 @@ using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 
-
 namespace UpkManager.Models.UpkFile.Properties
 {
-
-    internal sealed class UnrealPropertyBoolValue : UnrealPropertyValueBase
+    public sealed class UnrealPropertyBoolValue : UnrealPropertyValueBase
     {
-
         #region Properties
 
         private uint boolValue { get; set; }

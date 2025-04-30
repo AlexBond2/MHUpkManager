@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using UpkManager.Constants;
 using UpkManager.Helpers;
@@ -30,6 +29,11 @@ namespace UpkManager.Models.UpkFile.Properties
         protected virtual VirtualNode GetVirtualTree()
         {
             return new(ToString());
+        }
+
+        public virtual void BuildVirtualTree(VirtualNode valueTree)
+        {
+            valueTree.Children.Add(new(PropertyString));
         }
 
         public override string ToString()

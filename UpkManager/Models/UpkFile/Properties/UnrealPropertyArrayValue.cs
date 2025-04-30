@@ -32,6 +32,19 @@ namespace UpkManager.Models.UpkFile.Properties
         AttachmentBones,
         WeaponSlot,
         AnimationSet,
+        MAttachmentClasses,
+        PhysicsFloppyBones,
+        AnimationSetAliases,
+        ThrowPowerWeakComponents,
+        ThrowPowerStrongComponents,
+        ThrowPutdownPowerWeakComponents,
+        ThrowPutdownPowerStrongComponents,
+        Components,
+        FunctionExpressions,
+        LibraryCategories,
+        Emitters,
+        LODDistances,
+        LODSettings,
     }
 
     public sealed class UnrealPropertyArrayValue : UnrealPropertyValueBase
@@ -89,7 +102,9 @@ namespace UpkManager.Models.UpkFile.Properties
             { PropertyArrayTypes.LODInfo, CustomPropertyStruct.FSkeletalMeshLODInfo },
             { PropertyArrayTypes.TriangleSortSettings, CustomPropertyStruct.FTriangleSortSettings },
             { PropertyArrayTypes.ScalarParameterValues, CustomPropertyStruct.FScalarParameterValue },
-            { PropertyArrayTypes.TextureParameterValues, CustomPropertyStruct.FTextureParameterValue }
+            { PropertyArrayTypes.TextureParameterValues, CustomPropertyStruct.FTextureParameterValue },
+            { PropertyArrayTypes.AnimationSetAliases, CustomPropertyStruct.FAnimationSetAlias },
+            { PropertyArrayTypes.LODSettings, CustomPropertyStruct.FParticleSystemLOD },
         };
 
         private async Task BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
@@ -112,11 +127,23 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.Sockets:
                     case PropertyArrayTypes.ModelMesh:
                     case PropertyArrayTypes.AnimationSet:
+                    case PropertyArrayTypes.MAttachmentClasses:
+                    case PropertyArrayTypes.ThrowPowerWeakComponents:
+                    case PropertyArrayTypes.ThrowPowerStrongComponents:
+                    case PropertyArrayTypes.ThrowPutdownPowerWeakComponents:
+                    case PropertyArrayTypes.ThrowPutdownPowerStrongComponents:
+                    case PropertyArrayTypes.Components:
+                    case PropertyArrayTypes.FunctionExpressions:
+                    case PropertyArrayTypes.Emitters:
                         factory = () => new UnrealPropertyObjectValue();
                         break;
 
                     case PropertyArrayTypes.bEnableShadowCasting:
                         factory = () => new UnrealPropertyBoolValue();
+                        break;
+
+                    case PropertyArrayTypes.LODDistances:
+                        factory = () => new UnrealPropertyFloatValue();
                         break;
 
                     case PropertyArrayTypes.BoundsBodies:
@@ -126,10 +153,15 @@ namespace UpkManager.Models.UpkFile.Properties
                         factory = () => new UnrealPropertyIntValue();
                         break;
 
+                    case PropertyArrayTypes.LibraryCategories:
+                        factory = () => new UnrealPropertyStringValue();
+                        break;
+
                     case PropertyArrayTypes.TrackBoneNames:
                     case PropertyArrayTypes.UseTranslationBoneNames:
                     case PropertyArrayTypes.AttachmentBones:
                     case PropertyArrayTypes.WeaponSlot:
+                    case PropertyArrayTypes.PhysicsFloppyBones:
                         factory = () => new UnrealPropertyNameValue();
                         break;
 
@@ -138,6 +170,8 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.TriangleSortSettings:
                     case PropertyArrayTypes.ScalarParameterValues:
                     case PropertyArrayTypes.TextureParameterValues:
+                    case PropertyArrayTypes.AnimationSetAliases:
+                    case PropertyArrayTypes.LODSettings:
 
                         if (CustomPropertyCache.TryGetValue(type, out var structType))
                             factory = () => new UnrealPropertyCustomStructValue(structType);

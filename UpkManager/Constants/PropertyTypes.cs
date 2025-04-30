@@ -23,8 +23,13 @@ namespace UpkManager.Constants
 
         StructProperty, // variable : depends on structNameIndex
 
-        ArrayProperty // uint elements, elements * element size
+        ArrayProperty, // uint elements, elements * element size
 
+        VectorPrioperty,
+
+        RotatorProperty,
+
+        BoxProperty,
     }
 
 }

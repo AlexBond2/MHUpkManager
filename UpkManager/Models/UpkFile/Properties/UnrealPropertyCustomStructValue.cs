@@ -20,7 +20,9 @@ namespace UpkManager.Models.UpkFile.Properties
         FSkeletalMeshLODInfo,
         FTriangleSortSettings,
         FScalarParameterValue,
-        FTextureParameterValue
+        FTextureParameterValue,
+        FAnimationSetAlias,
+        FParticleSystemLOD
     }
 
     public class UnrealPropertyCustomStructValue : UnrealPropertyValueBase
@@ -51,7 +53,7 @@ namespace UpkManager.Models.UpkFile.Properties
             return StructType.ToString();
         }
 
-        public void BuildVirtualTree(VirtualNode valueTree)
+        public override void BuildVirtualTree(VirtualNode valueTree)
         {
             foreach (var prop in Fields)
                 valueTree.Children.Add(prop.VirtualTree);
