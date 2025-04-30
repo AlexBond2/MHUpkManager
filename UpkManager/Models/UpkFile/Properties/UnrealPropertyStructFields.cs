@@ -5,13 +5,20 @@ using UpkManager.Helpers;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
+
+    // https://github.com/mtz007/PUBG-SDK/blob/master/SDK/PUBG_Engine_structs.hpp
+
     public enum CustomPropertyStruct
     {
         ColorMaterialInput,
         ScalarMaterialInput,
         RawDistributionVector,
         RawDistributionFloat,
-        AnimNotifyEvent
+        FAnimNotifyEvent,
+        FSkeletalMeshLODInfo,
+        FTriangleSortSettings,
+        FScalarParameterValue,
+        FTextureParameterValue
     }
 
     public class UnrealPropertyStructFields

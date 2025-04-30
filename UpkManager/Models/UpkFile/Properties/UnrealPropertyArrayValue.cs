@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
@@ -20,7 +19,18 @@ namespace UpkManager.Models.UpkFile.Properties
         Constraints,
         ClothingAssets,
         Sockets,
-        Notifies
+        Notifies,
+        LODInfo,
+        LODMaterialMap,
+        bEnableShadowCasting,
+        TriangleSortSettings,
+        CompressedTrackOffsets,
+        ScalarParameterValues,
+        TextureParameterValues,
+        ModelMesh,
+        AttachmentBones,
+        WeaponSlot,
+        AnimationSet,
     }
 
     public sealed class UnrealPropertyArrayValue : UnrealPropertyValueBase
@@ -43,9 +53,10 @@ namespace UpkManager.Models.UpkFile.Properties
         {
             Size = await Task.Run(() => reader.ReadInt32());
             size -= 4;
-            await base.ReadPropertyValue(reader, size, header, property);     
-            
-            var itemSize = size / Size;
+            await base.ReadPropertyValue(reader, size, header, property);
+
+            int itemSize = 0;
+            if (Size != 0) itemSize = size / Size;
 
             itemType = $"{itemSize}byte";
             showArray = false;
@@ -73,6 +84,18 @@ namespace UpkManager.Models.UpkFile.Properties
             return arrayNone;
         }
 
+        private static CustomPropertyStruct GetCustomProperty(PropertyArrayTypes type)
+        {
+            return type switch { 
+                PropertyArrayTypes.Notifies => CustomPropertyStruct.FAnimNotifyEvent,
+                PropertyArrayTypes.LODInfo => CustomPropertyStruct.FSkeletalMeshLODInfo,
+                PropertyArrayTypes.TriangleSortSettings => CustomPropertyStruct.FTriangleSortSettings,
+                PropertyArrayTypes.ScalarParameterValues => CustomPropertyStruct.FScalarParameterValue,
+                PropertyArrayTypes.TextureParameterValues => CustomPropertyStruct.FTextureParameterValue,
+                _ => 0
+            };
+        }
+
         private async Task BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
         {
             string name = property.NameIndex.Name;
@@ -91,25 +114,54 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.ConstraintSetup:
                     case PropertyArrayTypes.Constraints:
                     case PropertyArrayTypes.Sockets:
-                        readFunc = () => Task.FromResult<object>(header.GetObjectTableEntry(dataReader.ReadInt32())?.ObjectNameIndex?.Name);
+                    case PropertyArrayTypes.ModelMesh:
+                    case PropertyArrayTypes.AnimationSet:
+                        readFunc = () =>
+                        {
+                            int index = dataReader.ReadInt32();
+                            var obj = header.GetObjectTableEntry(index);
+                            return Task.FromResult<object>(obj?.ObjectNameIndex?.Name);
+                        };
+                        break;
+
+                    case PropertyArrayTypes.bEnableShadowCasting:
+                        readFunc = () =>
+                        {
+                            byte index = dataReader.ReadByte();
+                            return Task.FromResult<object>(index != 0);
+                        };
                         break;
 
                     case PropertyArrayTypes.BoundsBodies:
                     case PropertyArrayTypes.ClothingAssets:
-                        readFunc = () => Task.FromResult<object>(dataReader.ReadInt32());
+                    case PropertyArrayTypes.LODMaterialMap:
+                    case PropertyArrayTypes.CompressedTrackOffsets:
+                        readFunc = () =>
+                        {
+                            int index = dataReader.ReadInt32();
+                            return Task.FromResult<object>(index);
+                        };
                         break;
 
                     case PropertyArrayTypes.TrackBoneNames:
                     case PropertyArrayTypes.UseTranslationBoneNames:
+                    case PropertyArrayTypes.AttachmentBones:
+                    case PropertyArrayTypes.WeaponSlot:
                         readFunc = () => { 
                             nameTableIndex.ReadNameTableIndex(dataReader, header); 
                             return Task.FromResult<object>(nameTableIndex?.Name); 
                         };
                         break;
+
                     case PropertyArrayTypes.Notifies:
+                    case PropertyArrayTypes.LODInfo:
+                    case PropertyArrayTypes.TriangleSortSettings:
+                    case PropertyArrayTypes.ScalarParameterValues:
+                    case PropertyArrayTypes.TextureParameterValues:
+
                         readFunc = async () => 
                         {
-                            var propStruct = new UnrealPropertyStructFields(CustomPropertyStruct.AnimNotifyEvent);
+                            var propStruct = new UnrealPropertyStructFields(GetCustomProperty(type));
                             await propStruct.ReadPropertyValue(dataReader, size, header);
                             return propStruct;
                         };
