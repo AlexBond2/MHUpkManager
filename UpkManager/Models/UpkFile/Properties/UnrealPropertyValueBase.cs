@@ -41,7 +41,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Methods
 
-        public virtual async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
+        public virtual async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
             DataReader = await reader.ReadByteArray(size);
         }

@@ -323,10 +323,10 @@
             // 
             // tabControl1
             // 
+            tabControl1.Controls.Add(propertyPage);
             tabControl1.Controls.Add(namePage);
             tabControl1.Controls.Add(importPage);
             tabControl1.Controls.Add(exportPage);
-            tabControl1.Controls.Add(propertyPage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";

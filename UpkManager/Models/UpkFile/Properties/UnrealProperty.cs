@@ -76,7 +76,7 @@ namespace UpkManager.Models.UpkFile.Properties
             try
             {
                 Value = propertyValueFactory();
-                await Value.ReadPropertyValue(reader, Size, header);
+                await Value.ReadPropertyValue(reader, Size, header, this);
             }
             catch (Exception ex)
             {

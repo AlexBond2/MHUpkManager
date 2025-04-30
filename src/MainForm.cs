@@ -245,8 +245,18 @@ namespace MHUpkManager
             if (propertyHeader.Result != ResultProperty.None || propertyHeader.RemainingData != 0)
                 propertiesView.Nodes.Add(new TreeNode($"Data [{propertyHeader.Result}][{propertyHeader.RemainingData}]"));
 
-            propertiesView.ExpandAll();
+            ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();
+        }
+
+        private static void ExpandFiltered(TreeNodeCollection nodes)
+        {
+            foreach (TreeNode node in nodes)
+                if (node.Nodes.Count > 0 && node.Nodes.Count < 11)
+                {
+                    node.Expand();
+                    ExpandFiltered(node.Nodes);
+                }
         }
 
         private static TreeNode CreateRealNode(VirtualNode virtualNode)

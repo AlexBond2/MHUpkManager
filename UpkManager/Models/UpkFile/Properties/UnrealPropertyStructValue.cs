@@ -98,7 +98,7 @@ namespace UpkManager.Models.UpkFile.Properties
             return valueTree;
         }
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header)
+        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
             await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header));
             int offset = reader.CurrentOffset;
@@ -110,10 +110,10 @@ namespace UpkManager.Models.UpkFile.Properties
 
                 do
                 {
-                    var property = new UnrealProperty();
+                    var prop = new UnrealProperty();
                     try
                     {
-                        Result = await property.ReadProperty(reader, header);
+                        Result = await prop.ReadProperty(reader, header);
                     }
                     catch (Exception ex)
                     {
@@ -125,7 +125,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
                     if (Result != ResultProperty.Success) break;
 
-                    PropertyCollection.Add(property);
+                    PropertyCollection.Add(prop);
                 }
                 while (Result == ResultProperty.Success);
 
@@ -133,7 +133,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 return;
             }
 
-            await base.ReadPropertyValue(reader, size, header);
+            await base.ReadPropertyValue(reader, size, header, property);
         }
 
         #endregion Unreal Methods
