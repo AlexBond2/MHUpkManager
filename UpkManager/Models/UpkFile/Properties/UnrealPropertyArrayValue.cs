@@ -45,6 +45,13 @@ namespace UpkManager.Models.UpkFile.Properties
         Emitters,
         LODDistances,
         LODSettings,
+        LookupTable,
+        BurstList,
+        LODLevels,
+        Modules,
+        Expressions,
+        MaterialFunctionInfos,
+        VectorParameterValues,
     }
 
     public sealed class UnrealPropertyArrayValue : UnrealPropertyValueBase
@@ -105,6 +112,9 @@ namespace UpkManager.Models.UpkFile.Properties
             { PropertyArrayTypes.TextureParameterValues, CustomPropertyStruct.FTextureParameterValue },
             { PropertyArrayTypes.AnimationSetAliases, CustomPropertyStruct.FAnimationSetAlias },
             { PropertyArrayTypes.LODSettings, CustomPropertyStruct.FParticleSystemLOD },
+            { PropertyArrayTypes.BurstList, CustomPropertyStruct.FParticleBurst },
+            { PropertyArrayTypes.MaterialFunctionInfos, CustomPropertyStruct.FMaterialFunctionInfo },
+            { PropertyArrayTypes.VectorParameterValues, CustomPropertyStruct.FVectorParameterValue },
         };
 
         private async Task BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
@@ -127,6 +137,7 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.Sockets:
                     case PropertyArrayTypes.ModelMesh:
                     case PropertyArrayTypes.AnimationSet:
+                    case PropertyArrayTypes.ClothingAssets:
                     case PropertyArrayTypes.MAttachmentClasses:
                     case PropertyArrayTypes.ThrowPowerWeakComponents:
                     case PropertyArrayTypes.ThrowPowerStrongComponents:
@@ -135,6 +146,9 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.Components:
                     case PropertyArrayTypes.FunctionExpressions:
                     case PropertyArrayTypes.Emitters:
+                    case PropertyArrayTypes.LODLevels:
+                    case PropertyArrayTypes.Modules:
+                    case PropertyArrayTypes.Expressions:
                         factory = () => new UnrealPropertyObjectValue();
                         break;
 
@@ -143,11 +157,11 @@ namespace UpkManager.Models.UpkFile.Properties
                         break;
 
                     case PropertyArrayTypes.LODDistances:
+                    case PropertyArrayTypes.LookupTable:
                         factory = () => new UnrealPropertyFloatValue();
                         break;
 
                     case PropertyArrayTypes.BoundsBodies:
-                    case PropertyArrayTypes.ClothingAssets:
                     case PropertyArrayTypes.LODMaterialMap:
                     case PropertyArrayTypes.CompressedTrackOffsets:
                         factory = () => new UnrealPropertyIntValue();
@@ -172,6 +186,9 @@ namespace UpkManager.Models.UpkFile.Properties
                     case PropertyArrayTypes.TextureParameterValues:
                     case PropertyArrayTypes.AnimationSetAliases:
                     case PropertyArrayTypes.LODSettings:
+                    case PropertyArrayTypes.BurstList:
+                    case PropertyArrayTypes.MaterialFunctionInfos:
+                    case PropertyArrayTypes.VectorParameterValues:
 
                         if (CustomPropertyCache.TryGetValue(type, out var structType))
                             factory = () => new UnrealPropertyCustomStructValue(structType);

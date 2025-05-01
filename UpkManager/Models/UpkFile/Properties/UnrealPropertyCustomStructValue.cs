@@ -14,6 +14,7 @@ namespace UpkManager.Models.UpkFile.Properties
         None,
         ColorMaterialInput,
         ScalarMaterialInput,
+        VectorMaterialInput,
         RawDistributionVector,
         RawDistributionFloat,
         FAnimNotifyEvent,
@@ -22,7 +23,10 @@ namespace UpkManager.Models.UpkFile.Properties
         FScalarParameterValue,
         FTextureParameterValue,
         FAnimationSetAlias,
-        FParticleSystemLOD
+        FParticleSystemLOD,
+        FParticleBurst,
+        FMaterialFunctionInfo,
+        FVectorParameterValue
     }
 
     public class UnrealPropertyCustomStructValue : UnrealPropertyValueBase
