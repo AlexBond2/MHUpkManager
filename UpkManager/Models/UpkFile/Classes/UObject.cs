@@ -66,7 +66,7 @@ namespace UpkManager.Models.UpkFile.Classes
         private IEnumerable<PropertyInfo> GetTreeViewFields(UObject obj)
         {
             Type type = obj.GetType();
-            foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
                 if (field.IsDefined(typeof(TreeNodeFieldAttribute)))
                     yield return field;

@@ -92,6 +92,7 @@ namespace MHUpkManager
             skeletalmesh = 9,
             staticmesh = 10,
             entityfxsound = 11,
+            swfmovie = 14,
             animset = 15,
             animsequence = 16,
             entityfxparticle = 19,
@@ -109,7 +110,9 @@ namespace MHUpkManager
             rb_constraintsetup = 33,
             rb_constraintinstance = 33,
             level = 34,
-            world = 35
+            world = 35,
+            font = 36,
+            objectredirector = 37,
         }
 
         public static void BuildObjectTree(List<TreeNode> rootNodes, UnrealHeader header)
@@ -160,9 +163,10 @@ namespace MHUpkManager
 
         private static int GetImageIndex(string className)
         {
-            if (string.IsNullOrEmpty(className)) return 0;
+            if (string.IsNullOrEmpty(className)) return 25;
             if (Enum.TryParse(typeof(UClassIndex), className, out var index))
                 return (int)index;
+            if (className == "class") return 25;
             return 0;
         }
 

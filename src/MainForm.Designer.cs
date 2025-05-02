@@ -257,6 +257,8 @@
             iconList.Images.SetKeyName(33, "setup");
             iconList.Images.SetKeyName(34, "level");
             iconList.Images.SetKeyName(35, "world");
+            iconList.Images.SetKeyName(36, "font");
+            iconList.Images.SetKeyName(37, "direct");
             // 
             // panel4
             // 
