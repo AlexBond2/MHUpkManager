@@ -7,7 +7,7 @@ using UpkManager.Helpers;
 namespace UpkManager.Models.UpkFile.Tables
 {
 
-    public sealed class UnrealNameTableIndex : UnrealUpkBuilderBase
+    public class UnrealNameTableIndex : UnrealUpkBuilderBase
     {
 
         #region Properties

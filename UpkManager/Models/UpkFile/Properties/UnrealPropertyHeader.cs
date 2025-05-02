@@ -22,7 +22,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Properties
 
-        public int TypeIndex { get; private set; }
+        public int NetIndex { get; private set; }
 
         public List<UnrealProperty> Properties { get; }
 
@@ -37,7 +37,7 @@ namespace UpkManager.Models.UpkFile.Properties
         {
             try
             {
-                TypeIndex = reader.ReadInt32();
+                NetIndex = reader.ReadInt32();
                 Result = ResultProperty.Success;
                 do
                 {
@@ -88,7 +88,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            Writer.WriteInt32(TypeIndex);
+            Writer.WriteInt32(NetIndex);
 
             foreach (UnrealProperty property in Properties) await property.WriteBuffer(Writer, CurrentOffset);
         }
