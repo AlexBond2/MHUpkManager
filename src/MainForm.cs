@@ -7,6 +7,8 @@ using System.Reflection;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Properties;
 using MHUpkManager.Models;
+using UpkManager.Models.UpkFile.Objects;
+using UpkManager.Models.UpkFile.Classes;
 
 namespace MHUpkManager
 {
@@ -223,7 +225,7 @@ namespace MHUpkManager
                 if (export.UnrealObject == null)
                     await export.ParseUnrealObject(UpkFile.Header, false, false);
 
-                BuildPropertyTree(export.UnrealObject.PropertyHeader);
+                BuildPropertyTree(export.UnrealObject);
             }
             else if (e.Node.Tag is UnrealImportTableEntry importEntry)
             {
@@ -231,19 +233,29 @@ namespace MHUpkManager
             }
         }
 
-        private void BuildPropertyTree(UnrealPropertyHeader propertyHeader)
+        private void BuildPropertyTree(UnrealObjectBase unrealObject)
         {
             propertiesView.BeginUpdate();
             propertiesView.Nodes.Clear();
 
-            foreach (var property in propertyHeader.Properties)
-                propertiesView.Nodes.Add(CreateRealNode(property.VirtualTree));
+            if (unrealObject is UnrealClassObject classObject)
+            {
+                foreach (VirtualNode virtualNode in classObject.FieldNodes)
+                     propertiesView.Nodes.Add(CreateRealNode(virtualNode));
+            }
+            else
+            {
+                var propertyHeader = unrealObject.PropertyHeader;
 
-            if (propertyHeader.Properties.Count == 0 && propertyHeader.Result ==  ResultProperty.None)
-                propertiesView.Nodes.Add(new TreeNode($"none"));
+                foreach (var property in propertyHeader.Properties)
+                    propertiesView.Nodes.Add(CreateRealNode(property.VirtualTree));
 
-            if (propertyHeader.Result != ResultProperty.None || propertyHeader.RemainingData != 0)
-                propertiesView.Nodes.Add(new TreeNode($"Data [{propertyHeader.Result}][{propertyHeader.RemainingData}]"));
+                if (propertyHeader.Properties.Count == 0 && propertyHeader.Result == ResultProperty.None)
+                    propertiesView.Nodes.Add(new TreeNode($"none"));
+
+                if (propertyHeader.Result != ResultProperty.None || propertyHeader.RemainingData != 0)
+                    propertiesView.Nodes.Add(new TreeNode($"Data [{propertyHeader.Result}][{propertyHeader.RemainingData}]"));
+            }            
 
             ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();

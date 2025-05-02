@@ -26,6 +26,8 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Public Methods
 
+        public override string ToString() => Name;
+
         public void SetNameTableIndex(UnrealNameTableEntry nameTableEntry, int numeric = 0)
         {
             Index = nameTableEntry.TableIndex;

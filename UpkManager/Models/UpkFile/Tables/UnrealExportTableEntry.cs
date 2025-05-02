@@ -58,29 +58,19 @@ namespace UpkManager.Models.UpkFile.Tables
         #region Properties
 
         public int ClassReference { get; private set; }
-
         public int SuperReference { get; private set; }
         //
         // OwnerReference in ObjectTableEntryBase
-        //
         // NameTableIndex in ObjectTableEntryBase
         //
         public int ArchetypeReference { get; private set; }
-
         public ulong ObjectFlags { get; private set; }
-
         public int SerialDataSize { get; private set; }
-
         public int SerialDataOffset { get; private set; }
-
         public uint ExportFlags { get; private set; }
-
         public int NetObjectCount { get; private set; }
-
         public List<int> NetObjects { get; private set; }
-
         public byte[] PackageGuid { get; private set; }
-
         public uint PackageFlags { get; private set; }
 
         #endregion Properties
@@ -88,15 +78,10 @@ namespace UpkManager.Models.UpkFile.Tables
         #region Unreal Properties
 
         public ByteArrayReader UnrealObjectReader { get; private set; }
-
         public UnrealObjectBase UnrealObject { get; private set; }
-
         public UnrealNameTableIndex ClassReferenceNameIndex { get; private set; }
-
         public UnrealNameTableIndex SuperReferenceNameIndex { get; private set; }
-
         public UnrealNameTableIndex OuterReferenceNameIndex { get; private set; }
-
         public UnrealNameTableIndex ArchetypeReferenceNameIndex { get; private set; }
 
         #endregion Unreal Properties
@@ -218,6 +203,8 @@ namespace UpkManager.Models.UpkFile.Tables
 
         private UnrealObjectBase objectTypeFactory()
         {
+            if (ClassReferenceNameIndex == null) return new UnrealClassObject();
+
             Enum.TryParse(ClassReferenceNameIndex?.Name, true, out ObjectTypes type);
             /*
             if (type == ObjectTypes.Unknown && ClassReferenceNameIndex != null)

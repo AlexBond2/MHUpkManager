@@ -5,11 +5,25 @@ namespace UpkManager.Models.UpkFile.Classes
 {
     public class UStruct : UField
     {
-        public UnrealNameTableIndex ScriptText { get; private set; } // UTextBuffer
-        public UnrealNameTableIndex CppText { get; private set; } // UTextBuffer
+        [TreeNodeField("UTextBuffer")]
+        public UnrealNameTableIndex ScriptText { get; private set; }
+
+        [TreeNodeField("UField")]
+        public UnrealNameTableIndex Children { get; private set; }
+
+        [TreeNodeField("UTextBuffer")]
+        public UnrealNameTableIndex CppText { get; private set; }
+
+        [TreeNodeField]
         public int Line { get; private set; }
+
+        [TreeNodeField]
         public int TextPos { get; private set; }
+
+        [TreeNodeField]
         public int ByteScriptSize { get; private set; }
+
+        [TreeNodeField]
         public int DataScriptSize { get; private set; }
 
         public override void ReadBuffer(UBuffer buffer)
@@ -18,6 +32,7 @@ namespace UpkManager.Models.UpkFile.Classes
 
             SuperIndex = buffer.ReadObject();
             ScriptText = buffer.ReadObject();
+            Children = buffer.ReadObject();
             CppText = buffer.ReadObject();
             Line = buffer.Reader.ReadInt32();
             TextPos = buffer.Reader.ReadInt32();

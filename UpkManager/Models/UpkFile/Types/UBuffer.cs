@@ -6,10 +6,10 @@ using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Types
 {
-    public class UBuffer
+    public class UBuffer(ByteArrayReader reader, UnrealHeader header)
     {
-        public ByteArrayReader Reader;
-        public UnrealHeader Header;
+        public ByteArrayReader Reader = reader;
+        public UnrealHeader Header = header;
 
         public List<T> ReadList<T>(Func<UBuffer, T> readMethod)
         {
