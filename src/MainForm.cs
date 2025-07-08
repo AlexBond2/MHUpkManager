@@ -56,6 +56,7 @@ namespace MHUpkManager
             upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
             var header = upkFile.Header;
             await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
+
             nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
             importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
             exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable);
@@ -222,10 +223,21 @@ namespace MHUpkManager
 
             if (e.Node.Tag is UnrealExportTableEntry export)
             {
-                if (export.UnrealObject == null)
-                    await export.ParseUnrealObject(UpkFile.Header, false, false);
+                try
+                {
+                    if (export.UnrealObject == null)
+                        await export.ParseUnrealObject(UpkFile.Header, false, false);
 
-                BuildPropertyTree(export.UnrealObject);
+                    BuildPropertyTree(export.UnrealObject);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Error parse object:\n{export.ObjectNameIndex} :: {export.ClassReferenceNameIndex}\n\n{ex.Message}",
+                        "Parse error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
             }
             else if (e.Node.Tag is UnrealImportTableEntry importEntry)
             {

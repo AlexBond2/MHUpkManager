@@ -123,9 +123,8 @@ namespace UpkManager.Models.UpkFile
 
         public async Task ReadHeaderAsync(Action<UnrealLoadProgress> progress)
         {
-            var message = new UnrealLoadProgress { Text = "Parsing Header..." };
-
-            progress?.Invoke(message);
+            var message = new UnrealLoadProgress { Progress = progress };
+            message.Update("Parsing Header...");
 
             await readUpkHeader();
 
@@ -133,10 +132,7 @@ namespace UpkManager.Models.UpkFile
 
             if (((CompressionTypes)CompressionFlags & validCompression) > 0)
             {
-                message.Text = "Decompressing...";
-
-                progress?.Invoke(message);
-
+                message.Update("Decompressing...");
                 reader = await decompressChunks();
             }
             else if (CompressionFlags > 0) throw new Exception($"Unsupported compression type 0x{CompressionFlags:X8}.");
@@ -151,30 +147,22 @@ namespace UpkManager.Models.UpkFile
 
             await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
 
-            message.Text = "Slicing and Dicing...";
-
-            progress?.Invoke(message);
+            message.Update("Slicing and Dicing...");
 
             await readDependsTable();
 
-            message.Text = "Reading Objects...";
-            message.Total = ExportTableCount;
-
-            progress?.Invoke(message);
+            message.Total = ExportTableCount; 
+            message.Update("Reading Objects...");
             
             await ExportTable.ForEachAsync(export =>
             {
                 return export.ReadUnrealObject(reader).ContinueWith(t =>
                 {
                     message.IncrementCurrent();
-
-                    if (ExportTableCount > 100) progress?.Invoke(message);
                 });
             });
 
-            message.IsComplete = true;
-
-            progress?.Invoke(message);
+            message.Complete();
         }
 
         public UnrealObjectTableEntryBase GetObjectTableEntry(int reference)
@@ -447,7 +435,7 @@ namespace UpkManager.Models.UpkFile
 
         private async Task readNameTable(Action<UnrealLoadProgress> progress)
         {
-            var message = new UnrealLoadProgress { Text = "Reading Name Table...", Current = 0, Total = NameTableCount };
+            var message = new UnrealLoadProgress { Text = "Reading Name Table...", Current = 0, Total = NameTableCount, Progress = progress };
 
             reader.Seek(NameTableOffset);
 
@@ -460,8 +448,6 @@ namespace UpkManager.Models.UpkFile
                 NameTable.Add(name);
 
                 message.IncrementCurrent();
-
-                if (NameTableCount > 100) progress?.Invoke(message);
             }
         }
 
@@ -475,7 +461,7 @@ namespace UpkManager.Models.UpkFile
 
         private async Task readImportTable(Action<UnrealLoadProgress> progress)
         {
-            var message = new UnrealLoadProgress { Text = "Reading Import Table...", Current = 0, Total = ImportTableCount };
+            var message = new UnrealLoadProgress { Text = "Reading Import Table...", Current = 0, Total = ImportTableCount, Progress = progress };
 
             reader.Seek(ImportTableOffset);
 
@@ -488,15 +474,11 @@ namespace UpkManager.Models.UpkFile
                 ImportTable.Add(import);
 
                 message.IncrementCurrent();
-
-                if (ImportTableCount > 100) progress?.Invoke(message);
             }
 
-            message.Text = "Expanding References...";
             message.Current = 0;
             message.Total = 0;
-
-            progress?.Invoke(message);
+            message.Update("Expanding References...");
         }
 
         private async Task writeImportTable()
@@ -509,7 +491,7 @@ namespace UpkManager.Models.UpkFile
 
         private async Task readExportTable(Action<UnrealLoadProgress> progress)
         {
-            var message = new UnrealLoadProgress { Text = "Reading Export Table...", Current = 0, Total = ExportTableCount };
+            var message = new UnrealLoadProgress { Text = "Reading Export Table...", Current = 0, Total = ExportTableCount, Progress = progress };
 
             reader.Seek(ExportTableOffset);
 
@@ -522,15 +504,11 @@ namespace UpkManager.Models.UpkFile
                 ExportTable.Add(export);
 
                 message.IncrementCurrent();
-
-                if (ExportTableCount > 100) progress?.Invoke(message);
             }
 
-            message.Text = "Expanding References...";
             message.Current = 0;
             message.Total = 0;
-
-            progress?.Invoke(message);            
+            message.Update("Expanding References...");
         }
 
         private async Task writeExportTable()
