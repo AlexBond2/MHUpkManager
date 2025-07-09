@@ -20,13 +20,19 @@ namespace UpkManager.Models.UpkFile.Classes
     {
         [TreeNodeField]
         public int NetIndex { get; private set; } = -1;
-
-        [TreeNodeField]
-        public UName Name { get; private set; }
+        public List<UnrealProperty> Properties { get; } = [];
 
         public virtual VirtualNode GetVirtualNode()
         {
             var node = new VirtualNode(GetType().Name);
+
+            if (Properties.Count > 0)
+            {
+                var fieldNode = new VirtualNode($"Properties");
+                foreach (var prop in Properties)
+                    fieldNode.Children.Add(prop.VirtualTree);
+                node.Children.Add(fieldNode);
+            }
 
             foreach (var prop in GetTreeViewFields(this))
             {
@@ -90,8 +96,18 @@ namespace UpkManager.Models.UpkFile.Classes
         public virtual void ReadBuffer(UBuffer buffer)
         {
             NetIndex = buffer.Reader.ReadInt32();
-            if (buffer.IsType)
-                Name = UName.ReadName(buffer);
+            if (!buffer.IsAbstractClass)
+                ReadProperties(buffer);
+        }
+
+        private void ReadProperties(UBuffer buffer)
+        {
+            while (true)
+            {
+                var property = new UnrealProperty();
+                if (!buffer.ReadProperty(property)) break;
+                Properties.Add(property);
+            }
         }
 
         public override int GetBuilderSize()

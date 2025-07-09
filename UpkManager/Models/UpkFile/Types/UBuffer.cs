@@ -4,6 +4,7 @@ using System;
 
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Models.UpkFile.Properties;
 
 namespace UpkManager.Models.UpkFile.Types
 {
@@ -11,7 +12,7 @@ namespace UpkManager.Models.UpkFile.Types
     {
         public ByteArrayReader Reader = reader;
         public UnrealHeader Header = header;
-        public bool IsType;
+        public bool IsAbstractClass = false;
 
         public List<T> ReadList<T>(Func<UBuffer, T> readMethod)
         {
@@ -64,6 +65,15 @@ namespace UpkManager.Models.UpkFile.Types
                 var ustring = new UnrealString();
                 await ustring.ReadString(Reader);
                 return ustring.String;
+            }).Result;
+        }
+
+        public bool ReadProperty(UnrealProperty property)
+        {
+            return Task.Run(async () =>
+            {
+                var result = await property.ReadProperty(Reader, Header);
+                return result == ResultProperty.Success;
             }).Result;
         }
     }

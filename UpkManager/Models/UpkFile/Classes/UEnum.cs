@@ -9,7 +9,6 @@ namespace UpkManager.Models.UpkFile.Classes
 
         public override void ReadBuffer(UBuffer buffer)
         {
-            buffer.IsType = true;
             base.ReadBuffer(buffer);
             Names = buffer.ReadArray(UName.ReadName);
         }

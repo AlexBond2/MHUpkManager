@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Classes.Props;
 using UpkManager.Models.UpkFile.Objects;
 
 namespace UpkManager.Models.UpkFile.Tables
@@ -204,7 +205,29 @@ namespace UpkManager.Models.UpkFile.Tables
         {
             if (ClassReferenceNameIndex == null) return new UnrealObject<UClass>();
 
-            Enum.TryParse(ClassReferenceNameIndex?.Name, true, out ObjectTypes type);
+            string className = ClassReferenceNameIndex?.Name;
+
+            if (Enum.TryParse(className, true, out PropertyTypes property))
+            {
+                return property switch
+                {
+                    PropertyTypes.ByteProperty => new UnrealObject<UByteProperty>(),
+                    PropertyTypes.BoolProperty => new UnrealObject<UBoolProperty>(),
+                    PropertyTypes.IntProperty => new UnrealObject<UIntProperty>(),
+                    PropertyTypes.FloatProperty => new UnrealObject<UFloatProperty>(),
+                    PropertyTypes.ObjectProperty => new UnrealObject<UObjectProperty>(),
+                    PropertyTypes.ComponentProperty => new UnrealObject<UComponentProperty>(),
+                    PropertyTypes.InterfaceProperty => new UnrealObject<UInterfaceProperty>(),
+                    PropertyTypes.ClassProperty => new UnrealObject<UClassProperty>(),
+                    PropertyTypes.NameProperty => new UnrealObject<UNameProperty>(),
+                    PropertyTypes.StructProperty => new UnrealObject<UStructProperty>(),
+                    PropertyTypes.StrProperty => new UnrealObject<UStrProperty>(),
+                    PropertyTypes.ArrayProperty => new UnrealObject<UArrayProperty>(),
+                    _ => new UnrealObjectBase(),
+                };
+            }
+
+            Enum.TryParse(className, true, out ObjectTypes type);
             /*
             if (type == ObjectTypes.Unknown && ClassReferenceNameIndex != null)
             {

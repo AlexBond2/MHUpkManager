@@ -68,6 +68,11 @@ namespace UpkManager.Models.UpkFile.Tables
             });
         }
 
+        public bool IsNone()
+        {
+            return Name?.ToLower() == "none";
+        }
+
         #endregion UnrealUpkBuilderBase Implementation
 
     }

@@ -57,7 +57,7 @@ namespace UpkManager.Models.UpkFile.Properties
             {
                 await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header));
 
-                if (NameIndex.Name == "none") return ResultProperty.None;
+                if (NameIndex.IsNone()) return ResultProperty.None;
                 if (NameIndex.Name == null) return ResultProperty.Null;
 
                 await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));

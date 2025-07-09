@@ -55,6 +55,7 @@ namespace UpkManager.Models.UpkFile.Classes
 
         public override void ReadBuffer(UBuffer buffer)
         {
+            buffer.IsAbstractClass = true;
             base.ReadBuffer(buffer);
             ClassFlags = (EClassFlags)buffer.Reader.ReadUInt32();
             Within = buffer.ReadObject();
