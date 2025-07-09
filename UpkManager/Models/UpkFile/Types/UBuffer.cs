@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System;
 
 using UpkManager.Helpers;
@@ -10,6 +11,7 @@ namespace UpkManager.Models.UpkFile.Types
     {
         public ByteArrayReader Reader = reader;
         public UnrealHeader Header = header;
+        public bool IsType;
 
         public List<T> ReadList<T>(Func<UBuffer, T> readMethod)
         {
@@ -19,6 +21,16 @@ namespace UpkManager.Models.UpkFile.Types
                 list.Add(readMethod(this));
 
             return list;
+        }
+
+        public UArray<T> ReadArray<T>(Func<UBuffer, T> readMethod)
+        {
+            int count = Reader.ReadInt32();
+            var array = new UArray<T>(count);
+            for (int i = 0; i < count; i++)
+                array.Add(readMethod(this));
+
+            return array;
         }
 
         public bool ReadBool()
@@ -47,9 +59,12 @@ namespace UpkManager.Models.UpkFile.Types
 
         public string ReadString()
         {
-            UnrealString ustring = new();
-            ustring.ReadString(Reader).GetAwaiter().GetResult();
-            return ustring.String;
+            return Task.Run(async () =>
+            {
+                var ustring = new UnrealString();
+                await ustring.ReadString(Reader);
+                return ustring.String;
+            }).Result;
         }
     }
 }

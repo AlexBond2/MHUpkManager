@@ -10,7 +10,8 @@ namespace UpkManager.Constants
         ShadowMapTexture2D,
         SoundNodeWave,
         Texture2D,
-        TextureMovie
+        TextureMovie,
+        Enum
     }
 
 }

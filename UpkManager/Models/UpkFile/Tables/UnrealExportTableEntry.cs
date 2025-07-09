@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
+using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Objects;
-using UpkManager.Models.UpkFile.Objects.Sounds;
-using UpkManager.Models.UpkFile.Objects.Textures;
 
 namespace UpkManager.Models.UpkFile.Tables
 {
@@ -203,7 +202,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         private UnrealObjectBase objectTypeFactory()
         {
-            if (ClassReferenceNameIndex == null) return new UnrealClassObject();
+            if (ClassReferenceNameIndex == null) return new UnrealObject<UClass>();
 
             Enum.TryParse(ClassReferenceNameIndex?.Name, true, out ObjectTypes type);
             /*
@@ -223,6 +222,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),
                 ObjectTypes.Texture2D => new UnrealObjectTexture2D(),
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
+                ObjectTypes.Enum => new UnrealObject<UEnum>(),
                 _ => new UnrealObjectBase(),
             };
         }

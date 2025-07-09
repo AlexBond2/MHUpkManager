@@ -21,6 +21,9 @@ namespace UpkManager.Models.UpkFile.Classes
         [TreeNodeField]
         public int NetIndex { get; private set; } = -1;
 
+        [TreeNodeField]
+        public UName Name { get; private set; }
+
         public virtual VirtualNode GetVirtualNode()
         {
             var node = new VirtualNode(GetType().Name);
@@ -87,6 +90,8 @@ namespace UpkManager.Models.UpkFile.Classes
         public virtual void ReadBuffer(UBuffer buffer)
         {
             NetIndex = buffer.Reader.ReadInt32();
+            if (buffer.IsType)
+                Name = UName.ReadName(buffer);
         }
 
         public override int GetBuilderSize()

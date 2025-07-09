@@ -9,36 +9,40 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Objects
 {
-    public class UnrealClassObject : UnrealObjectBase
+    public interface IUnrealObject
     {
-        public UnrealClassObject() 
-        {
-            Class = new UClass();
-        }
+        List<VirtualNode> FieldNodes { get; }
+    }
 
-        private List<VirtualNode> classNodes;
-        public UClass Class { get; set; }
-        public List<VirtualNode> FieldNodes { get => GetFieldNodes(); }
+    public class UnrealObject<T> : UnrealObjectBase, IUnrealObject where T : UObject, new()
+    {
+        protected List<VirtualNode> classNodes;
+        public T UnrealType { get; set; }
         public UBuffer Buffer { get; set; }
+
+        public List<VirtualNode> FieldNodes => GetFieldNodes();
+
+        public UnrealObject()
+        {
+            UnrealType = new T();
+        }
 
         private List<VirtualNode> GetFieldNodes()
         {
-            classNodes ??= Class.GetVirtualNode().Children;
+            classNodes ??= UnrealType.GetVirtualNode().Children;
             return classNodes;
         }
 
         public override Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            Buffer = new (reader, header);
-            Class.ReadBuffer(Buffer);
-
+            Buffer = new UBuffer(reader, header);
+            UnrealType.ReadBuffer(Buffer);
             return Task.CompletedTask;
         }
 
         public override Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
             // TODO
-
             return Task.CompletedTask;
         }
     }

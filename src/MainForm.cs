@@ -250,9 +250,9 @@ namespace MHUpkManager
             propertiesView.BeginUpdate();
             propertiesView.Nodes.Clear();
 
-            if (unrealObject is UnrealClassObject classObject)
+            if (unrealObject is IUnrealObject uObject)
             {
-                foreach (VirtualNode virtualNode in classObject.FieldNodes)
+                foreach (VirtualNode virtualNode in uObject.FieldNodes)
                      propertiesView.Nodes.Add(CreateRealNode(virtualNode));
             }
             else
