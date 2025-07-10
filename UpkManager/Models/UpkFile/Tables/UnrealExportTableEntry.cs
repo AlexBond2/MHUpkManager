@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
-using UpkManager.Models.UpkFile.Classes.Props;
 using UpkManager.Models.UpkFile.Objects;
 
 namespace UpkManager.Models.UpkFile.Tables
@@ -245,7 +244,9 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),
                 ObjectTypes.Texture2D => new UnrealObjectTexture2D(),
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
+                ObjectTypes.Const => new UnrealObject<UConst>(),
                 ObjectTypes.Enum => new UnrealObject<UEnum>(),
+                ObjectTypes.ScriptStruct => new UnrealObject<UScriptStruct>(),
                 _ => new UnrealObjectBase(),
             };
         }

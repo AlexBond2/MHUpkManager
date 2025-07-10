@@ -3,7 +3,7 @@ using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 using UpkManager.Constants;
 
-namespace UpkManager.Models.UpkFile.Classes.Props
+namespace UpkManager.Models.UpkFile.Classes
 {
     public class UProperty : UField
     {
@@ -34,6 +34,7 @@ namespace UpkManager.Models.UpkFile.Classes.Props
             ArrayEnum = buffer.ReadObject();
         }
     }
+
     public class UByteProperty : UProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.ByteProperty;

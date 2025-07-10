@@ -11,7 +11,9 @@ namespace UpkManager.Constants
         SoundNodeWave,
         Texture2D,
         TextureMovie,
-        Enum
+        Enum,
+        Const,
+        ScriptStruct
     }
 
 }

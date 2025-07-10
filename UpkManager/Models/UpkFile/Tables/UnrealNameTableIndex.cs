@@ -73,6 +73,11 @@ namespace UpkManager.Models.UpkFile.Tables
             return Name?.ToLower() == "none";
         }
 
+        public bool IsNotBool()
+        {
+            return Name?.ToLower() != "boolproperty";
+        }
+
         #endregion UnrealUpkBuilderBase Implementation
 
     }

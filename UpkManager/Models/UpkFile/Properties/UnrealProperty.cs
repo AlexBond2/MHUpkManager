@@ -63,7 +63,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
 
                 Size = reader.ReadInt32();
-                if (Size == 0 && TypeNameIndex?.Name != "boolproperty") return ResultProperty.Size;
+                if (Size == 0 && TypeNameIndex.IsNotBool()) return ResultProperty.Size;
 
                 ArrayIndex = reader.ReadInt32();
             }
