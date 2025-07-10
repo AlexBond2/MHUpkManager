@@ -55,7 +55,7 @@ namespace UpkManager.Models.UpkFile.Properties
             StructNameIndex.ReadNameTableIndex(reader, header);
 
             var structType = StructNameIndex.Name;
-            if (UnrealPropertyCustomStructValue.CastCustomStruct(structType, out CustomPropertyStruct type))
+            if (CustomStructRegistry.TryGetStruct(structType, out var type))
             {
                 StructValue = new UnrealPropertyCustomStructValue(type);
                 StructValue.ReadPropertyValue(reader, size, header, property);                

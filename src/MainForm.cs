@@ -8,7 +8,6 @@ using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Properties;
 using MHUpkManager.Models;
 using UpkManager.Models.UpkFile.Objects;
-using UpkManager.Models.UpkFile.Classes;
 
 namespace MHUpkManager
 {
@@ -16,6 +15,7 @@ namespace MHUpkManager
     {
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
+        public const string PropJson = "MHEngineTypes.json";
         public UnrealUpkFile UpkFile { get; set; }
         private List<TreeNode> rootNodes;
 
@@ -27,7 +27,20 @@ namespace MHUpkManager
 
             EnableDoubleBuffering(nameGridView);
             EnableDoubleBuffering(importGridView);
-            EnableDoubleBuffering(exportGridView);
+            EnableDoubleBuffering(exportGridView); 
+
+            string path = Path.Combine("Data", PropJson);
+            var warning = CustomStructRegistry.LoadFromJson(path);
+
+            if (!string.IsNullOrEmpty(warning))
+            {
+                MessageBox.Show(
+                    $"Warning while loading struct definitions from {PropJson}:\n\n{warning}",
+                    "Json Warning",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+            }
         }
 
         private void EnableDoubleBuffering(DataGridView dgv)

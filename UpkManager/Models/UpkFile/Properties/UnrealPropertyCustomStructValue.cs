@@ -9,33 +9,13 @@ namespace UpkManager.Models.UpkFile.Properties
 
     // https://github.com/mtz007/PUBG-SDK/blob/master/SDK/PUBG_Engine_structs.hpp
 
-    public enum CustomPropertyStruct
-    {
-        None,
-        ColorMaterialInput,
-        ScalarMaterialInput,
-        VectorMaterialInput,
-        RawDistributionVector,
-        RawDistributionFloat,
-        FAnimNotifyEvent,
-        FSkeletalMeshLODInfo,
-        FTriangleSortSettings,
-        FScalarParameterValue,
-        FTextureParameterValue,
-        FAnimationSetAlias,
-        FParticleSystemLOD,
-        FParticleBurst,
-        FMaterialFunctionInfo,
-        FVectorParameterValue
-    }
-
     public class UnrealPropertyCustomStructValue : UnrealPropertyValueBase
     {
         #region Constructor
 
-        public UnrealPropertyCustomStructValue(CustomPropertyStruct type)
+        public UnrealPropertyCustomStructValue(string structType)
         {
-            StructType = type;
+            StructType = structType;
             Fields = [];
         }
 
@@ -43,7 +23,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Properties
 
-        public CustomPropertyStruct StructType { get; private set; }
+        public string StructType { get; private set; }
         public List<UnrealProperty> Fields { get; set; }
         public ResultProperty Result { get; private set; }
         public int RemainingData { get; private set; }
@@ -54,7 +34,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         public override string ToString()
         {
-            return StructType.ToString();
+            return StructType;
         }
 
         public override void BuildVirtualTree(VirtualNode valueTree)
@@ -64,11 +44,6 @@ namespace UpkManager.Models.UpkFile.Properties
 
             if (Result != ResultProperty.None || RemainingData > 0)
                 valueTree.Children.Add(new($"Data [{Result}][{RemainingData}]"));
-        }
-
-        public static bool CastCustomStruct(string structType, out CustomPropertyStruct type)
-        {
-            return Enum.TryParse(structType, true, out type);
         }
 
         public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)

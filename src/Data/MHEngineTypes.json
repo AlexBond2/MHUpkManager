@@ -1,0 +1,54 @@
+[
+  { "Name": "ReferencedObjects", "Type": "Object" },
+  { "Name": "Sequences", "Type": "Object" },
+  { "Name": "BodySetup", "Type": "Object" },
+  { "Name": "Bodies", "Type": "Object" },
+  { "Name": "ConstraintSetup", "Type": "Object" },
+  { "Name": "Constraints", "Type": "Object" },
+  { "Name": "Sockets", "Type": "Object" },
+  { "Name": "ModelMesh", "Type": "Object" },
+  { "Name": "AnimationSet", "Type": "Object" },
+  { "Name": "ClothingAssets", "Type": "Object" },
+  { "Name": "MAttachmentClasses", "Type": "Object" },
+  { "Name": "ThrowPowerWeakComponents", "Type": "Object" },
+  { "Name": "ThrowPowerStrongComponents", "Type": "Object" },
+  { "Name": "ThrowPutdownPowerWeakComponents", "Type": "Object" },
+  { "Name": "ThrowPutdownPowerStrongComponents", "Type": "Object" },
+  { "Name": "Components", "Type": "Object" },
+
+  { "Name": "FunctionExpressions", "Type": "Object" },
+  { "Name": "Emitters", "Type": "Object" },
+  { "Name": "LODLevels", "Type": "Object" },
+  { "Name": "Modules", "Type": "Object" },
+  { "Name": "Expressions", "Type": "Object" },
+
+  { "Name": "bEnableShadowCasting", "Type": "Bool" },
+
+  { "Name": "LODDistances", "Type": "Float" },
+  { "Name": "LookupTable", "Type": "Float" },
+
+  { "Name": "BoundsBodies", "Type": "Int" },
+  { "Name": "LODMaterialMap", "Type": "Int" },
+  { "Name": "CompressedTrackOffsets", "Type": "Int" },
+
+  { "Name": "LibraryCategories", "Type": "String" },
+
+  { "Name": "TrackBoneNames", "Type": "Name" },
+  { "Name": "UseTranslationBoneNames", "Type": "Name" },
+  { "Name": "AttachmentBones", "Type": "Name" },
+  { "Name": "WeaponSlot", "Type": "Name" },
+  { "Name": "PhysicsFloppyBones", "Type": "Name" },
+
+  { "Name": "Notifies", "Type": "Struct", "Struct": "FAnimNotifyEvent" },
+  { "Name": "LODInfo", "Type": "Struct", "Struct": "FSkeletalMeshLODInfo" },
+  { "Name": "TriangleSortSettings", "Type": "Struct", "Struct": "FTriangleSortSettings" },
+  { "Name": "ScalarParameterValues", "Type": "Struct", "Struct": "FScalarParameterValue" },
+  { "Name": "TextureParameterValues", "Type": "Struct", "Struct": "FTextureParameterValue" },
+  { "Name": "AnimationSetAliases", "Type": "Struct", "Struct": "FAnimationSetAlias" },
+  { "Name": "LODSettings", "Type": "Struct", "Struct": "FParticleSystemLOD" },
+  { "Name": "BurstList", "Type": "Struct", "Struct": "FParticleBurst" },
+  { "Name": "MaterialFunctionInfos", "Type": "Struct", "Struct": "FMaterialFunctionInfo" },
+  { "Name": "VectorParameterValues", "Type": "Struct", "Struct": "FVectorParameterValue" },
+  { "Name": "AggregateGeom", "Type": "Struct", "Struct": "KAggregateGeom" },
+  { "Name": "SphylElems", "Type": "Struct", "Struct": "KSphylElem" }
+]

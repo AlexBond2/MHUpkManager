@@ -1,59 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 
 using UpkManager.Constants;
 using UpkManager.Helpers;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
-    public enum PropertyArrayTypes
-    {
-        ReferencedObjects,
-        TrackBoneNames,
-        UseTranslationBoneNames,
-        Sequences,
-        BodySetup,
-        BoundsBodies,
-        Bodies,
-        ConstraintSetup,
-        Constraints,
-        ClothingAssets,
-        Sockets,
-        Notifies,
-        LODInfo,
-        LODMaterialMap,
-        bEnableShadowCasting,
-        TriangleSortSettings,
-        CompressedTrackOffsets,
-        ScalarParameterValues,
-        TextureParameterValues,
-        ModelMesh,
-        AttachmentBones,
-        WeaponSlot,
-        AnimationSet,
-        MAttachmentClasses,
-        PhysicsFloppyBones,
-        AnimationSetAliases,
-        ThrowPowerWeakComponents,
-        ThrowPowerStrongComponents,
-        ThrowPutdownPowerWeakComponents,
-        ThrowPutdownPowerStrongComponents,
-        Components,
-        FunctionExpressions,
-        LibraryCategories,
-        Emitters,
-        LODDistances,
-        LODSettings,
-        LookupTable,
-        BurstList,
-        LODLevels,
-        Modules,
-        Expressions,
-        MaterialFunctionInfos,
-        VectorParameterValues,
-    }
-
     public sealed class UnrealPropertyArrayValue : UnrealPropertyValueBase
     {
         private bool showArray;
@@ -103,97 +58,26 @@ namespace UpkManager.Models.UpkFile.Properties
             return arrayNone;
         }
 
-        private static readonly Dictionary<PropertyArrayTypes, CustomPropertyStruct> CustomPropertyCache = new()
-        {
-            { PropertyArrayTypes.Notifies, CustomPropertyStruct.FAnimNotifyEvent },
-            { PropertyArrayTypes.LODInfo, CustomPropertyStruct.FSkeletalMeshLODInfo },
-            { PropertyArrayTypes.TriangleSortSettings, CustomPropertyStruct.FTriangleSortSettings },
-            { PropertyArrayTypes.ScalarParameterValues, CustomPropertyStruct.FScalarParameterValue },
-            { PropertyArrayTypes.TextureParameterValues, CustomPropertyStruct.FTextureParameterValue },
-            { PropertyArrayTypes.AnimationSetAliases, CustomPropertyStruct.FAnimationSetAlias },
-            { PropertyArrayTypes.LODSettings, CustomPropertyStruct.FParticleSystemLOD },
-            { PropertyArrayTypes.BurstList, CustomPropertyStruct.FParticleBurst },
-            { PropertyArrayTypes.MaterialFunctionInfos, CustomPropertyStruct.FMaterialFunctionInfo },
-            { PropertyArrayTypes.VectorParameterValues, CustomPropertyStruct.FVectorParameterValue },
-        };
-
         private void BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
         {
             string name = property.NameIndex.Name;
             Func<UnrealPropertyValueBase> factory = null;
 
-            if (Enum.TryParse(name, true, out PropertyArrayTypes type))
+            if (CustomStructRegistry.TryGetProperty(name, out var def))
             {
-                itemType = $"{type}";
+                itemType = def.Name;
 
-                switch (type)
+                factory = def.Type switch
                 {
-                    case PropertyArrayTypes.ReferencedObjects:
-                    case PropertyArrayTypes.Sequences:
-                    case PropertyArrayTypes.BodySetup:
-                    case PropertyArrayTypes.Bodies:
-                    case PropertyArrayTypes.ConstraintSetup:
-                    case PropertyArrayTypes.Constraints:
-                    case PropertyArrayTypes.Sockets:
-                    case PropertyArrayTypes.ModelMesh:
-                    case PropertyArrayTypes.AnimationSet:
-                    case PropertyArrayTypes.ClothingAssets:
-                    case PropertyArrayTypes.MAttachmentClasses:
-                    case PropertyArrayTypes.ThrowPowerWeakComponents:
-                    case PropertyArrayTypes.ThrowPowerStrongComponents:
-                    case PropertyArrayTypes.ThrowPutdownPowerWeakComponents:
-                    case PropertyArrayTypes.ThrowPutdownPowerStrongComponents:
-                    case PropertyArrayTypes.Components:
-                    case PropertyArrayTypes.FunctionExpressions:
-                    case PropertyArrayTypes.Emitters:
-                    case PropertyArrayTypes.LODLevels:
-                    case PropertyArrayTypes.Modules:
-                    case PropertyArrayTypes.Expressions:
-                        factory = () => new UnrealPropertyObjectValue();
-                        break;
-
-                    case PropertyArrayTypes.bEnableShadowCasting:
-                        factory = () => new UnrealPropertyBoolValue();
-                        break;
-
-                    case PropertyArrayTypes.LODDistances:
-                    case PropertyArrayTypes.LookupTable:
-                        factory = () => new UnrealPropertyFloatValue();
-                        break;
-
-                    case PropertyArrayTypes.BoundsBodies:
-                    case PropertyArrayTypes.LODMaterialMap:
-                    case PropertyArrayTypes.CompressedTrackOffsets:
-                        factory = () => new UnrealPropertyIntValue();
-                        break;
-
-                    case PropertyArrayTypes.LibraryCategories:
-                        factory = () => new UnrealPropertyStringValue();
-                        break;
-
-                    case PropertyArrayTypes.TrackBoneNames:
-                    case PropertyArrayTypes.UseTranslationBoneNames:
-                    case PropertyArrayTypes.AttachmentBones:
-                    case PropertyArrayTypes.WeaponSlot:
-                    case PropertyArrayTypes.PhysicsFloppyBones:
-                        factory = () => new UnrealPropertyNameValue();
-                        break;
-
-                    case PropertyArrayTypes.Notifies:
-                    case PropertyArrayTypes.LODInfo:
-                    case PropertyArrayTypes.TriangleSortSettings:
-                    case PropertyArrayTypes.ScalarParameterValues:
-                    case PropertyArrayTypes.TextureParameterValues:
-                    case PropertyArrayTypes.AnimationSetAliases:
-                    case PropertyArrayTypes.LODSettings:
-                    case PropertyArrayTypes.BurstList:
-                    case PropertyArrayTypes.MaterialFunctionInfos:
-                    case PropertyArrayTypes.VectorParameterValues:
-
-                        if (CustomPropertyCache.TryGetValue(type, out var structType))
-                            factory = () => new UnrealPropertyCustomStructValue(structType);
-                        break;
-                }
+                    PropertyTypes.FloatProperty => () => new UnrealPropertyFloatValue(),
+                    PropertyTypes.IntProperty => () => new UnrealPropertyIntValue(),
+                    PropertyTypes.BoolProperty => () => new UnrealPropertyBoolValue(),
+                    PropertyTypes.StrProperty => () => new UnrealPropertyStringValue(),
+                    PropertyTypes.NameProperty => () => new UnrealPropertyNameValue(),
+                    PropertyTypes.ObjectProperty => () => new UnrealPropertyObjectValue(),
+                    PropertyTypes.StructProperty => () => new UnrealPropertyCustomStructValue(def.Struct!),
+                    _ => null
+                };
             }
 
             Array = new UnrealPropertyValueBase[ArraySize];
