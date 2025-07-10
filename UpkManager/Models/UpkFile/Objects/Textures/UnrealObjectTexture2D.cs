@@ -81,7 +81,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
                 });
             }
 
-            Guid = await reader.ReadBytes(16);
+            Guid = reader.ReadBytes(16);
         }
 
         public void ResetMipMaps(int count)
@@ -94,7 +94,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         {
             var header = new UnrealCompressedChunkHeader();
 
-            await header.ReadCompressedChunkHeader(upkReader, 1, 0, 0);
+            header.ReadCompressedChunkHeader(upkReader, 1, 0, 0);
 
             if (TryGetImageProperties(header, (int)index, overrideMipMap, out int width, out int height, out FileFormat format))
             {

@@ -27,11 +27,11 @@ namespace UpkManager.Models.UpkFile.Properties
             return (int)value.PropertyValue / 32768.0f * 180.0f;
         }
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
-            await Pitch.ReadPropertyValue(reader, size, header, property);
-            await Yaw.ReadPropertyValue(reader, size, header, property);
-            await Roll.ReadPropertyValue(reader, size, header, property);
+            Pitch.ReadPropertyValue(reader, size, header, property);
+            Yaw.ReadPropertyValue(reader, size, header, property);
+            Roll.ReadPropertyValue(reader, size, header, property);
         }
     }
 }

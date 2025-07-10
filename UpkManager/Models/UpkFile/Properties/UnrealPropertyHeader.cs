@@ -33,7 +33,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Methods
 
-        internal async Task ReadPropertyHeader(ByteArrayReader reader, UnrealHeader header)
+        internal void ReadPropertyHeader(ByteArrayReader reader, UnrealHeader header)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace UpkManager.Models.UpkFile.Properties
                     var property = new UnrealProperty();
                     try
                     {
-                        Result = await property.ReadProperty(reader, header);
+                        Result = property.ReadProperty(reader, header);
                     }
                     catch (Exception ex)
                     {

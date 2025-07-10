@@ -40,15 +40,14 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Unreal Methods
 
-        public async Task ReadImportTableEntry(ByteArrayReader reader, UnrealHeader header)
+        public Task ReadImportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
-            await Task.Run(() => PackageNameIndex.ReadNameTableIndex(reader, header)); // PackageName
+            PackageNameIndex.ReadNameTableIndex(reader, header); // PackageName
+            ClassNameIndex.ReadNameTableIndex(reader, header);   // ClassName
+            OuterReference = reader.ReadInt32();                 // OuterIndex
+            ObjectNameIndex.ReadNameTableIndex(reader, header);  // ObjectName
 
-            await Task.Run(() => ClassNameIndex.ReadNameTableIndex(reader, header)); // ClassName
-
-            OuterReference = reader.ReadInt32(); // OuterIndex
-
-            await Task.Run(() => ObjectNameIndex.ReadNameTableIndex(reader, header)); // ObjectName
+            return Task.CompletedTask;
         }
 
         public void ExpandReferences(UnrealHeader header)

@@ -105,11 +105,10 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public virtual async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            if (!skipProperties) await PropertyHeader.ReadPropertyHeader(reader, header);
-
+            if (!skipProperties) PropertyHeader.ReadPropertyHeader(reader, header);
             AdditionalDataOffset = export.SerialDataOffset + reader.CurrentOffset;
-
-            AdditionalDataReader = await reader.Splice();
+            AdditionalDataReader = reader.Splice();
+            await Task.CompletedTask;
         }
 
         public virtual async Task SaveObject(string filename, object configuration)

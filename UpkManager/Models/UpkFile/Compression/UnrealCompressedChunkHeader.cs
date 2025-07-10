@@ -35,7 +35,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
         #region Unreal Methods
 
-        public async Task ReadCompressedChunkHeader(ByteArrayReader reader, uint flags, int uncompressedSize, int compressedSize)
+        public void ReadCompressedChunkHeader(ByteArrayReader reader, uint flags, int uncompressedSize, int compressedSize)
         {
             if (flags > 0)
             {
@@ -55,9 +55,7 @@ namespace UpkManager.Models.UpkFile.Compression
                 for (int i = 0; i < blockCount; ++i)
                 {
                     UnrealCompressedChunkBlock block = new();
-
                     block.ReadCompressedChunkBlock(reader);
-
                     Blocks.Add(block);
                 }
             }
@@ -71,7 +69,7 @@ namespace UpkManager.Models.UpkFile.Compression
                 ];
             }
 
-            foreach (UnrealCompressedChunkBlock block in Blocks) await block.ReadCompressedChunkBlockData(reader);
+            foreach (UnrealCompressedChunkBlock block in Blocks) block.ReadCompressedChunkBlockData(reader);
         }
 
         public async Task<int> BuildCompressedChunkHeader(ByteArrayReader reader, uint flags)
@@ -92,7 +90,7 @@ namespace UpkManager.Models.UpkFile.Compression
             {
                 UnrealCompressedChunkBlock block = new UnrealCompressedChunkBlock();
 
-                ByteArrayReader uncompressed = await reader.ReadByteArray(Math.Min(BlockSize, reader.Remaining));
+                ByteArrayReader uncompressed = reader.ReadByteArray(Math.Min(BlockSize, reader.Remaining));
 
                 builderSize += await block.BuildCompressedChunkBlockData(uncompressed);
 

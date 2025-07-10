@@ -60,21 +60,15 @@ namespace UpkManager.Models.UpkFile.Types
 
         public string ReadString()
         {
-            return Task.Run(async () =>
-            {
-                var ustring = new UnrealString();
-                await ustring.ReadString(Reader);
-                return ustring.String;
-            }).Result;
+            var ustring = new UnrealString();
+            ustring.ReadString(Reader);
+            return ustring.String;
         }
 
         public bool ReadProperty(UnrealProperty property)
         {
-            return Task.Run(async () =>
-            {
-                var result = await property.ReadProperty(Reader, Header);
-                return result == ResultProperty.Success;
-            }).Result;
+            var result = property.ReadProperty(Reader, Header);
+            return result == ResultProperty.Success;
         }
     }
 }

@@ -32,14 +32,14 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Methods
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
-            await Task.Run(() => EnumNameIndex.ReadNameTableIndex(reader, header));
+            EnumNameIndex.ReadNameTableIndex(reader, header);
 
             if (EnumNameIndex?.Name == "none")
                 byteValue = reader.ReadByte();
             else
-                await Task.Run(() => EnumValueIndex.ReadNameTableIndex(reader, header));
+                EnumValueIndex.ReadNameTableIndex(reader, header);
         }
 
         public override void SetPropertyValue(object value)

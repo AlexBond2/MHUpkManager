@@ -69,11 +69,11 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Methods
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
-            ArraySize = await Task.Run(() => reader.ReadInt32());
+            ArraySize = reader.ReadInt32();
             size -= 4;
-            await base.ReadPropertyValue(reader, size, header, property);
+            base.ReadPropertyValue(reader, size, header, property);
 
             int itemSize = 0;
             if (ArraySize != 0) itemSize = size / ArraySize;
@@ -81,7 +81,7 @@ namespace UpkManager.Models.UpkFile.Properties
             itemType = $"{itemSize}byte";
             showArray = false;
 
-            await BuildArrayFactory(property, DataReader, header, itemSize);
+            BuildArrayFactory(property, DataReader, header, itemSize);
         }
 
         protected override VirtualNode GetVirtualTree()
@@ -117,7 +117,7 @@ namespace UpkManager.Models.UpkFile.Properties
             { PropertyArrayTypes.VectorParameterValues, CustomPropertyStruct.FVectorParameterValue },
         };
 
-        private async Task BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
+        private void BuildArrayFactory(UnrealProperty property, ByteArrayReader dataReader, UnrealHeader header, int size)
         {
             string name = property.NameIndex.Name;
             Func<UnrealPropertyValueBase> factory = null;
@@ -207,7 +207,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 try
                 {
                     var value = factory();
-                    await value.ReadPropertyValue(dataReader, size, header, property);
+                    value.ReadPropertyValue(dataReader, size, header, property);
                     Array[i] = value;
                 }
                 catch (Exception ex)

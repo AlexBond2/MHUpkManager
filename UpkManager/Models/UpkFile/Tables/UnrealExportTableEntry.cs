@@ -87,7 +87,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Unreal Methods
 
-        internal async Task ReadExportTableEntry(ByteArrayReader reader, UnrealHeader header)
+        internal void ReadExportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
             ClassReference = reader.ReadInt32(); // ClassIndex
             SuperReference = reader.ReadInt32(); // SuperIndex
@@ -109,7 +109,7 @@ namespace UpkManager.Models.UpkFile.Tables
             for (int i = 0; i < netObjectCount; i++)
                 NetObjects.Add(reader.ReadInt32());
 
-            PackageGuid = await reader.ReadBytes(16); // PackageGuid
+            PackageGuid = reader.ReadBytes(16); // PackageGuid
 
             PackageFlags = reader.ReadUInt32(); // PackageFlags
         }
@@ -122,9 +122,9 @@ namespace UpkManager.Models.UpkFile.Tables
             ArchetypeReferenceNameIndex = header.GetObjectTableEntry(ArchetypeReference)?.ObjectNameIndex;
         }
 
-        internal async Task ReadUnrealObject(ByteArrayReader reader)
+        internal void ReadUnrealObject(ByteArrayReader reader)
         {
-            UnrealObjectReader = await reader.Splice(SerialDataOffset, SerialDataSize);
+            UnrealObjectReader = reader.Splice(SerialDataOffset, SerialDataSize);
         }
 
         public async Task ParseUnrealObject(UnrealHeader header, bool skipProperties, bool skipParse)

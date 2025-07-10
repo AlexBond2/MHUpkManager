@@ -26,7 +26,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
         #region Unreal Methods
 
-        public override async Task ReadCompressedChunk(ByteArrayReader reader)
+        public override void ReadCompressedChunk(ByteArrayReader reader)
         {
             BulkDataFlags = reader.ReadUInt32();
 
@@ -39,7 +39,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
             Header = new UnrealCompressedChunkHeader();
 
-            await Header.ReadCompressedChunkHeader(reader, BulkDataFlags, UncompressedSize, CompressedSize);
+            Header.ReadCompressedChunkHeader(reader, BulkDataFlags, UncompressedSize, CompressedSize);
         }
 
         public async Task<ByteArrayReader> DecompressChunk(uint flags)
@@ -60,10 +60,10 @@ namespace UpkManager.Models.UpkFile.Compression
 
             byte[] chunkData = new byte[totalSize];
 
-            var blockTasks = blocks.Select((block, i) => Task.Run(async () =>
+            var blockTasks = blocks.Select((block, i) => Task.Run(() =>
             {
                 if (((BulkDataCompressionTypes)BulkDataFlags & BulkDataCompressionTypes.LZO_ENC) > 0)
-                    await block.CompressedData.Decrypt();
+                    block.CompressedData.Decrypt();
 
                 byte[] decompressed;
 

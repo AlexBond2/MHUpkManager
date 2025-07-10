@@ -50,15 +50,15 @@ namespace UpkManager.Models.UpkFile.Properties
             return valueTree;
         }
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
-            await Task.Run(() => StructNameIndex.ReadNameTableIndex(reader, header));
+            StructNameIndex.ReadNameTableIndex(reader, header);
 
             var structType = StructNameIndex.Name;
             if (UnrealPropertyCustomStructValue.CastCustomStruct(structType, out CustomPropertyStruct type))
             {
                 StructValue = new UnrealPropertyCustomStructValue(type);
-                await StructValue.ReadPropertyValue(reader, size, header, property);                
+                StructValue.ReadPropertyValue(reader, size, header, property);                
             } 
             else
             {
@@ -73,11 +73,11 @@ namespace UpkManager.Models.UpkFile.Properties
                         _ => new UnrealPropertyValueBase()
                     };
 
-                    await StructValue.ReadPropertyValue(reader, size, header, property);
+                    StructValue.ReadPropertyValue(reader, size, header, property);
                 }
                 else
                 {
-                    await base.ReadPropertyValue(reader, size, header, property);
+                    base.ReadPropertyValue(reader, size, header, property);
                 }
             }
         }

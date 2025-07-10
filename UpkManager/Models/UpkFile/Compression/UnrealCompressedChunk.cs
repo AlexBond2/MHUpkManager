@@ -22,7 +22,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
         #region Unreal Methods
 
-        public virtual async Task ReadCompressedChunk(ByteArrayReader reader)
+        public virtual void ReadCompressedChunk(ByteArrayReader reader)
         {
             UncompressedOffset = reader.ReadInt32();
             UncompressedSize = reader.ReadInt32();
@@ -32,7 +32,7 @@ namespace UpkManager.Models.UpkFile.Compression
 
             Header = new UnrealCompressedChunkHeader();
 
-            await Header.ReadCompressedChunkHeader(reader.Branch(CompressedOffset), 1, UncompressedSize, CompressedSize);
+            Header.ReadCompressedChunkHeader(reader.Branch(CompressedOffset), 1, UncompressedSize, CompressedSize);
         }
 
         #endregion Unreal Methods

@@ -51,16 +51,16 @@ namespace UpkManager.Models.UpkFile.Properties
 
         #region Unreal Methods
 
-        public async Task<ResultProperty> ReadProperty(ByteArrayReader reader, UnrealHeader header)
+        public ResultProperty ReadProperty(ByteArrayReader reader, UnrealHeader header)
         {
             try
             {
-                await Task.Run(() => NameIndex.ReadNameTableIndex(reader, header));
+                NameIndex.ReadNameTableIndex(reader, header);
 
                 if (NameIndex.IsNone()) return ResultProperty.None;
                 if (NameIndex.Name == null) return ResultProperty.Null;
 
-                await Task.Run(() => TypeNameIndex.ReadNameTableIndex(reader, header));
+                TypeNameIndex.ReadNameTableIndex(reader, header);
 
                 Size = reader.ReadInt32();
                 if (Size == 0 && TypeNameIndex.IsNotBool()) return ResultProperty.Size;
@@ -76,7 +76,7 @@ namespace UpkManager.Models.UpkFile.Properties
             try
             {
                 Value = propertyValueFactory();
-                await Value.ReadPropertyValue(reader, Size, header, this);
+                Value.ReadPropertyValue(reader, Size, header, this);
             }
             catch (Exception ex)
             {

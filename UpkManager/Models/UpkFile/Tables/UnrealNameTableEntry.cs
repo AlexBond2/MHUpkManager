@@ -34,19 +34,16 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Unreal Methods
 
-        public async Task ReadNameTableEntry(ByteArrayReader reader)
+        public void ReadNameTableEntry(ByteArrayReader reader)
         {
-            await Name.ReadString(reader);
-
+            Name.ReadString(reader);
             Flags = reader.ReadUInt64();
         }
 
         public void SetNameTableEntry(UnrealString name, ulong flags, int index)
         {
             Name = name;
-
             Flags = flags;
-
             TableIndex = index;
         }
 

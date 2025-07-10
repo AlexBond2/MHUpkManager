@@ -71,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Properties
             return Enum.TryParse(structType, true, out type);
         }
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
             int offset = reader.CurrentOffset;
             Fields.Clear();
@@ -82,7 +82,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 var prop = new UnrealProperty();
                 try
                 {
-                    Result = await prop.ReadProperty(reader, header);
+                    Result = prop.ReadProperty(reader, header);
                 }
                 catch (Exception ex)
                 {

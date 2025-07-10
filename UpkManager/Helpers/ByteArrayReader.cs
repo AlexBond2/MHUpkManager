@@ -82,42 +82,40 @@ namespace UpkManager.Helpers
             return reader;
         }
 
-        public async Task<ByteArrayReader> ReadByteArray(int Length)
+        public ByteArrayReader ReadByteArray(int Length)
         {
             if (index + Length < 0 || index + Length > data.Length) throw new ArgumentOutOfRangeException(nameof(Length), "Index + Length is out of the bounds of the byte array.");
 
             ByteArrayReader reader = new ByteArrayReader();
-
-            reader.Initialize(await ReadBytes(Length), 0);
+            reader.Initialize(ReadBytes(Length), 0);
 
             return reader;
         }
 
-        public async Task<ByteArrayReader> Splice()
+        public ByteArrayReader Splice()
         {
-            return await Splice(index, data.Length - index);
+            return Splice(index, data.Length - index);
         }
 
-        public async Task<ByteArrayReader> Splice(int Offset, int Length)
+        public ByteArrayReader Splice(int Offset, int Length)
         {
             if (Offset + Length < 0 || Offset + Length > data.Length) throw new ArgumentOutOfRangeException(nameof(Offset), "Offset + Length is out of the bounds of the byte array.");
 
-            ByteArrayReader reader = new ByteArrayReader();
-
-            reader.Initialize(await ReadBytes(Offset, Length), 0);
+            var reader = new ByteArrayReader();
+            reader.Initialize(ReadBytes(Offset, Length), 0);
 
             return reader;
         }
 
-        public async Task Encrypt()
+        public void Encrypt()
         {
-            await Decrypt();
+            Decrypt();
         }
 
-        public async Task Decrypt()
+        public void Decrypt()
         {
             if (data.Length < 32) return;
-            await Task.Run(() => Console.WriteLine("Put here your decrypt algorythm "));
+            Console.WriteLine("Put here your decrypt algorythm ");
         }
 
         public async Task<byte[]> Compress()
@@ -190,26 +188,27 @@ namespace UpkManager.Helpers
             return value;
         }
 
-        public async Task<byte[]> ReadBytes(int Length)
+        public byte[] ReadBytes(int length)
         {
-            if (Length == 0) return new byte[0];
+            if (length == 0) return Array.Empty<byte>();
 
-            if (index + Length < 0 || index + Length > data.Length) throw new ArgumentOutOfRangeException(nameof(Length), "Index + Length is out of the bounds of the byte array.");
+            if (index + length < 0 || index + length > data.Length)
+                throw new ArgumentOutOfRangeException(nameof(length), "Index + Length is out of the bounds of the byte array.");
 
-            byte[] value = new byte[Length];
-
-            await Task.Run(() => { Array.ConstrainedCopy(data, index, value, 0, Length); index += Length; });
+            byte[] value = new byte[length];
+            Array.ConstrainedCopy(data, index, value, 0, length);
+            index += length;
 
             return value;
         }
 
-        public async Task<byte[]> ReadBytes(int Offset, int Length)
+        public byte[] ReadBytes(int offset, int length)
         {
-            if (Offset + Length < 0 || Offset + Length > data.Length) throw new ArgumentOutOfRangeException(nameof(Offset), "Offset + Length is out of the bounds of the byte array.");
+            if (offset + length < 0 || offset + length > data.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset), "Offset + Length is out of the bounds of the byte array.");
 
-            byte[] value = new byte[Length];
-
-            await Task.Run(() => Array.ConstrainedCopy(data, Offset, value, 0, Length));
+            byte[] value = new byte[length];
+            Array.ConstrainedCopy(data, offset, value, 0, length);
 
             return value;
         }

@@ -126,7 +126,7 @@ namespace UpkManager.Models.UpkFile
             var message = new UnrealLoadProgress { Progress = progress };
             message.Update("Parsing Header...");
 
-            await readUpkHeader();
+            readUpkHeader();
 
             const CompressionTypes validCompression = CompressionTypes.LZO | CompressionTypes.LZO_ENC;
 
@@ -137,11 +137,11 @@ namespace UpkManager.Models.UpkFile
             }
             else if (CompressionFlags > 0) throw new Exception($"Unsupported compression type 0x{CompressionFlags:X8}.");
 
-            await readNameTable(progress);
+            readNameTable(progress);
 
-            await readImportTable(progress);
+            readImportTable(progress);
 
-            await readExportTable(progress);
+            readExportTable(progress);
 
             await ExportTable.ForEachAsync(export => Task.Run(() => export.ExpandReferences(this)));
 
@@ -154,13 +154,12 @@ namespace UpkManager.Models.UpkFile
             message.Total = ExportTableCount; 
             message.Update("Reading Objects...");
             
-            await ExportTable.ForEachAsync(export =>
-            {
-                return export.ReadUnrealObject(reader).ContinueWith(t =>
-                {
+            await ExportTable.ForEachAsync(export =>            
+                Task.Run(() => {
+                    export.ReadUnrealObject(reader);
                     message.IncrementCurrent();
-                });
-            });
+                })
+            );
 
             message.Complete();
         }
@@ -230,7 +229,7 @@ namespace UpkManager.Models.UpkFile
 
         #region Private Methods
 
-        private async Task readUpkHeader()
+        private void readUpkHeader()
         {
             reader.Seek(0);
 
@@ -243,7 +242,7 @@ namespace UpkManager.Models.UpkFile
 
             Size = reader.ReadInt32();
 
-            await Group.ReadString(reader);
+            Group.ReadString(reader);
 
             Flags = reader.ReadUInt32();
 
@@ -264,11 +263,11 @@ namespace UpkManager.Models.UpkFile
 
             ThumbnailTableOffset = reader.ReadInt32();
 
-            Guid = await reader.ReadBytes(16);
+            Guid = reader.ReadBytes(16);
 
             GenerationTableCount = reader.ReadInt32();
 
-            GenerationTable = await readGenerationTable();
+            GenerationTable = readGenerationTable();
 
             EngineVersion = reader.ReadUInt32();
             CookerVersion = reader.ReadUInt32();
@@ -277,16 +276,16 @@ namespace UpkManager.Models.UpkFile
 
             CompressionTableCount = reader.ReadInt32();
 
-            CompressedChunks = await readCompressedChunksTable();
+            CompressedChunks = readCompressedChunksTable();
 
             PackageSource = reader.ReadUInt32();
 
-            await readAdditionalPackagesToCook();
+            readAdditionalPackagesToCook();
 
             TextureAllocations.ReadTextureAllocations(reader);
         }
 
-        private async Task readAdditionalPackagesToCook()
+        private void readAdditionalPackagesToCook()
         {
             AdditionalPackagesToCook.Clear();
 
@@ -294,7 +293,7 @@ namespace UpkManager.Models.UpkFile
             for (int i = 0; i < count; i++)
             {
                 var pakageToCook = new UnrealString();
-                await pakageToCook.ReadString(reader);
+                pakageToCook.ReadString(reader);
                 AdditionalPackagesToCook.Add(pakageToCook);
             }
         }
@@ -360,16 +359,14 @@ namespace UpkManager.Models.UpkFile
             await TextureAllocations.WriteBuffer(writer, 0);
         }
 
-        private async Task<List<UnrealGenerationTableEntry>> readGenerationTable()
+        private List<UnrealGenerationTableEntry> readGenerationTable()
         {
             List<UnrealGenerationTableEntry> generations = [];
 
             for (int i = 0; i < GenerationTableCount; ++i)
             {
                 var info = new UnrealGenerationTableEntry();
-
-                await Task.Run(() => info.ReadGenerationTableEntry(reader));
-
+                info.ReadGenerationTableEntry(reader);
                 generations.Add(info);
             }
 
@@ -384,16 +381,14 @@ namespace UpkManager.Models.UpkFile
             }
         }
 
-        private async Task<List<UnrealCompressedChunk>> readCompressedChunksTable()
+        private List<UnrealCompressedChunk> readCompressedChunksTable()
         {
             List<UnrealCompressedChunk> chunks = [];
 
             for (int i = 0; i < CompressionTableCount; ++i)
             {
                 var chunk = new UnrealCompressedChunk();
-
-                await chunk.ReadCompressedChunk(reader);
-
+                chunk.ReadCompressedChunk(reader);
                 chunks.Add(chunk);
             }
 
@@ -422,10 +417,10 @@ namespace UpkManager.Models.UpkFile
                     localOffset += blocks[i].UncompressedSize;
                 }
 
-                var blockTasks = blocks.Select((block, i) => Task.Run(async () =>
+                var blockTasks = blocks.Select((block, i) => Task.Run(() =>
                 {
                     if (((CompressionTypes)CompressionFlags & CompressionTypes.LZO_ENC) > 0)
-                        await block.CompressedData.Decrypt();
+                        block.CompressedData.Decrypt();
 
                     byte[] decompressed = block.CompressedData.Decompress(block.UncompressedSize);
 
@@ -442,7 +437,7 @@ namespace UpkManager.Models.UpkFile
             return ByteArrayReader.CreateNew(data, start);
         }
 
-        private async Task readNameTable(Action<UnrealLoadProgress> progress)
+        private void readNameTable(Action<UnrealLoadProgress> progress)
         {
             var message = new UnrealLoadProgress { Text = "Reading Name Table...", Current = 0, Total = NameTableCount, Progress = progress };
 
@@ -451,11 +446,8 @@ namespace UpkManager.Models.UpkFile
             for (int i = 0; i < NameTableCount; ++i)
             {
                 var name = new UnrealNameTableEntry { TableIndex = i };
-
-                await name.ReadNameTableEntry(reader);
-
+                name.ReadNameTableEntry(reader);
                 NameTable.Add(name);
-
                 message.IncrementCurrent();
             }
         }
@@ -468,7 +460,7 @@ namespace UpkManager.Models.UpkFile
             }
         }
 
-        private async Task readImportTable(Action<UnrealLoadProgress> progress)
+        private void readImportTable(Action<UnrealLoadProgress> progress)
         {
             var message = new UnrealLoadProgress { Text = "Reading Import Table...", Current = 0, Total = ImportTableCount, Progress = progress };
 
@@ -478,8 +470,7 @@ namespace UpkManager.Models.UpkFile
             {
                 var import = new UnrealImportTableEntry { TableIndex = -(i + 1) };
 
-                await import.ReadImportTableEntry(reader, this);
-
+                import.ReadImportTableEntry(reader, this);
                 ImportTable.Add(import);
 
                 message.IncrementCurrent();
@@ -498,7 +489,7 @@ namespace UpkManager.Models.UpkFile
             }
         }
 
-        private async Task readExportTable(Action<UnrealLoadProgress> progress)
+        private void readExportTable(Action<UnrealLoadProgress> progress)
         {
             var message = new UnrealLoadProgress { Text = "Reading Export Table...", Current = 0, Total = ExportTableCount, Progress = progress };
 
@@ -508,8 +499,7 @@ namespace UpkManager.Models.UpkFile
             {
                 var export = new UnrealExportTableEntry { TableIndex = i + 1 };
 
-                await export.ReadExportTableEntry(reader, this);
-
+                export.ReadExportTableEntry(reader, this);
                 ExportTable.Add(export);
 
                 message.IncrementCurrent();

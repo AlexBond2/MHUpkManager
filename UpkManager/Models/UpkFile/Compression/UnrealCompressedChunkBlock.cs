@@ -25,9 +25,9 @@ namespace UpkManager.Models.UpkFile.Compression
             UncompressedSize = reader.ReadInt32();
         }
 
-        public async Task ReadCompressedChunkBlockData(ByteArrayReader reader)
+        public void ReadCompressedChunkBlockData(ByteArrayReader reader)
         {
-            CompressedData = await reader.ReadByteArray(CompressedSize);
+            CompressedData = reader.ReadByteArray(CompressedSize);
         }
 
         public async Task<int> BuildCompressedChunkBlockData(ByteArrayReader reader)

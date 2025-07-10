@@ -35,11 +35,11 @@ namespace UpkManager.Models.UpkFile.Properties
             valueTree.Children.Add(node);
         }
 
-        public override async Task ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
         {
-            await Min.ReadPropertyValue(reader, size, header, property);
-            await Max.ReadPropertyValue(reader, size, header, property);
-            await IsValid.ReadPropertyValue(reader, size, header, property);
+            Min.ReadPropertyValue(reader, size, header, property);
+            Max.ReadPropertyValue(reader, size, header, property);
+            IsValid.ReadPropertyValue(reader, size, header, property);
         }
     }
 }

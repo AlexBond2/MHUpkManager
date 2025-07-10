@@ -21,7 +21,7 @@ namespace UpkManager.Models.UpkFile
 
         #region Unreal Methods
 
-        public async Task ReadString(ByteArrayReader reader)
+        public void ReadString(ByteArrayReader reader)
         {
             Size = reader.ReadInt32();
 
@@ -36,13 +36,13 @@ namespace UpkManager.Models.UpkFile
             {
                 int size = -Size * 2;
 
-                byte[] str = await reader.ReadBytes(size);
+                byte[] str = reader.ReadBytes(size);
 
                 String = Encoding.Unicode.GetString(str);
             }
             else
             {
-                byte[] str = await reader.ReadBytes(Size - 1);
+                byte[] str = reader.ReadBytes(Size - 1);
 
                 reader.Skip(1); // NULL Terminator
 

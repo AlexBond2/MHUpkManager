@@ -45,7 +45,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
             if (skipParse) return;
 
-            Unknown1 = await reader.ReadBytes(sizeof(uint) * 3);
+            Unknown1 = reader.ReadBytes(sizeof(uint) * 3);
 
             CompressedChunkOffset = reader.ReadInt32();
         }
@@ -56,7 +56,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
             //    CompressedChunks.Add(compressedChunk);
 
-            await compressedChunk.ReadCompressedChunk(reader);
+            compressedChunk.ReadCompressedChunk(reader);
 
             await chunkHandler(compressedChunk);
         }
