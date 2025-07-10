@@ -48,11 +48,19 @@ namespace UpkManager.Models.UpkFile.Compression
 
             if (((BulkDataCompressionTypes)BulkDataFlags & nothingTodo) > 0) return null;
 
-            byte[] chunkData = new byte[Header.Blocks.Sum(block => block.UncompressedSize)];
+            var blocks = Header.Blocks;
+            int[] blockOffsets = new int[blocks.Count];
 
-            int uncompressedOffset = 0;
+            int totalSize = 0;
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                blockOffsets[i] = totalSize;
+                totalSize += blocks[i].UncompressedSize;
+            }
 
-            foreach (UnrealCompressedChunkBlock block in Header.Blocks)
+            byte[] chunkData = new byte[totalSize];
+
+            var blockTasks = blocks.Select((block, i) => Task.Run(async () =>
             {
                 if (((BulkDataCompressionTypes)BulkDataFlags & BulkDataCompressionTypes.LZO_ENC) > 0)
                     await block.CompressedData.Decrypt();
@@ -62,19 +70,18 @@ namespace UpkManager.Models.UpkFile.Compression
                 const BulkDataCompressionTypes validCompression = BulkDataCompressionTypes.LZO | BulkDataCompressionTypes.LZO_ENC;
 
                 if (((BulkDataCompressionTypes)BulkDataFlags & validCompression) > 0)
-                    decompressed = await block.CompressedData.Decompress(block.UncompressedSize);
+                    decompressed = block.CompressedData.Decompress(block.UncompressedSize);
                 else
                 {
                     if (BulkDataFlags == 0) decompressed = block.CompressedData.GetBytes();
                     else throw new Exception($"Unsupported bulk data compression type 0x{BulkDataFlags:X8}");
                 }
 
-                int offset = uncompressedOffset;
+                int offset = blockOffsets[i];
+                Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize);
+            }));
 
-                await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize));
-
-                uncompressedOffset += block.UncompressedSize;
-            }
+            await Task.WhenAll(blockTasks);
 
             return ByteArrayReader.CreateNew(chunkData, 0);
         }

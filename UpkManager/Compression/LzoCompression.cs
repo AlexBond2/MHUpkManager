@@ -67,14 +67,10 @@ namespace UpkManager.Compression
             return sizedToFit;
         }
 
-        public async Task Decompress(byte[] Source, byte[] Destination)
-        {
-            await Task.Run(() =>
-            {
-                int destinationSize = Destination.Length;
-
-                Lzo2.lzo1x_decompress_64(Source, Source.Length, Destination, ref destinationSize, null);
-            });
+        public void Decompress(byte[] Source, byte[] Destination)
+        {           
+            int destinationSize = Destination.Length;
+            Lzo2.lzo1x_decompress_64(Source, Source.Length, Destination, ref destinationSize, null);            
         }
 
         #endregion ILzoCompression Implementation

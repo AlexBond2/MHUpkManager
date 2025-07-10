@@ -148,26 +148,27 @@ namespace UpkManager.Models.UpkFile.Compression
                 await block.WriteCompressedChunkBlockData(Writer);
         }
 
-        public async Task<ByteArrayReader> DecompressChunk()
+        public Task<ByteArrayReader> DecompressChunk()
         {
-            byte[] chunkData = new byte[Blocks.Sum(block => block.UncompressedSize)];
-            int uncompressedOffset = 0;
+            var blockOffsets = new int[Blocks.Count];
+            int totalSize = 0;
 
-            foreach (UnrealCompressedChunkBlock block in Blocks)
+            for (int i = 0; i < Blocks.Count; i++)
             {
-                byte[] decompressed;
-
-                // BulkDataCompressionTypes.LZO | BulkDataCompressionTypes.LZO_ENC;
-                decompressed = await block.CompressedData.Decompress(block.UncompressedSize);
-
-                int offset = uncompressedOffset;
-
-                await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize));
-
-                uncompressedOffset += block.UncompressedSize;
+                blockOffsets[i] = totalSize;
+                totalSize += Blocks[i].UncompressedSize;
             }
 
-            return ByteArrayReader.CreateNew(chunkData, 0);
+            byte[] chunkData = new byte[totalSize];
+
+            var tasks = Blocks.Select((block, index) => Task.Run(() =>
+            {
+                byte[] decompressed = block.CompressedData.Decompress(block.UncompressedSize);
+                int offset = blockOffsets[index];
+                Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize);
+            }));
+
+            return Task.WhenAll(tasks).ContinueWith(_ => ByteArrayReader.CreateNew(chunkData, 0));
         }
 
         #endregion Unreal Methods

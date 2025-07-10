@@ -11,7 +11,7 @@ namespace UpkManager.Compression
 
         Task<byte[]> Compress(byte[] source);
 
-        Task Decompress(byte[] Source, byte[] Destination);
+        void Decompress(byte[] Source, byte[] Destination);
 
     }
 

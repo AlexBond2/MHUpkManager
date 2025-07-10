@@ -127,12 +127,10 @@ namespace UpkManager.Helpers
             return compressed;
         }
 
-        public async Task<byte[]> Decompress(int UncompressedSize)
+        public byte[] Decompress(int UncompressedSize)
         {
             byte[] decompressed = new byte[UncompressedSize];
-
-            await compression.Decompress(data, decompressed);
-
+            compression.Decompress(data, decompressed);
             return decompressed;
         }
 

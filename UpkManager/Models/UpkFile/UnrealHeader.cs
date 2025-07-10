@@ -404,31 +404,40 @@ namespace UpkManager.Models.UpkFile
         {
             int start = CompressedChunks.Min(ch => ch.UncompressedOffset);
 
-            int totalSize = CompressedChunks.SelectMany(ch => ch.Header.Blocks).Aggregate(start, (total, block) => total + block.UncompressedSize);
+            int totalSize = CompressedChunks
+                .SelectMany(ch => ch.Header.Blocks)
+                .Sum(block => block.UncompressedSize) + start;
 
             byte[] data = new byte[totalSize];
 
-            foreach (UnrealCompressedChunk chunk in CompressedChunks)
+            var chunkTasks = CompressedChunks.Select(async chunk =>
             {
-                byte[] chunkData = new byte[chunk.Header.Blocks.Sum(block => block.UncompressedSize)];
+                var blocks = chunk.Header.Blocks;
 
-                int uncompressedOffset = 0;
-
-                foreach (UnrealCompressedChunkBlock block in chunk.Header.Blocks)
+                int[] blockOffsets = new int[blocks.Count];
+                int localOffset = 0;
+                for (int i = 0; i < blocks.Count; i++)
                 {
-                    if (((CompressionTypes)CompressionFlags & CompressionTypes.LZO_ENC) > 0) await block.CompressedData.Decrypt();
-
-                    byte[] decompressed = await block.CompressedData.Decompress(block.UncompressedSize);
-
-                    int offset = uncompressedOffset;
-
-                    await Task.Run(() => Array.ConstrainedCopy(decompressed, 0, chunkData, offset, block.UncompressedSize));
-
-                    uncompressedOffset += block.UncompressedSize;
+                    blockOffsets[i] = localOffset;
+                    localOffset += blocks[i].UncompressedSize;
                 }
 
-                await Task.Run(() => Array.ConstrainedCopy(chunkData, 0, data, chunk.UncompressedOffset, chunk.Header.UncompressedSize));
-            }
+                var blockTasks = blocks.Select((block, i) => Task.Run(async () =>
+                {
+                    if (((CompressionTypes)CompressionFlags & CompressionTypes.LZO_ENC) > 0)
+                        await block.CompressedData.Decrypt();
+
+                    byte[] decompressed = block.CompressedData.Decompress(block.UncompressedSize);
+
+                    int writeOffset = chunk.UncompressedOffset + blockOffsets[i];
+
+                    Array.ConstrainedCopy(decompressed, 0, data, writeOffset, block.UncompressedSize);
+                })).ToArray();
+
+                await Task.WhenAll(blockTasks);
+            });
+
+            await Task.WhenAll(chunkTasks);
 
             return ByteArrayReader.CreateNew(data, start);
         }
