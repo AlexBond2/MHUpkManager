@@ -227,14 +227,12 @@ namespace UpkManager.Models.UpkFile.Tables
             }
 
             Enum.TryParse(className, true, out ObjectTypes type);
-            /*
-            if (type == ObjectTypes.Unknown && ClassReferenceNameIndex != null)
+            
+            if (type == ObjectTypes.Unknown)
             {
-                if (ClassReferenceNameIndex.Name.StartsWith("CustomUIComp", StringComparison.CurrentCultureIgnoreCase) ||
-                    ClassReferenceNameIndex.Name.StartsWith("Distribution", StringComparison.CurrentCultureIgnoreCase) ||
-                    ClassReferenceNameIndex.Name.StartsWith("UIComp", StringComparison.CurrentCultureIgnoreCase) ||
-                    ClassReferenceNameIndex.Name.EndsWith("Component", StringComparison.CurrentCultureIgnoreCase)) type = ObjectTypes.ArchetypeObjectReference;
-            }*/
+                if (className.EndsWith("Component", StringComparison.CurrentCultureIgnoreCase)) 
+                    type = ObjectTypes.Component;
+            }
 
             return type switch
             {
@@ -244,6 +242,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),
                 ObjectTypes.Texture2D => new UnrealObjectTexture2D(),
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
+                ObjectTypes.Component => new UnrealObject<UComponent>(),
                 ObjectTypes.Const => new UnrealObject<UConst>(),
                 ObjectTypes.Enum => new UnrealObject<UEnum>(),
                 ObjectTypes.ScriptStruct => new UnrealObject<UScriptStruct>(),

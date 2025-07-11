@@ -21,6 +21,7 @@
   { "Name": "LODLevels", "Type": "Object" },
   { "Name": "Modules", "Type": "Object" },
   { "Name": "Expressions", "Type": "Object" },
+  { "Name": "AnimSets", "Type": "Object" },
 
   { "Name": "bEnableShadowCasting", "Type": "Bool" },
 
