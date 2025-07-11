@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using UpkManager.Helpers;
 
 namespace UpkManager.Models.UpkFile.Properties
 {
-
-    // https://github.com/mtz007/PUBG-SDK/blob/master/SDK/PUBG_Engine_structs.hpp
-
-    public class UnrealPropertyCustomStructValue : UnrealPropertyValueBase
+    public class UnrealPropertyEngineValue : UnrealPropertyValueBase
     {
         #region Constructor
 
-        public UnrealPropertyCustomStructValue(string structType)
+        public UnrealPropertyEngineValue(string structType)
         {
             StructType = structType;
             Fields = [];

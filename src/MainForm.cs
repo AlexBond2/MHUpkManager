@@ -15,7 +15,8 @@ namespace MHUpkManager
     {
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
-        public const string PropJson = "MHEngineTypes.json";
+        public const string EngineJson = "MHEngineTypes.json";
+        public const string CoreJson = "MHCoreTypes.json";
         public UnrealUpkFile UpkFile { get; set; }
         private List<TreeNode> rootNodes;
 
@@ -29,13 +30,26 @@ namespace MHUpkManager
             EnableDoubleBuffering(importGridView);
             EnableDoubleBuffering(exportGridView); 
 
-            string path = Path.Combine("Data", PropJson);
-            var warning = CustomStructRegistry.LoadFromJson(path);
+            string path = Path.Combine("Data", EngineJson);
+            var warning = EngineRegistry.LoadFromJson(path);
 
             if (!string.IsNullOrEmpty(warning))
             {
                 MessageBox.Show(
-                    $"Warning while loading struct definitions from {PropJson}:\n\n{warning}",
+                    $"Warning while loading Engine types from {EngineJson}:\n\n{warning}",
+                    "Json Warning",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+            }
+
+            path = Path.Combine("Data", CoreJson);
+            warning = CoreRegistry.LoadFromJson(path);
+
+            if (!string.IsNullOrEmpty(warning))
+            {
+                MessageBox.Show(
+                    $"Warning while loading Core types from {EngineJson}:\n\n{warning}",
                     "Json Warning",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning

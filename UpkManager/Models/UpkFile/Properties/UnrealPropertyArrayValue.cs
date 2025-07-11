@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 
 using UpkManager.Constants;
 using UpkManager.Helpers;
@@ -49,7 +45,7 @@ namespace UpkManager.Models.UpkFile.Properties
                     var item = Array[i];
                     var itemNode = new VirtualNode($"[{i}] {item}");
 
-                    if (item is UnrealPropertyCustomStructValue value)
+                    if (item is UnrealPropertyEngineValue value)
                         value.BuildVirtualTree(itemNode);
 
                     arrayNone.Children.Add(itemNode);
@@ -63,7 +59,7 @@ namespace UpkManager.Models.UpkFile.Properties
             string name = property.NameIndex.Name;
             Func<UnrealPropertyValueBase> factory = null;
 
-            if (CustomStructRegistry.TryGetProperty(name, out var def))
+            if (EngineRegistry.TryGetProperty(name, out var def))
             {
                 itemType = def.Name;
 
@@ -75,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Properties
                     PropertyTypes.StrProperty => () => new UnrealPropertyStringValue(),
                     PropertyTypes.NameProperty => () => new UnrealPropertyNameValue(),
                     PropertyTypes.ObjectProperty => () => new UnrealPropertyObjectValue(),
-                    PropertyTypes.StructProperty => () => new UnrealPropertyCustomStructValue(def.Struct!),
+                    PropertyTypes.StructProperty => () => new UnrealPropertyEngineValue(def.Struct!),
                     _ => null
                 };
             }

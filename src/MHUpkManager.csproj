@@ -39,6 +39,9 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Update="Data\MHCoreTypes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Data\MHEngineTypes.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

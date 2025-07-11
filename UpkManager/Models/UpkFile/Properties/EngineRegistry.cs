@@ -15,6 +15,7 @@ namespace UpkManager.Models.UpkFile.Properties
         public PropertyTypes Type { get; set; }
         public string? Struct { get; set; } // Type == Struct
     }
+
     public class PropertyTypesConverter : JsonConverter<PropertyTypes>
     {
         public override PropertyTypes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -52,7 +53,7 @@ namespace UpkManager.Models.UpkFile.Properties
         }
     }
 
-    public static class CustomStructRegistry
+    public static class EngineRegistry
     {
         private static Dictionary<string, CustomStructJson> _structs;
 

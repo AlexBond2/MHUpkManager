@@ -55,30 +55,19 @@ namespace UpkManager.Models.UpkFile.Properties
             StructNameIndex.ReadNameTableIndex(reader, header);
 
             var structType = StructNameIndex.Name;
-            if (CustomStructRegistry.TryGetStruct(structType, out var type))
+            if (EngineRegistry.TryGetStruct(structType, out var type))
             {
-                StructValue = new UnrealPropertyCustomStructValue(type);
+                StructValue = new UnrealPropertyEngineValue(type);
                 StructValue.ReadPropertyValue(reader, size, header, property);                
             } 
+            else if (CoreRegistry.TryGetProperty(structType, out var prop))
+            {
+                StructValue = new UnrealPropertyCoreValue(prop);
+                StructValue.ReadPropertyValue(reader, size, header, property);
+            }
             else
             {
-                if (Enum.TryParse(structType, true, out UStructTypes uType))
-                {
-                    StructValue = uType switch
-                    {
-                        UStructTypes.Vector => new UnrealPropertyVectorValue(),
-                        UStructTypes.Box => new UnrealPropertyBoxValue(),
-                        UStructTypes.Guid => new UnrealPropertyGuidValue(),
-                        UStructTypes.Rotator => new UnrealPropertyRotatorValue(),
-                        _ => new UnrealPropertyValueBase()
-                    };
-
-                    StructValue.ReadPropertyValue(reader, size, header, property);
-                }
-                else
-                {
-                    base.ReadPropertyValue(reader, size, header, property);
-                }
+                base.ReadPropertyValue(reader, size, header, property);
             }
         }
 
