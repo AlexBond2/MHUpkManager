@@ -1,0 +1,13 @@
+CylinderComponent
+EntityFXParticle
+EntityFXSound
+PowerFXAnimation
+PowerFXAnimationLooping
+PowerFXMeshAttachment
+SkeletalMeshComponent
+DynamicLightEnvironmentComponent
+ActorComponent
+AudioComponent
+MarvelEntityCompAnimationComplex
+MarvelEntityCompDeathFX
+MarvelEntityCompSounds

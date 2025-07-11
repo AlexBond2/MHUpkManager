@@ -228,11 +228,8 @@ namespace UpkManager.Models.UpkFile.Tables
 
             Enum.TryParse(className, true, out ObjectTypes type);
             
-            if (type == ObjectTypes.Unknown)
-            {
-                if (className.EndsWith("Component", StringComparison.CurrentCultureIgnoreCase)) 
-                    type = ObjectTypes.Component;
-            }
+            if (type == ObjectTypes.Unknown && ComponentRegistry.HasComponent(className))
+                type = ObjectTypes.Component;
 
             return type switch
             {

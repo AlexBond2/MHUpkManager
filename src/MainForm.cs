@@ -1,13 +1,14 @@
 using System.Security.Cryptography;
+using System.Reflection;
+using MHUpkManager.Models;
+
 using UpkManager.Models;
 using UpkManager.Extensions;
 using UpkManager.Contracts;
 using UpkManager.Repository;
-using System.Reflection;
+using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Properties;
-using MHUpkManager.Models;
-using UpkManager.Models.UpkFile.Objects;
 
 namespace MHUpkManager
 {
@@ -17,6 +18,7 @@ namespace MHUpkManager
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
         public const string EngineJson = "MHEngineTypes.json";
         public const string CoreJson = "MHCoreTypes.json";
+        public const string ComponentsTxt = "MHComponents.txt";
         public UnrealUpkFile UpkFile { get; set; }
         private List<TreeNode> rootNodes;
 
@@ -28,33 +30,52 @@ namespace MHUpkManager
 
             EnableDoubleBuffering(nameGridView);
             EnableDoubleBuffering(importGridView);
-            EnableDoubleBuffering(exportGridView); 
+            EnableDoubleBuffering(exportGridView);
 
+            LoadDataFiles();            
+        }
+
+        private void LoadDataFiles()
+        {
+            string warning;
             string path = Path.Combine("Data", EngineJson);
-            var warning = EngineRegistry.LoadFromJson(path);
 
-            if (!string.IsNullOrEmpty(warning))
+            if (!File.Exists(path))
             {
-                MessageBox.Show(
-                    $"Warning while loading Engine types from {EngineJson}:\n\n{warning}",
-                    "Json Warning",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                WarningBox($"File with Engine types not found. Path: {path}");
+                return;
+            }
+            else
+            {
+                warning = EngineRegistry.LoadFromJson(path);
+                if (!string.IsNullOrEmpty(warning))
+                    WarningBox($"Warning while loading Engine types from {EngineJson}:\n\n{warning}");
             }
 
             path = Path.Combine("Data", CoreJson);
-            warning = CoreRegistry.LoadFromJson(path);
-
-            if (!string.IsNullOrEmpty(warning))
-            {
-                MessageBox.Show(
-                    $"Warning while loading Core types from {EngineJson}:\n\n{warning}",
-                    "Json Warning",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+            if (!File.Exists(path)) 
+            { 
+                WarningBox($"File with Engine types not found. {path}");
+                return;
             }
+            else
+            {
+                warning = CoreRegistry.LoadFromJson(path);
+
+                if (!string.IsNullOrEmpty(warning))
+                    WarningBox($"Warning while loading Core types from {CoreJson}:\n\n{warning}");
+            }
+
+            path = Path.Combine("Data", ComponentsTxt);
+            if (!File.Exists(path))
+                WarningBox($"File with component list not found. {path}");
+            else
+                ComponentRegistry.LoadFromFile(path);
+        }
+
+        private void WarningBox(string msg)
+        {
+            MessageBox.Show(msg, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void EnableDoubleBuffering(DataGridView dgv)

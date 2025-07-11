@@ -100,7 +100,7 @@ namespace UpkManager.Models.UpkFile.Classes
         Parsed = 0x00000010U,
         Localized = 0x00000020U,
         SafeReplace = 0x00000040U,
-
+        Native = 0x00000080U,
         NoExport = 0x00000100U,
         Placeable = 0x00000200U,
         PerObjectConfig = 0x00000400U,
@@ -108,7 +108,8 @@ namespace UpkManager.Models.UpkFile.Classes
         EditInlineNew = 0x00001000U,
         CollapseCategories = 0x00002000U,
         Interface = 0x00004000U,
-
+        Unknown_00080000 = 0x00008000U,
+        Unknown_00100000 = 0x00100000U,
         Instanced = 0x00200000U,
         NeedProps = 0x00400000U,
         HasComponents = 0x00800000U,
