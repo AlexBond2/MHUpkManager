@@ -12,6 +12,7 @@ namespace UpkManager.Models.UpkFile.Objects
     public interface IUnrealObject
     {
         List<VirtualNode> FieldNodes { get; }
+        public UBuffer Buffer { get; }
     }
 
     public class UnrealObject<T> : UnrealObjectBase, IUnrealObject where T : UObject, new()

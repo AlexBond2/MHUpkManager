@@ -222,7 +222,7 @@ namespace UpkManager.Models.UpkFile.Tables
                     PropertyTypes.StructProperty => new UnrealObject<UStructProperty>(),
                     PropertyTypes.StrProperty => new UnrealObject<UStrProperty>(),
                     PropertyTypes.ArrayProperty => new UnrealObject<UArrayProperty>(),
-                    _ => new UnrealObjectBase(),
+                    _ => new UnrealObject<UObject>(),
                 };
             }
 
@@ -243,7 +243,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.Const => new UnrealObject<UConst>(),
                 ObjectTypes.Enum => new UnrealObject<UEnum>(),
                 ObjectTypes.ScriptStruct => new UnrealObject<UScriptStruct>(),
-                _ => new UnrealObjectBase(),
+                _ => new UnrealObject<UObject>(),
             };
         }
 

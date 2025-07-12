@@ -44,17 +44,15 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override int GetBuilderSize()
         {
-            BuilderSize = PropertyHeader.GetBuilderSize()
-                        + sizeof(int);
+            BuilderSize = sizeof(int);
 
             return BuilderSize;
         }
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PropertyHeader.WriteBuffer(Writer, CurrentOffset);
-
             Writer.WriteInt32(ObjectTableReference);
+            await Task.CompletedTask;
         }
 
         #endregion UnrealUpkBuilderBase Implementation

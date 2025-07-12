@@ -102,12 +102,19 @@ namespace UpkManager.Models.UpkFile.Classes
 
         private void ReadProperties(UBuffer buffer)
         {
+            ResultProperty result;
             while (true)
             {
                 var property = new UnrealProperty();
-                if (!buffer.ReadProperty(property)) break;
+                result = buffer.ReadProperty(property);
+                if (result != ResultProperty.Success)
+                {                    
+                    buffer.SetDataOffset();
+                    break;
+                }
                 Properties.Add(property);
             }
+            buffer.ResultProperty = result;
         }
 
         public override int GetBuilderSize()

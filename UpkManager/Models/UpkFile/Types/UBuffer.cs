@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using System;
 
 using UpkManager.Helpers;
@@ -13,6 +12,10 @@ namespace UpkManager.Models.UpkFile.Types
         public ByteArrayReader Reader = reader;
         public UnrealHeader Header = header;
         public bool IsAbstractClass = false;
+
+        public ResultProperty ResultProperty { get; set; }
+        public int DataOffset { get; private set; }
+        public int DataSize { get; private set; }
 
         public List<T> ReadList<T>(Func<UBuffer, T> readMethod)
         {
@@ -65,10 +68,15 @@ namespace UpkManager.Models.UpkFile.Types
             return ustring.String;
         }
 
-        public bool ReadProperty(UnrealProperty property)
+        public ResultProperty ReadProperty(UnrealProperty property)
         {
-            var result = property.ReadProperty(Reader, Header);
-            return result == ResultProperty.Success;
+            return property.ReadProperty(Reader, Header);
+        }
+
+        public void SetDataOffset()
+        {
+            DataOffset = Reader.CurrentOffset;
+            DataSize = Reader.Remaining;
         }
     }
 }

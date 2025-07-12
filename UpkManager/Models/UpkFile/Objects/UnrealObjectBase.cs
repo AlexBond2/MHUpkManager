@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using UpkManager.Constants;
 using UpkManager.Helpers;
-using UpkManager.Models.UpkFile.Properties;
 using UpkManager.Models.UpkFile.Tables;
 
 
@@ -68,18 +67,7 @@ namespace UpkManager.Models.UpkFile.Objects
     public class UnrealObjectBase : UnrealUpkBuilderBase
     {
 
-        #region Constructor
-
-        public UnrealObjectBase()
-        {
-            PropertyHeader = new UnrealPropertyHeader();
-        }
-
-        #endregion Constructor
-
         #region Properties
-
-        public UnrealPropertyHeader PropertyHeader { get; }
 
         public ByteArrayReader AdditionalDataReader { get; private set; }
 
@@ -105,9 +93,6 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public virtual async Task ReadUnrealObject(ByteArrayReader reader, UnrealHeader header, UnrealExportTableEntry export, bool skipProperties, bool skipParse)
         {
-            if (!skipProperties) PropertyHeader.ReadPropertyHeader(reader, header);
-            AdditionalDataOffset = export.SerialDataOffset + reader.CurrentOffset;
-            AdditionalDataReader = reader.Splice();
             await Task.CompletedTask;
         }
 
@@ -132,16 +117,13 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override int GetBuilderSize()
         {
-            BuilderSize = PropertyHeader.GetBuilderSize()
-                        + AdditionalDataReader?.GetBytes().Length ?? 0;
+            BuilderSize = AdditionalDataReader?.GetBytes().Length ?? 0;
 
             return BuilderSize;
         }
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PropertyHeader.WriteBuffer(Writer, CurrentOffset);
-
             await Writer.WriteBytes(AdditionalDataReader?.GetBytes());
         }
 

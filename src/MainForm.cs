@@ -286,8 +286,11 @@ namespace MHUpkManager
                 {
                     if (export.UnrealObject == null)
                         await export.ParseUnrealObject(UpkFile.Header, false, false);
+
                     viewObjectInHEXMenuItem.Enabled = true;
-                    BuildPropertyTree(export.UnrealObject);
+
+                    if (export.UnrealObject is IUnrealObject uObject)
+                        BuildPropertyTree(uObject);
                 }
                 catch (Exception ex)
                 {
@@ -304,31 +307,19 @@ namespace MHUpkManager
             }
         }
 
-        private void BuildPropertyTree(UnrealObjectBase unrealObject)
+        private void BuildPropertyTree(IUnrealObject uObject)
         {
             propertiesView.BeginUpdate();
             propertiesView.Nodes.Clear();
 
-            if (unrealObject is IUnrealObject uObject)
+            foreach (VirtualNode virtualNode in uObject.FieldNodes)
+                propertiesView.Nodes.Add(CreateRealNode(virtualNode));
+
+            var buffer = uObject.Buffer;
+            if (!buffer.IsAbstractClass && (buffer.ResultProperty != ResultProperty.None || buffer.DataSize != 0))
             {
-                foreach (VirtualNode virtualNode in uObject.FieldNodes)
-                    propertiesView.Nodes.Add(CreateRealNode(virtualNode));
-            }
-            else
-            {
-                var propertyHeader = unrealObject.PropertyHeader;
-
-                foreach (var property in propertyHeader.Properties)
-                    propertiesView.Nodes.Add(CreateRealNode(property.VirtualTree));
-
-                if (propertyHeader.Properties.Count == 0 && propertyHeader.Result == ResultProperty.None)
-                    propertiesView.Nodes.Add(new TreeNode($"none"));
-
-                if (propertyHeader.Result != ResultProperty.None || propertyHeader.RemainingData != 0)
-                {
-                    propertiesView.Nodes.Add(new TreeNode($"Data [{propertyHeader.Result}][{propertyHeader.RemainingData}]"));
-                    viewDataInHEXMenuItem.Enabled = true;
-                }
+                propertiesView.Nodes.Add(new TreeNode($"Data [{buffer.ResultProperty}][{buffer.DataSize}]"));
+                viewDataInHEXMenuItem.Enabled = true;
             }
 
             ExpandFiltered(propertiesView.Nodes);
@@ -358,24 +349,41 @@ namespace MHUpkManager
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-            {
-                var obj = export.UnrealObject;
-            }
+               openHexView(export.ObjectNameIndex.Name, export.UnrealObject);
         }
 
         private void viewDataInHEXMenuItem_Click(object sender, EventArgs e)
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-            {
-                var obj = export.UnrealObject;
-            }
+               openHexView(export.ObjectNameIndex.Name, export.UnrealObject, true);
         }
 
         private void objectNameClassMenuItem_Click(object sender, EventArgs e)
         {
             if (objectNameClassMenuItem.Text != null)
                 Clipboard.SetText(objectNameClassMenuItem.Text);
+        }
+
+        private void openHexView(string name, UnrealObjectBase unrealObject, bool fromOffset = false)
+        {
+            if (unrealObject is IUnrealObject uObject)
+            {
+                using (var hexViewForm = new HexViewForm())
+                {
+                    hexViewForm.SetTitle(name);
+                    var data = uObject.Buffer.Reader.GetBytes();
+                    if (fromOffset && uObject.Buffer.DataOffset >= 0 && uObject.Buffer.DataOffset < data.Length)
+                    {                        
+                        int length = data.Length - uObject.Buffer.DataOffset;
+                        byte[] offsetData = new byte[length];
+                        Array.Copy(data, uObject.Buffer.DataOffset, offsetData, 0, length);
+                        data = offsetData;
+                    }
+                    hexViewForm.SetHexData(data);
+                    hexViewForm.ShowDialog();
+                }
+            }
         }
 
         private void viewParentMenuItem_Click(object sender, EventArgs e)

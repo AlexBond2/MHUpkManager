@@ -313,7 +313,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             DdsSaveConfig config = configuration as DdsSaveConfig ?? new DdsSaveConfig(FileFormat.Unknown, 0, 0, false, false);
 
             DdsFile image = await Task.Run(() => new DdsFile(filename));
-
+            /*
             bool skipFirstMip = false;
 
             int width = image.Width;
@@ -326,7 +326,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
                 skipFirstMip = true;
             }
-
+            
             UnrealPropertyIntValue sizeX = PropertyHeader.GetProperty("SizeX").FirstOrDefault()?.Value as UnrealPropertyIntValue;
             UnrealPropertyIntValue sizeY = PropertyHeader.GetProperty("SizeY").FirstOrDefault()?.Value as UnrealPropertyIntValue;
 
@@ -385,7 +385,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
                     Width = mipMap.Width,
                     Height = mipMap.Height
                 });
-            }
+            }*/
         }
 
         public override Stream GetObjectStream()
@@ -453,8 +453,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public override int GetBuilderSize()
         {
-            BuilderSize = PropertyHeader.GetBuilderSize()
-                        + base.GetBuilderSize()
+            BuilderSize = base.GetBuilderSize()
                         + sizeof(int);
 
             foreach (UnrealMipMap mipMap in MipMaps)
@@ -493,8 +492,6 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public override async Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
         {
-            await PropertyHeader.WriteBuffer(Writer, CurrentOffset);
-
             await base.WriteBuffer(Writer, CurrentOffset);
 
             Writer.WriteInt32(MipMaps.Count);
@@ -521,9 +518,9 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             if (mipMap.OverrideFormat == FileFormat.Unknown)
             {
                 imageFormat = FileFormat.Unknown;
-                if (PropertyHeader.GetProperty("Format").FirstOrDefault()?.Value is not UnrealPropertyByteValue formatProp) return null;
+                /*if (PropertyHeader.GetProperty("Format").FirstOrDefault()?.Value is not UnrealPropertyByteValue formatProp) return null;
                 string format = formatProp.PropertyString;
-                imageFormat = DdsPixelFormat.ParseFileFormat(format);
+                imageFormat = DdsPixelFormat.ParseFileFormat(format);*/
             } 
             else
             {
