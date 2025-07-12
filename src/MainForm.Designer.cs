@@ -55,6 +55,11 @@
             tabControl1 = new TabControl();
             propertyPage = new TabPage();
             propertiesView = new TreeView();
+            propertiesMenu = new ContextMenuStrip(components);
+            objectNameClassMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripSeparator();
+            viewObjectInHEXMenuItem = new ToolStripMenuItem();
+            viewDataInHEXMenuItem = new ToolStripMenuItem();
             namePage = new TabPage();
             nameGridView = new DataGridView();
             nameTableIndex = new DataGridViewTextBoxColumn();
@@ -76,6 +81,9 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
+            viewParentMenuItem = new ToolStripMenuItem();
+            viewObjectMenuItem = new ToolStripMenuItem();
+            objectMenu = new ContextMenuStrip(components);
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -89,12 +97,14 @@
             propertyFilePage.SuspendLayout();
             tabControl1.SuspendLayout();
             propertyPage.SuspendLayout();
+            propertiesMenu.SuspendLayout();
             namePage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nameGridView).BeginInit();
             importPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)importGridView).BeginInit();
             exportPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)exportGridView).BeginInit();
+            objectMenu.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -206,6 +216,7 @@
             // 
             // objectsTree
             // 
+            objectsTree.ContextMenuStrip = objectMenu;
             objectsTree.Dock = DockStyle.Fill;
             objectsTree.ImageIndex = 0;
             objectsTree.ImageList = iconList;
@@ -354,11 +365,46 @@
             // 
             // propertiesView
             // 
+            propertiesView.ContextMenuStrip = propertiesMenu;
             propertiesView.Dock = DockStyle.Fill;
             propertiesView.Location = new Point(3, 3);
             propertiesView.Name = "propertiesView";
             propertiesView.Size = new Size(796, 524);
             propertiesView.TabIndex = 0;
+            // 
+            // propertiesMenu
+            // 
+            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem });
+            propertiesMenu.Name = "propertiesMenu";
+            propertiesMenu.Size = new Size(185, 76);
+            // 
+            // objectNameClassMenuItem
+            // 
+            objectNameClassMenuItem.Name = "objectNameClassMenuItem";
+            objectNameClassMenuItem.Size = new Size(184, 22);
+            objectNameClassMenuItem.Text = "ObjectName :: Class";
+            objectNameClassMenuItem.Click += objectNameClassMenuItem_Click;
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(181, 6);
+            // 
+            // viewObjectInHEXMenuItem
+            // 
+            viewObjectInHEXMenuItem.Enabled = false;
+            viewObjectInHEXMenuItem.Name = "viewObjectInHEXMenuItem";
+            viewObjectInHEXMenuItem.Size = new Size(184, 22);
+            viewObjectInHEXMenuItem.Text = "View Object in HEX...";
+            viewObjectInHEXMenuItem.Click += viewObjectInHEXMenuItem_Click;
+            // 
+            // viewDataInHEXMenuItem
+            // 
+            viewDataInHEXMenuItem.Enabled = false;
+            viewDataInHEXMenuItem.Name = "viewDataInHEXMenuItem";
+            viewDataInHEXMenuItem.Size = new Size(184, 22);
+            viewDataInHEXMenuItem.Text = "View Data in HEX...";
+            viewDataInHEXMenuItem.Click += viewDataInHEXMenuItem_Click;
             // 
             // namePage
             // 
@@ -583,6 +629,28 @@
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
+            // viewParentMenuItem
+            // 
+            viewParentMenuItem.Enabled = false;
+            viewParentMenuItem.Name = "viewParentMenuItem";
+            viewParentMenuItem.Size = new Size(137, 22);
+            viewParentMenuItem.Text = "View Parent";
+            viewParentMenuItem.Click += viewParentMenuItem_Click;
+            // 
+            // viewObjectMenuItem
+            // 
+            viewObjectMenuItem.Enabled = false;
+            viewObjectMenuItem.Name = "viewObjectMenuItem";
+            viewObjectMenuItem.Size = new Size(137, 22);
+            viewObjectMenuItem.Text = "View Object";
+            viewObjectMenuItem.Click += viewObjectMenuItem_Click;
+            // 
+            // objectMenu
+            // 
+            objectMenu.Items.AddRange(new ToolStripItem[] { viewParentMenuItem, viewObjectMenuItem });
+            objectMenu.Name = "objectMenu";
+            objectMenu.Size = new Size(138, 48);
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -612,12 +680,14 @@
             propertyFilePage.ResumeLayout(false);
             tabControl1.ResumeLayout(false);
             propertyPage.ResumeLayout(false);
+            propertiesMenu.ResumeLayout(false);
             namePage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)nameGridView).EndInit();
             importPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)importGridView).EndInit();
             exportPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)exportGridView).EndInit();
+            objectMenu.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -668,5 +738,13 @@
         private TextBox filterBox;
         private ImageList iconList;
         private TreeView propertiesView;
+        private ContextMenuStrip propertiesMenu;
+        private ToolStripMenuItem viewObjectInHEXMenuItem;
+        private ToolStripMenuItem viewDataInHEXMenuItem;
+        private ToolStripMenuItem objectNameClassMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem viewParentMenuItem;
+        private ToolStripMenuItem viewObjectMenuItem;
+        private ContextMenuStrip objectMenu;
     }
 }

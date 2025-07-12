@@ -537,6 +537,18 @@ namespace UpkManager.Models.UpkFile
             return Task.CompletedTask;
         }
 
+        public int GetClassNameTableIndex(int nameIndex)
+        {
+            foreach (var entry in ImportTable)
+                if (entry.ObjectNameIndex.Index == nameIndex)
+                    return entry.TableIndex;
+
+            foreach (var entry in ExportTable)
+                if (entry.ObjectNameIndex.Index == nameIndex)
+                    return entry.TableIndex;
+            return 0;
+        }
+
         #endregion Private Methods
 
     }

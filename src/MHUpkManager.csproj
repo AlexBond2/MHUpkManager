@@ -19,6 +19,10 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="Be.Windows.Forms.HexBox.Net5" Version="1.8.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\DDSLib\DDSLib.csproj" />
     <ProjectReference Include="..\UpkManager\UpkManager.csproj" />
   </ItemGroup>

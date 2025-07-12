@@ -21,6 +21,7 @@ namespace MHUpkManager
         public const string ComponentsTxt = "MHComponents.txt";
         public UnrealUpkFile UpkFile { get; set; }
         private List<TreeNode> rootNodes;
+        private object currentObject;
 
         public MainForm()
         {
@@ -32,7 +33,7 @@ namespace MHUpkManager
             EnableDoubleBuffering(importGridView);
             EnableDoubleBuffering(exportGridView);
 
-            LoadDataFiles();            
+            LoadDataFiles();
         }
 
         private void LoadDataFiles()
@@ -53,8 +54,8 @@ namespace MHUpkManager
             }
 
             path = Path.Combine("Data", CoreJson);
-            if (!File.Exists(path)) 
-            { 
+            if (!File.Exists(path))
+            {
                 WarningBox($"File with Engine types not found. {path}");
                 return;
             }
@@ -267,15 +268,25 @@ namespace MHUpkManager
 
         private async void objectsTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (e.Node?.Tag is null) return;
+            currentObject = e.Node?.Tag;
+            viewDataInHEXMenuItem.Enabled = false;
+            viewObjectInHEXMenuItem.Enabled = false;
+            viewObjectMenuItem.Enabled = false;
+            viewParentMenuItem.Enabled = false;
 
-            if (e.Node.Tag is UnrealExportTableEntry export)
+            if (currentObject is null) return;
+
+            viewObjectMenuItem.Enabled = true;
+            viewParentMenuItem.Enabled = true;
+            objectNameClassMenuItem.Text = e.Node.Text;
+
+            if (currentObject is UnrealExportTableEntry export)
             {
                 try
                 {
                     if (export.UnrealObject == null)
                         await export.ParseUnrealObject(UpkFile.Header, false, false);
-
+                    viewObjectInHEXMenuItem.Enabled = true;
                     BuildPropertyTree(export.UnrealObject);
                 }
                 catch (Exception ex)
@@ -287,7 +298,7 @@ namespace MHUpkManager
                         MessageBoxIcon.Error);
                 }
             }
-            else if (e.Node.Tag is UnrealImportTableEntry importEntry)
+            else if (currentObject is UnrealImportTableEntry importEntry)
             {
                 propertiesView.Nodes.Clear();
             }
@@ -301,7 +312,7 @@ namespace MHUpkManager
             if (unrealObject is IUnrealObject uObject)
             {
                 foreach (VirtualNode virtualNode in uObject.FieldNodes)
-                     propertiesView.Nodes.Add(CreateRealNode(virtualNode));
+                    propertiesView.Nodes.Add(CreateRealNode(virtualNode));
             }
             else
             {
@@ -314,8 +325,11 @@ namespace MHUpkManager
                     propertiesView.Nodes.Add(new TreeNode($"none"));
 
                 if (propertyHeader.Result != ResultProperty.None || propertyHeader.RemainingData != 0)
+                {
                     propertiesView.Nodes.Add(new TreeNode($"Data [{propertyHeader.Result}][{propertyHeader.RemainingData}]"));
-            }            
+                    viewDataInHEXMenuItem.Enabled = true;
+                }
+            }
 
             ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();
@@ -338,6 +352,90 @@ namespace MHUpkManager
                 node.Nodes.Add(CreateRealNode(child));
 
             return node;
+        }
+
+        private void viewObjectInHEXMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentObject == null) return;
+            if (currentObject is UnrealExportTableEntry export)
+            {
+                var obj = export.UnrealObject;
+            }
+        }
+
+        private void viewDataInHEXMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentObject == null) return;
+            if (currentObject is UnrealExportTableEntry export)
+            {
+                var obj = export.UnrealObject;
+            }
+        }
+
+        private void objectNameClassMenuItem_Click(object sender, EventArgs e)
+        {
+            if (objectNameClassMenuItem.Text != null)
+                Clipboard.SetText(objectNameClassMenuItem.Text);
+        }
+
+        private void viewParentMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentObject == null) return;
+            if (currentObject is UnrealExportTableEntry export)
+            {
+                int index = export.SuperReference;
+                if (index == 0)
+                    index = export.ClassReference;
+
+                if (index > 0)
+                    selectExportIndex(index);
+                else
+                    selectImportIndex(index);
+            }
+            else if (currentObject is UnrealImportTableEntry import)
+            {
+                int nameIndex = import.ClassNameIndex.Index;
+                int index = UpkFile.Header.GetClassNameTableIndex(nameIndex);
+                if (index > 0)
+                    selectExportIndex(index);
+                else
+                    selectImportIndex(index);
+            }
+        }
+
+        private void viewObjectMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentObject == null) return;
+            if (currentObject is UnrealExportTableEntry export) 
+                selectExportIndex(export.TableIndex);
+            else if (currentObject is UnrealImportTableEntry import)
+                selectImportIndex(import.TableIndex);
+        }
+
+        private void selectExportIndex(int tableIndex)
+        {
+            tabControl1.SelectTab(3);
+            int index = tableIndex - 1;
+            if (index >= 0 && index < exportGridView.Rows.Count)
+            {
+                exportGridView.ClearSelection();
+                exportGridView.Rows[index].Selected = true;
+                exportGridView.CurrentCell = exportGridView.Rows[index].Cells[0];
+                exportGridView.FirstDisplayedScrollingRowIndex = index;
+            }
+        }
+
+        private void selectImportIndex(int tableIndex)
+        {
+            tabControl1.SelectTab(2);
+            int index = -tableIndex - 1;
+            if (index >= 0 && index < importGridView.Rows.Count)
+            {
+                importGridView.ClearSelection();
+                importGridView.Rows[index].Selected = true;
+                importGridView.CurrentCell = importGridView.Rows[index].Cells[0];
+                importGridView.FirstDisplayedScrollingRowIndex = index;
+            }
         }
     }
 }
