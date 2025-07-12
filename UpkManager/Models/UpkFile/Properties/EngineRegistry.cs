@@ -13,14 +13,14 @@ namespace UpkManager.Models.UpkFile.Properties
         public string Name { get; set; } 
         [JsonConverter(typeof(PropertyTypesConverter))]
         public PropertyTypes Type { get; set; }
-        public string? Struct { get; set; } // Type == Struct
+        public string Struct { get; set; } // Type == Struct
     }
 
     public class PropertyTypesConverter : JsonConverter<PropertyTypes>
     {
         public override PropertyTypes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            string? str = reader.GetString();
+            string str = reader.GetString();
             if (str == null) return PropertyTypes.UnknownProperty;
 
             return str.ToLowerInvariant() switch
@@ -66,7 +66,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 PropertyNameCaseInsensitive = true
             };
 
-            List<CustomStructJson>? loadedStructs;
+            List<CustomStructJson> loadedStructs;
             try
             {
                 loadedStructs = JsonSerializer.Deserialize<List<CustomStructJson>>(json, options);

@@ -15,7 +15,7 @@ namespace UpkManager.Models.UpkFile.Properties
     {
         public string Name { get; set; }
         public List<CustomCoreFieldJson> Fields { get; set; }
-        public string? Format { get; set; }
+        public string Format { get; set; }
     }
 
     public static class CoreRegistry
@@ -31,7 +31,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 PropertyNameCaseInsensitive = true
             };
 
-            List<CustomCoreJson>? loadedStructs;
+            List<CustomCoreJson> loadedStructs;
             try
             {
                 loadedStructs = JsonSerializer.Deserialize<List<CustomCoreJson>>(json, options);
