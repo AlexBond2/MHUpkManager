@@ -329,7 +329,7 @@ namespace MHUpkManager
         private static void ExpandFiltered(TreeNodeCollection nodes)
         {
             foreach (TreeNode node in nodes)
-                if (node.Nodes.Count > 0 && node.Nodes.Count < 11)
+                if ((node.Nodes.Count > 0 && node.Nodes.Count < 11) || node.Text == "Properties")
                 {
                     node.Expand();
                     ExpandFiltered(node.Nodes);
