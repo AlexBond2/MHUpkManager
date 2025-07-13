@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 
 using UpkManager.Constants;
 using UpkManager.Helpers;
+using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Tables;
 
 

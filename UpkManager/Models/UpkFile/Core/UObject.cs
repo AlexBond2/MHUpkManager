@@ -16,7 +16,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public string TypeName { get; } = typeName;
     }
 
-    public class UObject : UnrealUpkBuilderBase
+    public class UObject// : UnrealUpkBuilderBase
     {
         [TreeNodeField]
         public int NetIndex { get; private set; } = -1;
@@ -116,7 +116,7 @@ namespace UpkManager.Models.UpkFile.Classes
             }
             buffer.ResultProperty = result;
         }
-
+        /*
         public override int GetBuilderSize()
         {
             BuilderSize = sizeof(int);
@@ -128,6 +128,6 @@ namespace UpkManager.Models.UpkFile.Classes
         {
             Writer.WriteInt32(NetIndex);
             return Task.CompletedTask;
-        }
+        }*/
     }
 }

@@ -9,6 +9,8 @@ using UpkManager.Repository;
 using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Properties;
+using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Engine;
 
 namespace MHUpkManager
 {

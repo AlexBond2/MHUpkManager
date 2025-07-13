@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.IO;
 using System;
 
-namespace UpkManager.Models.UpkFile.Properties
+namespace UpkManager.Models.UpkFile.Core
 {
     public class CustomCoreFieldJson
     {

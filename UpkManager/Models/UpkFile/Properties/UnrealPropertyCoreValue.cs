@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 
 using UpkManager.Helpers;
 using UpkManager.Constants;
+using UpkManager.Models.UpkFile.Core;
 
 namespace UpkManager.Models.UpkFile.Properties
 {

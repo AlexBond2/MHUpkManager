@@ -1,0 +1,37 @@
+﻿using System;
+using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Types;
+
+namespace UpkManager.Models.UpkFile.Core
+{
+    public class UScriptStruct : UStruct
+    {
+        [TreeNodeField]
+        public StructFlags StructFlags { get; private set; }
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            StructFlags = (StructFlags)buffer.Reader.ReadUInt32();
+        }
+    }
+
+    [Flags]
+    public enum StructFlags : uint
+    {
+        Native = 0x00000001U,
+        Export = 0x00000002U,
+
+        Long = 0x00000004U,      // @Redefined(UE3, HasComponents)
+        Init = 0x00000008U,      // @Redefined(UE3, Transient)
+
+        // UE3
+
+        HasComponents = 0x00000004U,      // @Redefined
+        Transient = 0x00000008U,      // @Redefined
+        Atomic = 0x00000010U,
+        Immutable = 0x00000020U,
+        StrictConfig = 0x00000040U,
+        ImmutableWhenCooked = 0x00000080U,
+        AtomicWhenCooked = 0x00000100U,
+    }
+}

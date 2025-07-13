@@ -5,6 +5,7 @@ using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Objects;
+using UpkManager.Models.UpkFile.Core;
 
 namespace UpkManager.Models.UpkFile.Tables
 {

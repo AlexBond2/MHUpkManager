@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using UpkManager.Constants;
 
-namespace UpkManager.Models.UpkFile.Properties
+namespace UpkManager.Models.UpkFile.Engine
 {
     public class CustomStructJson
     {
