@@ -45,6 +45,9 @@
             objectsPage = new TabPage();
             panel1 = new Panel();
             objectsTree = new TreeView();
+            objectMenu = new ContextMenuStrip(components);
+            viewParentMenuItem = new ToolStripMenuItem();
+            viewObjectMenuItem = new ToolStripMenuItem();
             iconList = new ImageList(components);
             panel4 = new Panel();
             filterClear = new Button();
@@ -81,9 +84,8 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
-            viewParentMenuItem = new ToolStripMenuItem();
-            viewObjectMenuItem = new ToolStripMenuItem();
-            objectMenu = new ContextMenuStrip(components);
+            toolStripMenuItem2 = new ToolStripSeparator();
+            viewTextureMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -93,6 +95,7 @@
             tabControl2.SuspendLayout();
             objectsPage.SuspendLayout();
             panel1.SuspendLayout();
+            objectMenu.SuspendLayout();
             panel4.SuspendLayout();
             propertyFilePage.SuspendLayout();
             tabControl1.SuspendLayout();
@@ -104,7 +107,6 @@
             ((System.ComponentModel.ISupportInitialize)importGridView).BeginInit();
             exportPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)exportGridView).BeginInit();
-            objectMenu.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -226,6 +228,28 @@
             objectsTree.Size = new Size(390, 492);
             objectsTree.TabIndex = 0;
             objectsTree.AfterSelect += objectsTree_AfterSelect;
+            // 
+            // objectMenu
+            // 
+            objectMenu.Items.AddRange(new ToolStripItem[] { viewParentMenuItem, viewObjectMenuItem });
+            objectMenu.Name = "objectMenu";
+            objectMenu.Size = new Size(138, 48);
+            // 
+            // viewParentMenuItem
+            // 
+            viewParentMenuItem.Enabled = false;
+            viewParentMenuItem.Name = "viewParentMenuItem";
+            viewParentMenuItem.Size = new Size(137, 22);
+            viewParentMenuItem.Text = "View Parent";
+            viewParentMenuItem.Click += viewParentMenuItem_Click;
+            // 
+            // viewObjectMenuItem
+            // 
+            viewObjectMenuItem.Enabled = false;
+            viewObjectMenuItem.Name = "viewObjectMenuItem";
+            viewObjectMenuItem.Size = new Size(137, 22);
+            viewObjectMenuItem.Text = "View Object";
+            viewObjectMenuItem.Click += viewObjectMenuItem_Click;
             // 
             // iconList
             // 
@@ -374,9 +398,9 @@
             // 
             // propertiesMenu
             // 
-            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem });
+            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem });
             propertiesMenu.Name = "propertiesMenu";
-            propertiesMenu.Size = new Size(185, 76);
+            propertiesMenu.Size = new Size(185, 126);
             // 
             // objectNameClassMenuItem
             // 
@@ -629,27 +653,18 @@
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
-            // viewParentMenuItem
+            // toolStripMenuItem2
             // 
-            viewParentMenuItem.Enabled = false;
-            viewParentMenuItem.Name = "viewParentMenuItem";
-            viewParentMenuItem.Size = new Size(137, 22);
-            viewParentMenuItem.Text = "View Parent";
-            viewParentMenuItem.Click += viewParentMenuItem_Click;
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(181, 6);
             // 
-            // viewObjectMenuItem
+            // viewTextureMenuItem
             // 
-            viewObjectMenuItem.Enabled = false;
-            viewObjectMenuItem.Name = "viewObjectMenuItem";
-            viewObjectMenuItem.Size = new Size(137, 22);
-            viewObjectMenuItem.Text = "View Object";
-            viewObjectMenuItem.Click += viewObjectMenuItem_Click;
-            // 
-            // objectMenu
-            // 
-            objectMenu.Items.AddRange(new ToolStripItem[] { viewParentMenuItem, viewObjectMenuItem });
-            objectMenu.Name = "objectMenu";
-            objectMenu.Size = new Size(138, 48);
+            viewTextureMenuItem.Enabled = false;
+            viewTextureMenuItem.Name = "viewTextureMenuItem";
+            viewTextureMenuItem.Size = new Size(184, 22);
+            viewTextureMenuItem.Text = "View Texture...";
+            viewTextureMenuItem.Click += viewTextureMenuItem_Click;
             // 
             // MainForm
             // 
@@ -675,6 +690,7 @@
             tabControl2.ResumeLayout(false);
             objectsPage.ResumeLayout(false);
             panel1.ResumeLayout(false);
+            objectMenu.ResumeLayout(false);
             panel4.ResumeLayout(false);
             panel4.PerformLayout();
             propertyFilePage.ResumeLayout(false);
@@ -687,7 +703,6 @@
             ((System.ComponentModel.ISupportInitialize)importGridView).EndInit();
             exportPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)exportGridView).EndInit();
-            objectMenu.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -746,5 +761,7 @@
         private ToolStripMenuItem viewParentMenuItem;
         private ToolStripMenuItem viewObjectMenuItem;
         private ContextMenuStrip objectMenu;
+        private ToolStripSeparator toolStripMenuItem2;
+        private ToolStripMenuItem viewTextureMenuItem;
     }
 }

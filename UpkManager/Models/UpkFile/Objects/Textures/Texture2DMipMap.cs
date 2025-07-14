@@ -17,10 +17,12 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public static Texture2DMipMap ReadMipMap(UBuffer buffer)
         {
-            var mipMap = new Texture2DMipMap();
-            mipMap.Data = buffer.ReadBulkData();
-            mipMap.SizeX = buffer.Reader.ReadInt32();
-            mipMap.SizeY = buffer.Reader.ReadInt32();
+            var mipMap = new Texture2DMipMap
+            {
+                Data = buffer.ReadBulkData(),
+                SizeX = buffer.Reader.ReadInt32(),
+                SizeY = buffer.Reader.ReadInt32()
+            };
             return mipMap;
         }
         public override string ToString()

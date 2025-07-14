@@ -281,7 +281,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         {
             if (MipMaps == null || !MipMaps.Any()) return;
 
-            DdsSaveConfig config = configuration as DdsSaveConfig ?? new DdsSaveConfig(FileFormat.Unknown, 0, 0, false, false);
+         /*   DdsSaveConfig config = configuration as DdsSaveConfig ?? new DdsSaveConfig(FileFormat.Unknown, 0, 0, false, false);
 
             FileFormat format;
 
@@ -305,7 +305,8 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
             ddsStream.Close();
 
-            memory.Close();
+            memory.Close();*/
+            await Task.CompletedTask;
         }
 
         public override async Task SetObject(string filename, List<UnrealNameTableEntry> nameTable, object configuration)
@@ -388,48 +389,6 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             }*/
         }
 
-        public override Stream GetObjectStream()
-        {
-            if (MipMaps == null || MipMaps.Count == 0) return null;
-
-            FileFormat format;
-
-            Texture2DMipMap mipMap = MipMaps
-                .Where(mm => mm.Data != null && mm.Data.Length > 0)
-                .OrderByDescending(mm => mm.SizeX > mm.SizeY ? mm.SizeX : mm.SizeY)
-                .FirstOrDefault();
-
-            return mipMap == null ? null : buildDdsImage(MipMaps.IndexOf(mipMap), out format);
-        }
-
-        public Stream GetMipMapsStream()
-        {
-            if (MipMaps == null || MipMaps.Count == 0) return null;
-
-            var orderedMipMaps = MipMaps.OrderByDescending(mip => mip.SizeX);
-
-            Texture2DMipMap mipMap = orderedMipMaps.FirstOrDefault();
-
-            var ddsHeader = new DdsHeader(new DdsSaveConfig(mipMap.OverrideFormat, 0, 0, false, false), mipMap.SizeX, mipMap.SizeY, MipMaps.Count);
-            var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream);
-
-            ddsHeader.Write(writer);
-            foreach (var map in orderedMipMaps)
-                stream.Write(map.Data, 0, map.Data.Length);
-
-            stream.Flush();
-            stream.Position = 0;
-
-            return stream;
-        }
-
-        public Stream GetObjectStream(int mipMapIndex)
-        {
-            FileFormat format;
-            return buildDdsImage(mipMapIndex, out format);
-        }
-
         #endregion Unreal Methods
 
         #region UnrealUpkBuilderBase Implementation
@@ -510,35 +469,6 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         #endregion UnrealUpkBuilderBase Implementation
 
         #region Private Methods
-
-        private Stream buildDdsImage(int mipMapIndex, out FileFormat imageFormat)
-        {
-            var mipMap = MipMaps[mipMapIndex];
-
-            if (mipMap.OverrideFormat == FileFormat.Unknown)
-            {
-                imageFormat = FileFormat.Unknown;
-                /*if (PropertyHeader.GetProperty("Format").FirstOrDefault()?.Value is not UnrealPropertyByteValue formatProp) return null;
-                string format = formatProp.PropertyString;
-                imageFormat = DdsPixelFormat.ParseFileFormat(format);*/
-            } 
-            else
-            {
-                imageFormat = mipMap.OverrideFormat;
-            }
-
-            var ddsHeader = new DdsHeader(new DdsSaveConfig(imageFormat, 0, 0, false, false), mipMap.SizeX, mipMap.SizeY);
-            var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream);
-
-            ddsHeader.Write(writer);
-            stream.Write(mipMap.Data, 0, mipMap.Data.Length);
-
-            stream.Flush();
-            stream.Position = 0;
-
-            return stream;
-        }
 
         public void ResetCompressedChunks()
         {

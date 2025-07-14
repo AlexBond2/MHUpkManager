@@ -275,6 +275,7 @@ namespace MHUpkManager
             viewObjectInHEXMenuItem.Enabled = false;
             viewObjectMenuItem.Enabled = false;
             viewParentMenuItem.Enabled = false;
+            viewTextureMenuItem.Enabled = false;
 
             if (currentObject is null) return;
 
@@ -324,6 +325,8 @@ namespace MHUpkManager
                 viewDataInHEXMenuItem.Enabled = true;
             }
 
+            if (uObject is UnrealObject<UTexture2D>) viewTextureMenuItem.Enabled = true;
+
             ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();
         }
@@ -351,14 +354,14 @@ namespace MHUpkManager
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-               openHexView(export.ObjectNameIndex.Name, export.UnrealObject);
+                openHexView(export.ObjectNameIndex.Name, export.UnrealObject);
         }
 
         private void viewDataInHEXMenuItem_Click(object sender, EventArgs e)
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-               openHexView(export.ObjectNameIndex.Name, export.UnrealObject, true);
+                openHexView(export.ObjectNameIndex.Name, export.UnrealObject, true);
         }
 
         private void objectNameClassMenuItem_Click(object sender, EventArgs e)
@@ -376,7 +379,7 @@ namespace MHUpkManager
                     hexViewForm.SetTitle(name);
                     var data = uObject.Buffer.Reader.GetBytes();
                     if (fromOffset && uObject.Buffer.DataOffset >= 0 && uObject.Buffer.DataOffset < data.Length)
-                    {                        
+                    {
                         int length = data.Length - uObject.Buffer.DataOffset;
                         byte[] offsetData = new byte[length];
                         Array.Copy(data, uObject.Buffer.DataOffset, offsetData, 0, length);
@@ -416,7 +419,7 @@ namespace MHUpkManager
         private void viewObjectMenuItem_Click(object sender, EventArgs e)
         {
             if (currentObject == null) return;
-            if (currentObject is UnrealExportTableEntry export) 
+            if (currentObject is UnrealExportTableEntry export)
                 selectExportIndex(export.TableIndex);
             else if (currentObject is UnrealImportTableEntry import)
                 selectImportIndex(import.TableIndex);
@@ -445,6 +448,28 @@ namespace MHUpkManager
                 importGridView.Rows[index].Selected = true;
                 importGridView.CurrentCell = importGridView.Rows[index].Cells[0];
                 importGridView.FirstDisplayedScrollingRowIndex = index;
+            }
+        }
+
+        private void viewTextureMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentObject == null) return;
+            if (currentObject is UnrealExportTableEntry export)
+                openTextureView(export.ObjectNameIndex.Name, export.UnrealObject);            
+        }
+
+        private void openTextureView(string name, UnrealObjectBase unrealObject)
+        {
+            if (unrealObject is UnrealObject<UTexture2D> textureObject)
+            {
+                UTexture2D data = textureObject.UnrealType;
+                if (data == null) return;
+                using (var textureViewForm = new TextureViewForm())
+                {
+                    textureViewForm.SetTitle(name);
+                    textureViewForm.SetTextureObject(data);
+                    textureViewForm.ShowDialog();
+                }
             }
         }
     }

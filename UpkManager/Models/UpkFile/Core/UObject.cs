@@ -116,6 +116,12 @@ namespace UpkManager.Models.UpkFile.Classes
             }
             buffer.ResultProperty = result;
         }
+
+        public List<UnrealProperty> GetProperty(string name)
+        {
+            return [.. Properties.Where(p => p.NameIndex.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))];
+        }
+
         /*
         public override int GetBuilderSize()
         {
