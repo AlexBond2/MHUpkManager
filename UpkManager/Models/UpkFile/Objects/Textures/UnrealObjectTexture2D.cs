@@ -34,7 +34,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public int MipMapsCount { get; private set; }
 
-        public List<UnrealMipMap> MipMaps { get; }
+        public List<Texture2DMipMap> MipMaps { get; }
 
         public byte[] Guid { get; private set; }
 
@@ -68,14 +68,14 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             {
                 await ProcessCompressedBulkData(reader, async bulkChunk =>
                 {
-                    UnrealMipMap mip = new UnrealMipMap
+                    Texture2DMipMap mip = new Texture2DMipMap
                     {
-                        Width = reader.ReadInt32(),
-                        Height = reader.ReadInt32()
+                        SizeX = reader.ReadInt32(),
+                        SizeY = reader.ReadInt32()
                     };
 
-                    if (mip.Width >= 4 || mip.Height >= 4) 
-                        mip.ImageData = (await bulkChunk.DecompressChunk(0))?.GetBytes();
+                    if (mip.SizeX >= 4 || mip.SizeY >= 4) 
+                        mip.Data = (await bulkChunk.DecompressChunk(0))?.GetBytes();
 
                     MipMaps.Add(mip);
                 });
@@ -90,7 +90,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             MipMapsCount = count;
         }
 
-        public async Task ReadMipMapCache(ByteArrayReader upkReader, uint index, UnrealMipMap overrideMipMap)
+        public async Task ReadMipMapCache(ByteArrayReader upkReader, uint index, Texture2DMipMap overrideMipMap)
         {
             var header = new UnrealCompressedChunkHeader();
 
@@ -98,34 +98,34 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
             if (TryGetImageProperties(header, (int)index, overrideMipMap, out int width, out int height, out FileFormat format))
             {
-                UnrealMipMap mip = new()
+                Texture2DMipMap mip = new()
                 {
-                    Width = width,
-                    Height = height,
+                    SizeX = width,
+                    SizeY = height,
                     OverrideFormat = format
                 };
 
-                if (mip.Width >= 4 || mip.Height >= 4) 
-                    mip.ImageData = (await header.DecompressChunk())?.GetBytes();
+                if (mip.SizeX >= 4 || mip.SizeY >= 4) 
+                    mip.Data = (await header.DecompressChunk())?.GetBytes();
 
                 MipMaps.Add(mip);
             }
         }
 
-        public bool TryGetImageProperties(UnrealCompressedChunkHeader header, int index, UnrealMipMap overrideMipMap, out int width, out int height, out FileFormat ddsFormat)
+        public bool TryGetImageProperties(UnrealCompressedChunkHeader header, int index, Texture2DMipMap overrideMipMap, out int width, out int height, out FileFormat ddsFormat)
         {
-            if (overrideMipMap.Width > 0)
+            if (overrideMipMap.SizeX > 0)
             {
-                int shift = index - overrideMipMap.ImageData[0];
+                int shift = index - overrideMipMap.Data[0];
                 if (shift < 0)
                 {
-                    width = overrideMipMap.Width << -shift;
-                    height = overrideMipMap.Height << -shift;
+                    width = overrideMipMap.SizeX << -shift;
+                    height = overrideMipMap.SizeY << -shift;
                 }
                 else
                 {
-                    width = overrideMipMap.Width >> shift;
-                    height = overrideMipMap.Height >> shift;
+                    width = overrideMipMap.SizeX >> shift;
+                    height = overrideMipMap.SizeY >> shift;
                 }
                 ddsFormat = overrideMipMap.OverrideFormat;
                 return true;
@@ -285,9 +285,9 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
             FileFormat format;
 
-            UnrealMipMap mipMap = MipMaps
-                .Where(mm => mm.ImageData != null && mm.ImageData.Length > 0)
-                .OrderByDescending(mm => mm.Width > mm.Height ? mm.Width : mm.Height).FirstOrDefault();
+            Texture2DMipMap mipMap = MipMaps
+                .Where(mm => mm.Data != null && mm.Data.Length > 0)
+                .OrderByDescending(mm => mm.SizeX > mm.SizeY ? mm.SizeX : mm.SizeY).FirstOrDefault();
 
             if (mipMap == null) return;
 
@@ -394,9 +394,9 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
             FileFormat format;
 
-            UnrealMipMap mipMap = MipMaps
-                .Where(mm => mm.ImageData != null && mm.ImageData.Length > 0)
-                .OrderByDescending(mm => mm.Width > mm.Height ? mm.Width : mm.Height)
+            Texture2DMipMap mipMap = MipMaps
+                .Where(mm => mm.Data != null && mm.Data.Length > 0)
+                .OrderByDescending(mm => mm.SizeX > mm.SizeY ? mm.SizeX : mm.SizeY)
                 .FirstOrDefault();
 
             return mipMap == null ? null : buildDdsImage(MipMaps.IndexOf(mipMap), out format);
@@ -406,17 +406,17 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         {
             if (MipMaps == null || MipMaps.Count == 0) return null;
 
-            var orderedMipMaps = MipMaps.OrderByDescending(mip => mip.Width);
+            var orderedMipMaps = MipMaps.OrderByDescending(mip => mip.SizeX);
 
-            UnrealMipMap mipMap = orderedMipMaps.FirstOrDefault();
+            Texture2DMipMap mipMap = orderedMipMaps.FirstOrDefault();
 
-            var ddsHeader = new DdsHeader(new DdsSaveConfig(mipMap.OverrideFormat, 0, 0, false, false), mipMap.Width, mipMap.Height, MipMaps.Count);
+            var ddsHeader = new DdsHeader(new DdsSaveConfig(mipMap.OverrideFormat, 0, 0, false, false), mipMap.SizeX, mipMap.SizeY, MipMaps.Count);
             var stream = new MemoryStream();
             var writer = new BinaryWriter(stream);
 
             ddsHeader.Write(writer);
             foreach (var map in orderedMipMaps)
-                stream.Write(map.ImageData, 0, map.ImageData.Length);
+                stream.Write(map.Data, 0, map.Data.Length);
 
             stream.Flush();
             stream.Position = 0;
@@ -456,14 +456,14 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             BuilderSize = base.GetBuilderSize()
                         + sizeof(int);
 
-            foreach (UnrealMipMap mipMap in MipMaps)
+            foreach (Texture2DMipMap mipMap in MipMaps)
             {
-                BulkDataCompressionTypes flags = mipMap.ImageData == null || 
-                    mipMap.ImageData.Length == 0 
+                BulkDataCompressionTypes flags = mipMap.Data == null || 
+                    mipMap.Data.Length == 0 
                     ? BulkDataCompressionTypes.Unused | BulkDataCompressionTypes.StoreInSeparatefile 
                     : BulkDataCompressionTypes.LZO_ENC;
 
-                BuilderSize += Task.Run(() => ProcessUncompressedBulkData(ByteArrayReader.CreateNew(mipMap.ImageData, 0), flags)).Result
+                BuilderSize += Task.Run(() => ProcessUncompressedBulkData(ByteArrayReader.CreateNew(mipMap.Data, 0), flags)).Result
                             + sizeof(int) * 2;
             }
 
@@ -479,12 +479,12 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             BuilderSize = base.GetBuilderSize() + sizeof(int); // need sizeof(int)?
             var mipMap = MipMaps[index];
 
-            BulkDataCompressionTypes flags = mipMap.ImageData == null ||
-                mipMap.ImageData.Length == 0
+            BulkDataCompressionTypes flags = mipMap.Data == null ||
+                mipMap.Data.Length == 0
                 ? BulkDataCompressionTypes.Unused | BulkDataCompressionTypes.StoreInSeparatefile
                 : BulkDataCompressionTypes.LZO_ENC;
 
-            BuilderSize += Task.Run(() => ProcessUncompressedBulkData(ByteArrayReader.CreateNew(mipMap.ImageData, 0), flags)).Result
+            BuilderSize += Task.Run(() => ProcessUncompressedBulkData(ByteArrayReader.CreateNew(mipMap.Data, 0), flags)).Result
                         + sizeof(int) * 2;
 
             return BuilderSize;
@@ -500,8 +500,8 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             {
                 await CompressedChunks[i].WriteCompressedChunk(Writer, CurrentOffset);
 
-                Writer.WriteInt32(MipMaps[i].Width);
-                Writer.WriteInt32(MipMaps[i].Height);
+                Writer.WriteInt32(MipMaps[i].SizeX);
+                Writer.WriteInt32(MipMaps[i].SizeY);
             }
 
             await Writer.WriteBytes(Guid);
@@ -527,12 +527,12 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
                 imageFormat = mipMap.OverrideFormat;
             }
 
-            var ddsHeader = new DdsHeader(new DdsSaveConfig(imageFormat, 0, 0, false, false), mipMap.Width, mipMap.Height);
+            var ddsHeader = new DdsHeader(new DdsSaveConfig(imageFormat, 0, 0, false, false), mipMap.SizeX, mipMap.SizeY);
             var stream = new MemoryStream();
             var writer = new BinaryWriter(stream);
 
             ddsHeader.Write(writer);
-            stream.Write(mipMap.ImageData, 0, mipMap.ImageData.Length);
+            stream.Write(mipMap.Data, 0, mipMap.Data.Length);
 
             stream.Flush();
             stream.Position = 0;
@@ -552,10 +552,10 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             var format = MipMaps[0].OverrideFormat;
             for (int index = maxIndex; index < MipMapsCount; index++)
             {
-                UnrealMipMap mip = new UnrealMipMap
+                Texture2DMipMap mip = new Texture2DMipMap
                 {
-                    Width = mipMaps[index].Width,
-                    Height = mipMaps[index].Height,
+                    SizeX = mipMaps[index].Width,
+                    SizeY = mipMaps[index].Height,
                     OverrideFormat = format
                 };
                 MipMaps.Add(mip);

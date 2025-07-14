@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
-using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Objects;
 
 namespace UpkManager.Models.UpkFile.Tables
 {
@@ -237,9 +238,9 @@ namespace UpkManager.Models.UpkFile.Tables
  /*               ObjectTypes.ArchetypeObjectReference => new UnrealObjectArchetypeBase(),
                 ObjectTypes.ObjectRedirector => new UnrealObjectObjectRedirector(),
                 ObjectTypes.ShadowMapTexture2D => new UnrealObjectShadowMapTexture2D(),
-                ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),
-                ObjectTypes.Texture2D => new UnrealObjectTexture2D(),
+                ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),                
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
+                ObjectTypes.Texture2D => new UnrealObject<UTexture2D>(),
                 ObjectTypes.Component => new UnrealObject<UComponent>(),
                 ObjectTypes.Const => new UnrealObject<UConst>(),
                 ObjectTypes.Enum => new UnrealObject<UEnum>(),

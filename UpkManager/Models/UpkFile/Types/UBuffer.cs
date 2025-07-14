@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UpkManager.Helpers;
-using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Models.UpkFile.Compression;
 using UpkManager.Models.UpkFile.Properties;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Types
 {
@@ -77,6 +78,20 @@ namespace UpkManager.Models.UpkFile.Types
         {
             DataOffset = Reader.CurrentOffset;
             DataSize = Reader.Remaining;
+        }
+
+        public byte[] ReadBulkData()
+        {
+            var bulkData = new UnrealCompressedChunkBulkData();
+            bulkData.ReadCompressedChunk(Reader);
+            var reader = Task.Run(() => bulkData.DecompressChunk(0)).Result;
+            return reader?.GetBytes();
+        }
+
+        public Guid ReadGuid()
+        {
+            byte[] bytes = Reader.ReadBytes(16);
+            return new Guid(bytes);
         }
     }
 }
