@@ -224,26 +224,30 @@ namespace UpkManager.Models.UpkFile.Tables
                     PropertyTypes.StructProperty => new UnrealObject<UStructProperty>(),
                     PropertyTypes.StrProperty => new UnrealObject<UStrProperty>(),
                     PropertyTypes.ArrayProperty => new UnrealObject<UArrayProperty>(),
+                    PropertyTypes.MapProperty => new UnrealObject<UMapProperty>(),
                     _ => new UnrealObject<UObject>(),
                 };
             }
 
             Enum.TryParse(className, true, out ObjectTypes type);
             
-            if (type == ObjectTypes.Unknown && ComponentRegistry.HasComponent(className))
+            if (type == ObjectTypes.Unknown && ComponentRegistry.HasComponent(className) && !ObjectNameIndex.Name.StartsWith("Default__"))
                 type = ObjectTypes.Component;
 
             return type switch
             {
- /*               ObjectTypes.ArchetypeObjectReference => new UnrealObjectArchetypeBase(),
-                ObjectTypes.ObjectRedirector => new UnrealObjectObjectRedirector(),
+ /*             ObjectTypes.ArchetypeObjectReference => new UnrealObjectArchetypeBase(),                
                 ObjectTypes.ShadowMapTexture2D => new UnrealObjectShadowMapTexture2D(),
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),                
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
                 ObjectTypes.Texture2D => new UnrealObject<UTexture2D>(),
+
+                ObjectTypes.ObjectRedirector => new UnrealObject<UObjectRedirector>(),
                 ObjectTypes.Component => new UnrealObject<UComponent>(),
                 ObjectTypes.Const => new UnrealObject<UConst>(),
                 ObjectTypes.Enum => new UnrealObject<UEnum>(),
+                ObjectTypes.State => new UnrealObject<UState>(),
+                ObjectTypes.Function => new UnrealObject<UFunction>(),
                 ObjectTypes.ScriptStruct => new UnrealObject<UScriptStruct>(),
                 _ => new UnrealObject<UObject>(),
             };

@@ -30,6 +30,7 @@ namespace UpkManager.Constants
         RotatorProperty,
 
         BoxProperty,
+        MapProperty,
     }
 
 }

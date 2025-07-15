@@ -49,8 +49,6 @@ namespace UpkManager.Models.UpkFile.Engine
             CachedFlashMipData = buffer.ReadBulkData();
 
             CachedETCMips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
-
-            buffer.SetDataOffset();
         }
 
         private void SetMipsFormat()

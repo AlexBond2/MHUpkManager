@@ -13,8 +13,10 @@ namespace UpkManager.Constants
         TextureMovie,
         Enum,
         Const,
+        State,
         ScriptStruct,
-        Component
+        Component,
+        Function
     }
 
 }

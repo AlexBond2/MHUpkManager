@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using UpkManager.Helpers;
@@ -38,6 +39,8 @@ namespace UpkManager.Models.UpkFile.Objects
         {
             Buffer = new UBuffer(reader, header);
             UnrealType.ReadBuffer(Buffer);
+            if (UnrealType.GetType().IsSubclassOf(typeof(UObject)))
+                Buffer.SetDataOffset();
             return Task.CompletedTask;
         }
 

@@ -37,7 +37,14 @@ namespace UpkManager.Models.UpkFile.Classes
 
     public class UByteProperty : UProperty
     {
-        public override PropertyTypes PropertyType => PropertyTypes.ByteProperty;
+        [TreeNodeField("UEnum")]
+        public UnrealNameTableIndex Enum { get; private set; } // UEnum
+        public override PropertyTypes PropertyType => PropertyTypes.ByteProperty; 
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            Enum = buffer.ReadObject();
+        }
     }
 
     public class UBoolProperty : UProperty
@@ -57,22 +64,43 @@ namespace UpkManager.Models.UpkFile.Classes
 
     public class UObjectProperty : UProperty
     {
+        [TreeNodeField("UObject")]
+        public UnrealNameTableIndex Object { get; private set; } // UObject
         public override PropertyTypes PropertyType => PropertyTypes.ObjectProperty;
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            Object = buffer.ReadObject();
+        }
     }
 
-    public class UComponentProperty : UProperty
+    public class UComponentProperty : UObjectProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.ComponentProperty;
     }
 
     public class UInterfaceProperty : UProperty
     {
+        [TreeNodeField("UClass")]
+        public UnrealNameTableIndex InterfaceClass { get; private set; } // UClass
         public override PropertyTypes PropertyType => PropertyTypes.InterfaceProperty;
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            InterfaceClass = buffer.ReadObject();
+        }
     }
 
-    public class UClassProperty : UProperty
+    public class UClassProperty : UObjectProperty
     {
-        public override PropertyTypes PropertyType => PropertyTypes.ClassProperty;
+        [TreeNodeField("UClass")]
+        public UnrealNameTableIndex MetaClass { get; private set; } // UClass
+        public override PropertyTypes PropertyType => PropertyTypes.ClassProperty; 
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            MetaClass = buffer.ReadObject();
+        }
     }
 
     public class UNameProperty : UProperty
@@ -82,7 +110,30 @@ namespace UpkManager.Models.UpkFile.Classes
 
     public class UStructProperty : UProperty
     {
+        [TreeNodeField("UStruct")]
+        public UnrealNameTableIndex Struct { get; private set; } // UStruct
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            Struct = buffer.ReadObject();
+        }
+    }
+
+    public class UMapProperty : UProperty
+    {
+        [TreeNodeField("UProperty")]
+        public UnrealNameTableIndex Key { get; private set; } // UProperty
+
+        [TreeNodeField("UProperty")]
+        public UnrealNameTableIndex Value { get; private set; } // UProperty
+        public override PropertyTypes PropertyType => PropertyTypes.MapProperty;
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            Key = buffer.ReadObject();
+            Value = buffer.ReadObject();
+        }
     }
 
     public class UStrProperty : UProperty
@@ -92,7 +143,15 @@ namespace UpkManager.Models.UpkFile.Classes
 
     public class UArrayProperty : UProperty
     {
+        [TreeNodeField("UProperty")]
+        public UnrealNameTableIndex Inner { get; private set; } // UProperty
         public override PropertyTypes PropertyType => PropertyTypes.ArrayProperty;
+
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            Inner = buffer.ReadObject();
+        }
     }
 
     [Flags]
