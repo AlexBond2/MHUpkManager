@@ -241,6 +241,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),                
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
                 ObjectTypes.Texture2D => new UnrealObject<UTexture2D>(),
+                ObjectTypes.LightMapTexture2D => new UnrealObject<ULightMapTexture2D>(),
 
                 ObjectTypes.ObjectRedirector => new UnrealObject<UObjectRedirector>(),
                 ObjectTypes.Component => new UnrealObject<UComponent>(),

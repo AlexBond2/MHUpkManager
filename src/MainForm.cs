@@ -325,7 +325,7 @@ namespace MHUpkManager
                 viewDataInHEXMenuItem.Enabled = true;
             }
 
-            if (uObject is UnrealObject<UTexture2D>) viewTextureMenuItem.Enabled = true;
+            if (uObject.UObject is UTexture2D) viewTextureMenuItem.Enabled = true;
 
             ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();
@@ -460,16 +460,12 @@ namespace MHUpkManager
 
         private void openTextureView(string name, UnrealObjectBase unrealObject)
         {
-            if (unrealObject is UnrealObject<UTexture2D> textureObject)
+            if (unrealObject is IUnrealObject uObject && uObject.UObject is UTexture2D data)
             {
-                UTexture2D data = textureObject.UnrealType;
-                if (data == null) return;
-                using (var textureViewForm = new TextureViewForm())
-                {
-                    textureViewForm.SetTitle(name);
-                    textureViewForm.SetTextureObject(data);
-                    textureViewForm.ShowDialog();
-                }
+                using var textureViewForm = new TextureViewForm();
+                textureViewForm.SetTitle(name);
+                textureViewForm.SetTextureObject(data);
+                textureViewForm.ShowDialog();
             }
         }
     }

@@ -14,12 +14,14 @@ namespace UpkManager.Models.UpkFile.Objects
     {
         List<VirtualNode> FieldNodes { get; }
         public UBuffer Buffer { get; }
+        object UObject { get; }
     }
 
     public class UnrealObject<T> : UnrealObjectBase, IUnrealObject where T : UObject, new()
     {
         protected List<VirtualNode> classNodes;
         public T UnrealType { get; set; }
+        public object UObject => UnrealType;
         public UBuffer Buffer { get; set; }
 
         public List<VirtualNode> FieldNodes => GetFieldNodes();

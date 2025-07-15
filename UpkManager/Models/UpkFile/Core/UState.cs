@@ -22,7 +22,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public ushort LabelTableOffset { get; private set; }
 
         [TreeNodeField("UStateFlags")]
-        public uint StateFlags { get; private set; } // UStateFlags 
+        public UStateFlags StateFlags { get; private set; } // UStateFlags 
 
         [TreeNodeField("UMap<UName, UFunction>")]
         public UMap<UName, UnrealNameTableIndex> FuncMap { get; private set; } // UMap<UName, UFunction>
@@ -33,7 +33,7 @@ namespace UpkManager.Models.UpkFile.Classes
 
             ProbeMask = buffer.Reader.ReadUInt32();
             LabelTableOffset = buffer.Reader.ReadUInt16();
-            StateFlags = buffer.Reader.ReadUInt32();
+            StateFlags = (UStateFlags)buffer.Reader.ReadUInt32();
             FuncMap = buffer.ReadMap();
         }
     }
