@@ -1,66 +1,26 @@
-﻿using System.Collections.Generic;
-using System.Text.Json;
-using System.IO;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-    public class CustomCoreFieldJson
+    public class CoreRegistry
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
-    }
+        private readonly Dictionary<string, Type> _types;
+        public static CoreRegistry Instance { get; } = new CoreRegistry();
 
-    public class CustomCoreJson
-    {
-        public string Name { get; set; }
-        public List<CustomCoreFieldJson> Fields { get; set; }
-        public string Format { get; set; }
-    }
-
-    public static class CoreRegistry
-    {
-        private static Dictionary<string, CustomCoreJson> _structs;
-
-        public static string LoadFromJson(string jsonPath)
+        private CoreRegistry()
         {
-            string json = File.ReadAllText(jsonPath);
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-            List<CustomCoreJson> loadedStructs;
-            try
-            {
-                loadedStructs = JsonSerializer.Deserialize<List<CustomCoreJson>>(json, options);
-            }
-            catch (Exception ex)
-            {
-                return $"Failed to deserialize JSON: {ex.Message}";
-            }
-
-            if (loadedStructs == null)
-                return "No structs found in JSON.";
-
-            var errors = new List<string>();
-            var tempDict = new Dictionary<string, CustomCoreJson>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var csj in loadedStructs)
-                tempDict[csj.Name] = csj;
-
-            _structs = tempDict;
-
-            if (errors.Count > 0)
-                return "Warning: " + string.Join("; ", errors);
-
-            return string.Empty;
+            _types = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(x => x.GetTypes())
+                .Where(t => typeof(IAtomicStruct).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                .ToDictionary(t => t.Name, t => t, StringComparer.OrdinalIgnoreCase);
         }
 
-        public static bool TryGetProperty(string name, out CustomCoreJson definition)
+        public bool TryGetProperty(string name, out Type definition)
         {
-            return _structs.TryGetValue(name, out definition);
+            return _types.TryGetValue(name, out definition);
         }
     }
 }

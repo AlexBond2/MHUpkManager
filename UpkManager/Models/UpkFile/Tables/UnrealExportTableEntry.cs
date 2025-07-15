@@ -240,8 +240,11 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.ShadowMapTexture2D => new UnrealObjectShadowMapTexture2D(),
                 ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),                
                 ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
+                ObjectTypes.Material => new UnrealObject<UMaterial>(),
+                ObjectTypes.MaterialInstance => new UnrealObject<UMaterialInstance>(),
                 ObjectTypes.Texture2D => new UnrealObject<UTexture2D>(),
                 ObjectTypes.LightMapTexture2D => new UnrealObject<ULightMapTexture2D>(),
+                ObjectTypes.AnimSequence => new UnrealObject<UAnimSequence>(),
 
                 ObjectTypes.ObjectRedirector => new UnrealObject<UObjectRedirector>(),
                 ObjectTypes.Component => new UnrealObject<UComponent>(),

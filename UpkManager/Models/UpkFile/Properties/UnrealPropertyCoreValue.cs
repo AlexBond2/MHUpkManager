@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Text.RegularExpressions;
-
-using UpkManager.Helpers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UpkManager.Constants;
+using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Core;
 
 namespace UpkManager.Models.UpkFile.Properties
@@ -12,15 +12,14 @@ namespace UpkManager.Models.UpkFile.Properties
     {
         public static UnrealPropertyValueBase Create(string type)
         {
-            if (CoreRegistry.TryGetProperty(type, out var prop))
+            if (CoreRegistry.Instance.TryGetProperty(type, out var prop))
                 return new UnrealPropertyCoreValue(prop);
 
-            return type.ToLower() switch
+            return type switch
             {
-                "int" => new UnrealPropertyIntValue(),
-                "angle" => new UnrealPropertyIntValue(),
-                "bool" => new UnrealPropertyBoolValue(),
-                "float" => new UnrealPropertyFloatValue(),
+                "Int32" => new UnrealPropertyIntValue(),
+                "Boolean" => new UnrealPropertyBoolValue(),
+                "Single" => new UnrealPropertyFloatValue(),
                 _ => new UnrealPropertyValueBase()
             };
         }
@@ -29,19 +28,22 @@ namespace UpkManager.Models.UpkFile.Properties
     public class UnrealPropertyCoreValue : UnrealPropertyValueBase
     {
         public string StructName { get; }
-        public CustomCoreJson Definition { get; private set; }
+        public IAtomicStruct Atomic { get; private set; }
         public List<(string Name, UnrealPropertyValueBase Value)> Fields { get; } = [];
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
 
-        public UnrealPropertyCoreValue(CustomCoreJson core)
+        public UnrealPropertyCoreValue(Type structType)
         {
-            StructName = core.Name;
-            Definition = core;
+            StructName = structType.Name;
+            Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
 
-            foreach (var field in core.Fields)
+            var props = structType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetCustomAttribute<StructFieldAttribute>() != null);
+
+            foreach (var prop in props)
             {
-                var fieldValue = UnrealPropertyFactory.Create(field.Type);
-                Fields.Add((field.Name, fieldValue));
+                var unrealValue = UnrealPropertyFactory.Create(prop.PropertyType.Name);
+                Fields.Add((prop.Name, unrealValue));
             }
         }
 
@@ -49,80 +51,50 @@ namespace UpkManager.Models.UpkFile.Properties
         {
             get
             {
-                if (string.IsNullOrEmpty(Definition?.Format))
-                    return StructName;
+                if (string.IsNullOrEmpty(Atomic.Format)) return StructName;
 
-                string result = Definition.Format;
-
-                for (int i = 0; i < Definition.Fields.Count; i++)
-                {
-                    var fieldDef = Definition.Fields[i];
-                    var fieldType = fieldDef.Type.ToLower();
-                    var fieldValue = Fields[i].Value;
-
-                    result = ReplaceWithObject(result, fieldDef.Name, fieldType, fieldValue);
-                }
-
-                return result;
+                SetValuesToStruct();
+                return Atomic.Format;
             }
         }
 
-        private static string ReplaceWithObject(string format, string fieldName, string fieldType, UnrealPropertyValueBase value)
+        private void SetValuesToStruct()
         {
-            var regex = new Regex(@"\{" + fieldName + @"(?::(F\d+|X|x))?\}");
+            var structType = Atomic.GetType();
 
-            return regex.Replace(format, match =>
+            foreach (var (name, value) in Fields)
             {
-                string formatSpecifier = match.Groups[1].Value;
-                switch (fieldType)
+                var prop = structType.GetProperty(name);
+                if (prop == null) continue;
+
+                object? val = value switch
                 {
-                    case "angle":
-                        if (value is UnrealPropertyIntValue intVal)
-                        {
-                            float angle = (int)intVal.PropertyValue / 32768.0f * 180.0f;
-                            return FormatFloat(angle, formatSpecifier);
-                        }
-                        break;
+                    UnrealPropertyIntValue intVal => intVal.PropertyValue,
+                    UnrealPropertyFloatValue floatVal => floatVal.PropertyValue,
+                    UnrealPropertyBoolValue boolVal => boolVal.PropertyValue,
+                    UnrealPropertyCoreValue coreVal => coreVal.Atomic,
+                    _ => null
+                };
 
-                    case "float":
-                        if (value is UnrealPropertyFloatValue floatVal)
-                            return FormatFloat((float)floatVal.PropertyValue, formatSpecifier);
-                        break;
-
-                    case "int":
-                        if (value is UnrealPropertyIntValue intVal2)
-                            return FormatInt((int)intVal2.PropertyValue, formatSpecifier);
-                        break;
-
-                    default:
-                        return value.PropertyString;
-                }
-
-                return "null";
-            });
-        }
-
-        private static string FormatFloat(float value, string format)
-        {
-            if (string.IsNullOrEmpty(format)) return value.ToString(CultureInfo.InvariantCulture);
-            return value.ToString(format, CultureInfo.InvariantCulture);
-        }
-
-        private static string FormatInt(int value, string format)
-        {
-            if (string.IsNullOrEmpty(format)) return value.ToString();
-            return value.ToString(format);
+                if (val != null)
+                    prop.SetValue(Atomic, val);
+            }
         }
 
         public override void BuildVirtualTree(VirtualNode valueTree)
         {
-            if (Definition.Format is not null)
+            if (!string.IsNullOrEmpty(Atomic.Format))
                 base.BuildVirtualTree(valueTree);
             else
-                for (int i = 0; i < Definition.Fields.Count; i++)
+                for (int i = 0; i < Fields.Count; i++)
                 {
-                    var node = new VirtualNode($"{Fields[i].Name} ::{Definition.Fields[i].Type}");
-                    Fields[i].Value.BuildVirtualTree(node);
+                    var (name, value) = Fields[i];
+
+                    var prop = Atomic.GetType().GetProperty(name);
+                    string typeName = prop?.PropertyType.Name ?? "Unknown";
+
+                    var node = new VirtualNode($"{name} ::{typeName}");
+                    value.BuildVirtualTree(node);
                     valueTree.Children.Add(node);
                 }
         }

@@ -55,20 +55,6 @@ namespace MHUpkManager
                     WarningBox($"Warning while loading Engine types from {EngineJson}:\n\n{warning}");
             }
 
-            path = Path.Combine("Data", CoreJson);
-            if (!File.Exists(path))
-            {
-                WarningBox($"File with Engine types not found. {path}");
-                return;
-            }
-            else
-            {
-                warning = CoreRegistry.LoadFromJson(path);
-
-                if (!string.IsNullOrEmpty(warning))
-                    WarningBox($"Warning while loading Core types from {CoreJson}:\n\n{warning}");
-            }
-
             path = Path.Combine("Data", ComponentsTxt);
             if (!File.Exists(path))
                 WarningBox($"File with component list not found. {path}");

@@ -62,7 +62,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 StructValue = new UnrealPropertyEngineValue(type);
                 StructValue.ReadPropertyValue(reader, size, header, property);                
             } 
-            else if (CoreRegistry.TryGetProperty(structType, out var prop))
+            else if (CoreRegistry.Instance.TryGetProperty(structType, out var prop))
             {
                 StructValue = new UnrealPropertyCoreValue(prop);
                 StructValue.ReadPropertyValue(reader, size, header, property);
