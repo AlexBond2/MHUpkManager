@@ -53,10 +53,17 @@ namespace UpkManager.Models.UpkFile.Classes
                     fieldNode.Text += "[]";
                     var listNode = new VirtualNode();
                     int count = 0;
-                    foreach (var item in enumerable)
+                    if (enumerable is byte[] data)
                     {
-                        listNode.Children.Add(new($"[{count}] {item}"));
-                        count++;
+                        count = data.Length;
+                    }
+                    else
+                    {
+                        foreach (var item in enumerable)
+                        {
+                            listNode.Children.Add(new($"[{count}] {item}"));
+                            count++;
+                        }
                     }
                     listNode.Text = $"{typeName}[{count}]";
                     fieldNode.Children.Add(listNode);

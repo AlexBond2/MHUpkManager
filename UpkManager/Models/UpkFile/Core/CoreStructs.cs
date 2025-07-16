@@ -1,4 +1,5 @@
 ﻿using System;
+using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
@@ -24,6 +25,47 @@ namespace UpkManager.Models.UpkFile.Core
         public float Z { get; set; }
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}]";
+
+        public static Vector ReadData(UBuffer buffer)
+        {
+            var vector = new Vector
+            {
+                X = buffer.Reader.ReadSingle(),
+                Y = buffer.Reader.ReadSingle(),
+                Z = buffer.Reader.ReadSingle()
+            };
+            return vector;
+        }
+    }
+
+    public class Quat : IAtomicStruct
+    {
+
+        [StructField]
+        public float X { get; set; }
+
+        [StructField]
+        public float Y { get; set; }
+
+        [StructField]
+        public float Z { get; set; }
+
+        [StructField]
+        public float W { get; set; }
+
+        public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}; {W:F4}]";
+
+        public static Quat ReadData(UBuffer buffer)
+        {
+            var quad = new Quat
+            {
+                X = buffer.Reader.ReadSingle(),
+                Y = buffer.Reader.ReadSingle(),
+                Z = buffer.Reader.ReadSingle(),
+                W = buffer.Reader.ReadSingle()
+            };
+            return quad;
+        }
     }
 
     public class Guid : IAtomicStruct

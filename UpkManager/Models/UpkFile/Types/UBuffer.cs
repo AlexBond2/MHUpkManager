@@ -93,5 +93,11 @@ namespace UpkManager.Models.UpkFile.Types
             byte[] bytes = Reader.ReadBytes(16);
             return new Guid(bytes);
         }
+
+        public byte[] ReadBytes()
+        {
+            int size = Reader.ReadInt32();
+            return Reader.ReadBytes(size);
+        }
     }
 }

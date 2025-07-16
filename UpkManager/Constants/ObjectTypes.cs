@@ -24,7 +24,8 @@ namespace UpkManager.Constants
 
         Material,
         MaterialInstance,
-        AnimSequence
+        AnimSequence,
+        RB_BodySetup
     }
 
 }

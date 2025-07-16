@@ -245,6 +245,7 @@ namespace UpkManager.Models.UpkFile.Tables
                 ObjectTypes.Texture2D => new UnrealObject<UTexture2D>(),
                 ObjectTypes.LightMapTexture2D => new UnrealObject<ULightMapTexture2D>(),
                 ObjectTypes.AnimSequence => new UnrealObject<UAnimSequence>(),
+                ObjectTypes.RB_BodySetup => new UnrealObject<URB_BodySetup>(),
 
                 ObjectTypes.ObjectRedirector => new UnrealObject<UObjectRedirector>(),
                 ObjectTypes.Component => new UnrealObject<UComponent>(),
