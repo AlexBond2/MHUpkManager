@@ -8,10 +8,15 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Classes
 {
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property, Inherited = true)]
     public class TreeNodeFieldAttribute(string typeName = null) : Attribute
     {
         public string TypeName { get; } = typeName;
+    }
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = true)]
+    public class PropertyFieldAttribute() : Attribute
+    {
     }
 
     public class UObject// : UnrealUpkBuilderBase
@@ -88,6 +93,16 @@ namespace UpkManager.Models.UpkFile.Classes
             }
         }
 
+        private IEnumerable<PropertyInfo> GetPropertyFields(UObject obj)
+        {
+            Type type = obj.GetType();
+            foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (field.IsDefined(typeof(PropertyFieldAttribute)) && field.CanWrite)
+                    yield return field;
+            }
+        }
+
         private string GetTypeName(Type type)
         {
             if (type.IsGenericType)
@@ -103,7 +118,36 @@ namespace UpkManager.Models.UpkFile.Classes
         {
             NetIndex = buffer.Reader.ReadInt32();
             if (!buffer.IsAbstractClass)
+            {
                 ReadProperties(buffer);
+                SetProperties();
+            }
+        }
+
+        private void SetProperties()
+        {
+            foreach (var prop in GetPropertyFields(this))
+            {
+                object value = GetPropertyObjectValue(prop.Name);
+                if (value == null) continue;
+                var targetType = prop.PropertyType;
+
+                if (targetType.IsEnum && value is string str)
+                {
+                    if (Enum.TryParse(prop.PropertyType, str, ignoreCase: true, out var enumValue))
+                        prop.SetValue(this, enumValue);
+                }
+                else if (targetType.IsInstanceOfType(value))
+                {
+                    prop.SetValue(this, value);
+                }
+                else
+                {
+                    var converted = Convert.ChangeType(value, targetType);
+                    if (converted != null)
+                        prop.SetValue(this, converted);
+                }
+            }
         }
 
         private void ReadProperties(UBuffer buffer)

@@ -6,10 +6,10 @@ namespace UpkManager.Models.UpkFile.Classes
     public class UComponent : UObject
     {
         [TreeNodeField("UClass")]
-        public UnrealNameTableIndex TemplateOwnerClass; // UClass
+        public UnrealNameTableIndex TemplateOwnerClass { get; set; } // UClass
 
         [TreeNodeField]
-        public UName TemplateName;
+        public UName TemplateName { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {

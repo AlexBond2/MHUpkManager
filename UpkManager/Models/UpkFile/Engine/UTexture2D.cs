@@ -1,17 +1,24 @@
-﻿using DDSLib;
-using DDSLib.Constants;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+
+using DDSLib;
+using DDSLib.Constants;
+
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Objects.Textures;
-using UpkManager.Models.UpkFile.Properties;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
     public class UTexture2D : UTexture
     {
+        [PropertyField]
+        public string TextureFileCacheName { get; set; }
+
+        [PropertyField]
+        public EPixelFormat Format { get; set; }
+
         [TreeNodeField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> Mips { get; set; }
 
@@ -33,13 +40,9 @@ namespace UpkManager.Models.UpkFile.Engine
         [TreeNodeField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> CachedETCMips { get; set; }
 
-        // Properties
-        public string TextureFileCacheName;
-
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
-            SetProperties();
 
             Mips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
 
@@ -55,16 +58,9 @@ namespace UpkManager.Models.UpkFile.Engine
             CachedETCMips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
         }
 
-        private void SetProperties()
-        {
-            TextureFileCacheName = (string)GetPropertyObjectValue("TextureFileCacheName");
-        }
-
         private void SetMipsFormat()
         {
-            EPixelFormat? format = GetPropertyEnum<EPixelFormat>("Format");
-            if (format == null) return;
-            var imageFormat = ParseFileFormat(format.Value);
+            var imageFormat = ParseFileFormat(Format);
             foreach (var mip in Mips)
                 mip.OverrideFormat = imageFormat;
         }
