@@ -215,17 +215,6 @@ namespace DDSLib
 
         #region Public Methods
 
-        public static FileFormat ParseFileFormat(string format)
-        {
-            if (format.ToLowerInvariant().Contains("dxt1")) return FileFormat.DXT1;
-            if (format.ToLowerInvariant().Contains("dxt3")) return FileFormat.DXT3;
-            if (format.ToLowerInvariant().Contains("dxt5")) return FileFormat.DXT5;
-            if (format.ToLowerInvariant().Contains("a8r8g8b8")) return FileFormat.A8R8G8B8;
-            if (format.ToLowerInvariant().Contains("g8")) return FileFormat.G8;
-
-            throw new FormatException("Not a known DDS format.");
-        }
-
         public static string BuildFileFormat(FileFormat format)
         {
             if (format == FileFormat.A8R8G8B8) return "PF_A8R8G8B8";

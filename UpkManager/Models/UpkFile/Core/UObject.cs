@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
-using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Properties;
 using UpkManager.Models.UpkFile.Types;
 
@@ -125,9 +123,42 @@ namespace UpkManager.Models.UpkFile.Classes
             buffer.ResultProperty = result;
         }
 
-        public List<UnrealProperty> GetProperty(string name)
+        public UnrealProperty GetProperty(string name)
         {
-            return [.. Properties.Where(p => p.NameIndex.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))];
+            return Properties.FirstOrDefault(p => p.NameIndex.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public UnrealPropertyValueBase GetPropertyValue(string name)
+        {
+            return GetProperty(name)?.Value;
+        }
+
+        public object GetPropertyObjectValue(string name)
+        {
+            return GetPropertyValue(name) switch
+            {
+                UnrealPropertyByteValue b => b.EnumValue,
+                UnrealPropertyIntValue i => i.PropertyValue,
+                UnrealPropertyFloatValue f => f.PropertyValue,
+                UnrealPropertyBoolValue bo => bo.PropertyValue,
+                UnrealPropertyNameValue n => n.PropertyString,
+                UnrealPropertyStringValue s => s.PropertyString,
+                UnrealPropertyStructValue sv => sv.StructValue,
+                UnrealPropertyArrayValue av => av.Array,
+                _ => null
+            };
+        }
+
+        public TEnum? GetPropertyEnum<TEnum>(string name) where TEnum : struct, Enum
+        {
+            if (GetPropertyValue(name) is UnrealPropertyByteValue byteValue)
+            {
+                string enumValueStr = byteValue.EnumValue;
+                if (!string.IsNullOrEmpty(enumValueStr) && Enum.TryParse(enumValueStr, true, out TEnum parsed))
+                    return parsed;
+            }
+
+            return null;
         }
 
         /*

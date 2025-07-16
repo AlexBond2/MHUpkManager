@@ -33,9 +33,13 @@ namespace UpkManager.Models.UpkFile.Engine
         [TreeNodeField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> CachedETCMips { get; set; }
 
+        // Properties
+        public string TextureFileCacheName;
+
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
+            SetProperties();
 
             Mips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
 
@@ -51,13 +55,31 @@ namespace UpkManager.Models.UpkFile.Engine
             CachedETCMips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
         }
 
+        private void SetProperties()
+        {
+            TextureFileCacheName = (string)GetPropertyObjectValue("TextureFileCacheName");
+        }
+
         private void SetMipsFormat()
         {
-            if (GetProperty("Format").FirstOrDefault()?.Value is not UnrealPropertyByteValue formatProp) return;
-            string format = formatProp.PropertyString;
-            var imageFormat = DdsPixelFormat.ParseFileFormat(format);
+            EPixelFormat? format = GetPropertyEnum<EPixelFormat>("Format");
+            if (format == null) return;
+            var imageFormat = ParseFileFormat(format.Value);
             foreach (var mip in Mips)
                 mip.OverrideFormat = imageFormat;
+        }
+
+        public static FileFormat ParseFileFormat(EPixelFormat format)
+        {
+            return format switch
+            {
+                EPixelFormat.PF_DXT1 => FileFormat.DXT1,
+                EPixelFormat.PF_DXT3 => FileFormat.DXT3,
+                EPixelFormat.PF_DXT5 => FileFormat.DXT5,
+                EPixelFormat.PF_A8R8G8B8 => FileFormat.A8R8G8B8,
+                EPixelFormat.PF_G8 => FileFormat.G8,
+                _ => throw new ArgumentOutOfRangeException(nameof(format), format, "Unsupported DDS format")
+            };
         }
 
         public Stream GetObjectStream()
@@ -119,12 +141,6 @@ namespace UpkManager.Models.UpkFile.Engine
         {
             FileFormat format;
             return buildDdsImage(mipMapIndex, out format);
-        }
-
-        public string GetTextureFileCacheName()
-        {
-            if (GetProperty("TextureFileCacheName").FirstOrDefault()?.Value is not UnrealPropertyByteValue formatProp) return "None";
-            return formatProp.PropertyString;
         }
     }
 }

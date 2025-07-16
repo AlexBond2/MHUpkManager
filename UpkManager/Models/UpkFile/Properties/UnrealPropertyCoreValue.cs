@@ -67,7 +67,7 @@ namespace UpkManager.Models.UpkFile.Properties
                 var prop = structType.GetProperty(name);
                 if (prop == null) continue;
 
-                object? val = value switch
+                object val = value switch
                 {
                     UnrealPropertyIntValue intVal => intVal.PropertyValue,
                     UnrealPropertyFloatValue floatVal => floatVal.PropertyValue,

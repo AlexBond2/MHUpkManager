@@ -12,14 +12,6 @@ namespace UpkManager.Models.UpkFile.Properties
 {
     public sealed class UnrealPropertyStructValue : UnrealPropertyValueBase
     {
-        public enum UStructTypes
-        {
-            Vector,
-            Rotator,
-            Guid,
-            Box
-        }
-
         #region Constructor
 
         public UnrealPropertyStructValue()

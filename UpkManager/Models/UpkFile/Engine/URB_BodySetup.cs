@@ -3,12 +3,12 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
-    public class KMeshProps : UObject
+    public class UKMeshProps : UObject
     {
 
     }
 
-    public class URB_BodySetup : KMeshProps
+    public class URB_BodySetup : UKMeshProps
     {
         [TreeNodeField("KCachedConvexData")]
         public UArray<FKCachedConvexData> PreCachedPhysData { get; set; }

@@ -23,6 +23,7 @@ namespace UpkManager.Models.UpkFile.Properties
         public UnrealNameTableIndex EnumNameIndex { get; set; } = new();
         public UnrealNameTableIndex EnumValueIndex { get; set; } = new();
         public override PropertyTypes PropertyType => PropertyTypes.ByteProperty;
+        public string EnumValue => EnumValueIndex?.Name;
 
         public override object PropertyValue => byteValue ?? base.PropertyValue;
 
