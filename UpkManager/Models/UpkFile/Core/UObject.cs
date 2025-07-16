@@ -56,6 +56,7 @@ namespace UpkManager.Models.UpkFile.Classes
                     if (enumerable is byte[] data)
                     {
                         count = data.Length;
+                        listNode.Tag = data;
                     }
                     else
                     {

@@ -6,12 +6,14 @@ namespace UpkManager.Models.UpkFile.Properties
     {
         public string Text { get; set; }
         public List<VirtualNode> Children { get; set; } = [];
+        public object Tag {  get; set; }
 
         public VirtualNode() { }
 
         public VirtualNode(string text)
         {
             Text = text;
+            Tag = null;
         }
     }
 }

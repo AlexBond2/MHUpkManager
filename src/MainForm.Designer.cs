@@ -63,6 +63,8 @@
             toolStripMenuItem1 = new ToolStripSeparator();
             viewObjectInHEXMenuItem = new ToolStripMenuItem();
             viewDataInHEXMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripSeparator();
+            viewTextureMenuItem = new ToolStripMenuItem();
             namePage = new TabPage();
             nameGridView = new DataGridView();
             nameTableIndex = new DataGridViewTextBoxColumn();
@@ -84,8 +86,6 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
-            toolStripMenuItem2 = new ToolStripSeparator();
-            viewTextureMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -401,6 +401,7 @@
             propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem });
             propertiesMenu.Name = "propertiesMenu";
             propertiesMenu.Size = new Size(185, 126);
+            propertiesMenu.Opening += propertiesMenu_Opening;
             // 
             // objectNameClassMenuItem
             // 
@@ -429,6 +430,19 @@
             viewDataInHEXMenuItem.Size = new Size(184, 22);
             viewDataInHEXMenuItem.Text = "View Data in HEX...";
             viewDataInHEXMenuItem.Click += viewDataInHEXMenuItem_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(181, 6);
+            // 
+            // viewTextureMenuItem
+            // 
+            viewTextureMenuItem.Enabled = false;
+            viewTextureMenuItem.Name = "viewTextureMenuItem";
+            viewTextureMenuItem.Size = new Size(184, 22);
+            viewTextureMenuItem.Text = "View Texture...";
+            viewTextureMenuItem.Click += viewTextureMenuItem_Click;
             // 
             // namePage
             // 
@@ -652,19 +666,6 @@
             buttonColumn.Text = "...";
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
-            // 
-            // toolStripMenuItem2
-            // 
-            toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new Size(181, 6);
-            // 
-            // viewTextureMenuItem
-            // 
-            viewTextureMenuItem.Enabled = false;
-            viewTextureMenuItem.Name = "viewTextureMenuItem";
-            viewTextureMenuItem.Size = new Size(184, 22);
-            viewTextureMenuItem.Text = "View Texture...";
-            viewTextureMenuItem.Click += viewTextureMenuItem_Click;
             // 
             // MainForm
             // 

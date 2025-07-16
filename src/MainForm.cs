@@ -1,16 +1,15 @@
-using System.Security.Cryptography;
-using System.Reflection;
 using MHUpkManager.Models;
+using System.Reflection;
+using System.Security.Cryptography;
 
-using UpkManager.Models;
-using UpkManager.Extensions;
 using UpkManager.Contracts;
-using UpkManager.Repository;
-using UpkManager.Models.UpkFile.Objects;
-using UpkManager.Models.UpkFile.Tables;
-using UpkManager.Models.UpkFile.Properties;
-using UpkManager.Models.UpkFile.Core;
+using UpkManager.Extensions;
+using UpkManager.Models;
 using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Objects;
+using UpkManager.Models.UpkFile.Properties;
+using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Repository;
 
 namespace MHUpkManager
 {
@@ -257,7 +256,6 @@ namespace MHUpkManager
         private async void objectsTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
             currentObject = e.Node?.Tag;
-            viewDataInHEXMenuItem.Enabled = false;
             viewObjectInHEXMenuItem.Enabled = false;
             viewObjectMenuItem.Enabled = false;
             viewParentMenuItem.Enabled = false;
@@ -307,8 +305,19 @@ namespace MHUpkManager
             var buffer = uObject.Buffer;
             if (!buffer.IsAbstractClass && (buffer.ResultProperty != ResultProperty.None || buffer.DataSize != 0))
             {
-                propertiesView.Nodes.Add(new TreeNode($"Data [{buffer.ResultProperty}][{buffer.DataSize}]"));
-                viewDataInHEXMenuItem.Enabled = true;
+                var dataNode = new TreeNode($"Data [{buffer.ResultProperty}][{buffer.DataSize}]");
+
+                var data = uObject.Buffer.Reader.GetBytes();
+                if (uObject.Buffer.DataOffset >= 0 && uObject.Buffer.DataOffset < data.Length)
+                {
+                    int length = data.Length - uObject.Buffer.DataOffset;
+                    byte[] offsetData = new byte[length];
+                    Array.Copy(data, uObject.Buffer.DataOffset, offsetData, 0, length);
+                    data = offsetData;
+                }
+                dataNode.Tag = data;
+
+                propertiesView.Nodes.Add(dataNode);
             }
 
             if (uObject.UObject is UTexture2D) viewTextureMenuItem.Enabled = true;
@@ -330,6 +339,7 @@ namespace MHUpkManager
         private static TreeNode CreateRealNode(VirtualNode virtualNode)
         {
             var node = new TreeNode(virtualNode.Text);
+            node.Tag = virtualNode.Tag;
             foreach (var child in virtualNode.Children)
                 node.Nodes.Add(CreateRealNode(child));
 
@@ -339,15 +349,30 @@ namespace MHUpkManager
         private void viewObjectInHEXMenuItem_Click(object sender, EventArgs e)
         {
             if (currentObject == null) return;
-            if (currentObject is UnrealExportTableEntry export)
-                openHexView(export.ObjectNameIndex.Name, export.UnrealObject);
+            if (currentObject is UnrealExportTableEntry export && export.UnrealObject is IUnrealObject uObject)
+            {
+                var data = uObject.Buffer.Reader.GetBytes();
+                openHexView(export.ObjectNameIndex.Name, data);
+            }
+        }
+
+        private void propertiesMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            viewDataInHEXMenuItem.Enabled = false;
+
+            if (propertiesView.SelectedNode?.Tag is not byte[] data || data.Length == 0) return;
+
+            viewDataInHEXMenuItem.Enabled = true;
         }
 
         private void viewDataInHEXMenuItem_Click(object sender, EventArgs e)
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-                openHexView(export.ObjectNameIndex.Name, export.UnrealObject, true);
+            {
+                if (propertiesView.SelectedNode.Tag is byte[] data)
+                    openHexView(export.ObjectNameIndex.Name, data);
+            }
         }
 
         private void objectNameClassMenuItem_Click(object sender, EventArgs e)
@@ -356,25 +381,13 @@ namespace MHUpkManager
                 Clipboard.SetText(objectNameClassMenuItem.Text);
         }
 
-        private void openHexView(string name, UnrealObjectBase unrealObject, bool fromOffset = false)
+        private void openHexView(string name, byte[] data)
         {
-            if (unrealObject is IUnrealObject uObject)
-            {
-                using (var hexViewForm = new HexViewForm())
-                {
-                    hexViewForm.SetTitle(name);
-                    var data = uObject.Buffer.Reader.GetBytes();
-                    if (fromOffset && uObject.Buffer.DataOffset >= 0 && uObject.Buffer.DataOffset < data.Length)
-                    {
-                        int length = data.Length - uObject.Buffer.DataOffset;
-                        byte[] offsetData = new byte[length];
-                        Array.Copy(data, uObject.Buffer.DataOffset, offsetData, 0, length);
-                        data = offsetData;
-                    }
-                    hexViewForm.SetHexData(data);
-                    hexViewForm.ShowDialog();
-                }
-            }
+            if (data == null || data.Length == 0) return;
+            using var hexViewForm = new HexViewForm();
+            hexViewForm.SetTitle(name);
+            hexViewForm.SetHexData(data);
+            hexViewForm.ShowDialog();
         }
 
         private void viewParentMenuItem_Click(object sender, EventArgs e)
@@ -441,7 +454,7 @@ namespace MHUpkManager
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-                openTextureView(export.ObjectNameIndex.Name, export.UnrealObject);            
+                openTextureView(export.ObjectNameIndex.Name, export.UnrealObject);
         }
 
         private void openTextureView(string name, UnrealObjectBase unrealObject)
