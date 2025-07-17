@@ -137,16 +137,49 @@ namespace UpkManager.Models.UpkFile.Classes
                     if (Enum.TryParse(prop.PropertyType, str, ignoreCase: true, out var enumValue))
                         prop.SetValue(this, enumValue);
                 }
+                else if (value is object[] objArray && targetType.IsArray)
+                {
+                    var elementType = targetType.GetElementType();
+                    if (elementType != null)
+                    {
+                        Array typedArray = Array.CreateInstance(elementType, objArray.Length);
+                        for (int i = 0; i < objArray.Length; i++)
+                        {
+                            var element = objArray[i];
+                            if (elementType.IsInstanceOfType(element))
+                                typedArray.SetValue(element, i);
+                            else
+                            {
+                                var converted = TryChangeType(element, elementType);
+                                if (converted != null)
+                                    typedArray.SetValue(converted, i);
+                            }
+                        }
+                        prop.SetValue(this, typedArray);
+                    }
+                }
                 else if (targetType.IsInstanceOfType(value))
                 {
                     prop.SetValue(this, value);
                 }
                 else
                 {
-                    var converted = Convert.ChangeType(value, targetType);
+                    var converted = TryChangeType(value, targetType);
                     if (converted != null)
                         prop.SetValue(this, converted);
                 }
+            }
+        }
+
+        private static object TryChangeType(object value, Type targetType)
+        {
+            try
+            {
+                return Convert.ChangeType(value, targetType);
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -179,7 +212,18 @@ namespace UpkManager.Models.UpkFile.Classes
 
         public object GetPropertyObjectValue(string name)
         {
-            return GetPropertyValue(name) switch
+            var value = GetPropertyValue(name);
+            return value != null ? ExtractValue(value) : null;
+        }
+
+        private object[] GetValueArray(UnrealPropertyValueBase[] array)
+        {
+            return [.. array.Select(ExtractValue)];
+        }
+
+        private object ExtractValue(UnrealPropertyValueBase value)
+        {
+            return value switch
             {
                 UnrealPropertyByteValue b => b.EnumValue,
                 UnrealPropertyIntValue i => i.PropertyValue,
@@ -188,7 +232,7 @@ namespace UpkManager.Models.UpkFile.Classes
                 UnrealPropertyNameValue n => n.PropertyString,
                 UnrealPropertyStringValue s => s.PropertyString,
                 UnrealPropertyStructValue sv => sv.StructValue,
-                UnrealPropertyArrayValue av => av.Array,
+                UnrealPropertyArrayValue av => GetValueArray(av.Array),
                 _ => null
             };
         }

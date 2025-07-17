@@ -21,10 +21,7 @@ namespace UpkManager.Helpers
 
         #region Constructor
 
-        private ByteArrayReader()
-        {
-            compression = new LzoCompression();
-        }
+        private ByteArrayReader() { }
 
         #endregion Constructor
 
@@ -35,11 +32,16 @@ namespace UpkManager.Helpers
             return data;
         }
 
+        public void InitCompression() 
+        { 
+            compression ??= new LzoCompression(); 
+        }
+
         public static ByteArrayReader CreateNew(byte[] Data, int Index)
         {
-            ByteArrayReader reader = new ByteArrayReader();
+            var reader = new ByteArrayReader();
 
-            if (Data == null) Data = new byte[0];
+            Data ??= [];
 
             if (Index < 0 || Index > Data.Length) throw new ArgumentOutOfRangeException(nameof(Index), "Index value is outside the bounds of the byte array.");
 
@@ -62,6 +64,14 @@ namespace UpkManager.Helpers
             if (Offset < 0 || Offset > data.Length) throw new ArgumentOutOfRangeException(nameof(Offset), "Index value is outside the bounds of the byte array.");
 
             index = Offset;
+        }
+
+        public void Align(int size)
+        {
+            int alignedIndex = (index + size - 1) / size * size;
+            if (alignedIndex > data.Length)  throw new IndexOutOfRangeException("Align goes past end of buffer.");
+
+            index = alignedIndex;
         }
 
         public void Skip(int Count)
@@ -127,6 +137,7 @@ namespace UpkManager.Helpers
 
         public byte[] Decompress(int UncompressedSize)
         {
+            InitCompression();
             byte[] decompressed = new byte[UncompressedSize];
             compression.Decompress(data, decompressed);
             return decompressed;
@@ -190,7 +201,7 @@ namespace UpkManager.Helpers
 
         public byte[] ReadBytes(int length)
         {
-            if (length == 0) return Array.Empty<byte>();
+            if (length == 0) return [];
 
             if (index + length < 0 || index + length > data.Length)
                 throw new ArgumentOutOfRangeException(nameof(length), "Index + Length is out of the bounds of the byte array.");

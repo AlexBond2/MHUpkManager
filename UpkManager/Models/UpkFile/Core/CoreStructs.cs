@@ -26,6 +26,15 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}]";
 
+        public Vector() { }
+
+        public Vector(float x, float y, float z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
         public static Vector ReadData(UBuffer buffer)
         {
             var vector = new Vector
@@ -40,7 +49,6 @@ namespace UpkManager.Models.UpkFile.Core
 
     public class Quat : IAtomicStruct
     {
-
         [StructField]
         public float X { get; set; }
 
@@ -54,6 +62,15 @@ namespace UpkManager.Models.UpkFile.Core
         public float W { get; set; }
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}; {W:F4}]";
+
+        public Quat() { }
+        public Quat(float x, float y, float z, int w)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
 
         public static Quat ReadData(UBuffer buffer)
         {

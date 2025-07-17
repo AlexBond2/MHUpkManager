@@ -1,16 +1,42 @@
 ﻿using UpkManager.Models.UpkFile.Classes;
-using UpkManager.Models.UpkFile.Types;
 using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
     public class UAnimSequence : UObject
     {
+        [PropertyField]
+        public int NumFrames { get; set; }
+
+        [PropertyField]
+        public AnimationCompressionFormat RotationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_Float96NoW;
+
+        [PropertyField]
+        public AnimationCompressionFormat TranslationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_None;
+
+        [PropertyField]
+        public AnimationKeyFormat KeyEncodingFormat { get; set; }
+
+        [PropertyField]
+        public int[] CompressedTrackOffsets { get; set; }
+
+
         [TreeNodeField("RawAnimSequenceTrack")]
         public UArray<RawAnimSequenceTrack> RawAnimationData { get; set; }
 
         [TreeNodeField("Data")]
         public byte[] CompressedByteStream { get; set; }
+
+
+        [TreeNodeField("TranslationTrack")]
+        public UArray<TranslationTrack> TranslationData { get; set; }
+
+        [TreeNodeField("RotationTrack")]
+        public UArray<RotationTrack> RotationData { get; set; }
+
+        public IAnimationCodec TranslationCodec { get; set; }
+        public IAnimationCodec RotationCodec { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {
@@ -19,6 +45,9 @@ namespace UpkManager.Models.UpkFile.Engine
             RawAnimationData = buffer.ReadArray(RawAnimSequenceTrack.ReadData);
 
             CompressedByteStream = buffer.ReadBytes();
+
+            if (AnimationFormat.SetInterfaceLinks(this))
+                AnimationEncodingCodec.Decompress(this, CompressedByteStream);            
         }
     }
     
@@ -38,24 +67,29 @@ namespace UpkManager.Models.UpkFile.Engine
         }
     }
 
-    public enum AnimationCompressionFormat
+    public class TranslationTrack
     {
-        ACF_None,                       // 0
-        ACF_Float96NoW,                 // 1
-        ACF_Fixed48NoW,                 // 2
-        ACF_IntervalFixed32NoW,         // 3
-        ACF_Fixed32NoW,                 // 4
-        ACF_Float32NoW,                 // 5
-        ACF_Identity,                   // 6
-        ACF_MAX                         // 7
-    };
+        public UArray<Vector> PosKeys { get; set; } = [];
+        public UArray<float> Times { get; set; } = [];
 
-    public enum AnimationKeyFormat
+        public override string ToString()
+        {
+            int count = PosKeys.Count;
+            string data = (count > 0) ? PosKeys[0].Format : "";
+            return $"{data} PosKeys[{count}] Times[{Times.Count}]";
+        }
+    }
+
+    public class RotationTrack
     {
-        AKF_ConstantKeyLerp,            // 0
-        AKF_VariableKeyLerp,            // 1
-        AKF_PerTrackCompression,        // 2
-        AKF_MAX                         // 3
-    };
+        public UArray<Quat> RotKeys { get; set; } = [];
+        public UArray<float> Times { get; set; } = [];
 
+        public override string ToString()
+        {
+            int count = RotKeys.Count;
+            string data = (count > 0) ? RotKeys[0].Format : "";
+            return $"{data} RotKeys[{RotKeys.Count}] Times[{Times.Count}]";
+        }
+    }
 }
