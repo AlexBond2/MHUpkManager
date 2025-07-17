@@ -3,6 +3,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Classes
 {
+    [UnrealClass("Component")]
     public class UComponent : UObject
     {
         [TreeNodeField("UClass")]

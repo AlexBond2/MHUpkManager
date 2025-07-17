@@ -19,6 +19,13 @@ namespace UpkManager.Models.UpkFile.Classes
     {
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public class UnrealClassAttribute(string className) : Attribute
+    {
+        public string ClassName { get; } = className;
+    }
+
+    [UnrealClass("Object")]
     public class UObject// : UnrealUpkBuilderBase
     {
         [TreeNodeField]

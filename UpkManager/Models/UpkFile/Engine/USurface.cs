@@ -2,6 +2,7 @@
 
 namespace UpkManager.Models.UpkFile.Engine
 {
+    [UnrealClass("Surface")]
     public class USurface : UObject
     {
     }

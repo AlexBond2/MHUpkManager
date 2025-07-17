@@ -3,6 +3,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Classes
 {
+    [UnrealClass("Struct")]
     public class UStruct : UField
     {
         [TreeNodeField("UTextBuffer")]

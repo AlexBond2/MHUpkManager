@@ -3,11 +3,13 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
+    [UnrealClass("KMeshProps")]
     public class UKMeshProps : UObject
     {
 
     }
 
+    [UnrealClass("RB_BodySetup")]
     public class URB_BodySetup : UKMeshProps
     {
         [TreeNodeField("KCachedConvexData")]

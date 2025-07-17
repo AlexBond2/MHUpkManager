@@ -131,7 +131,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public async Task ParseUnrealObject(UnrealHeader header, bool skipProperties, bool skipParse)
         {
-            UnrealObject = objectTypeFactory();
+            UnrealObject = ObjectTypeFactory();
 
             await UnrealObject.ReadUnrealObject(UnrealObjectReader, header, this, skipProperties, skipParse);
         }
@@ -202,60 +202,22 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Private Methods
 
-        private UnrealObjectBase objectTypeFactory()
+        private UnrealObjectBase ObjectTypeFactory()
         {
             if (ClassReferenceNameIndex == null) return new UnrealObject<UClass>();
 
             string className = ClassReferenceNameIndex?.Name;
 
-            if (Enum.TryParse(className, true, out PropertyTypes property))
+            if (ClassRegistry.Instance.TryGetType(className, out var type))
             {
-                return property switch
-                {
-                    PropertyTypes.ByteProperty => new UnrealObject<UByteProperty>(),
-                    PropertyTypes.BoolProperty => new UnrealObject<UBoolProperty>(),
-                    PropertyTypes.IntProperty => new UnrealObject<UIntProperty>(),
-                    PropertyTypes.FloatProperty => new UnrealObject<UFloatProperty>(),
-                    PropertyTypes.ObjectProperty => new UnrealObject<UObjectProperty>(),
-                    PropertyTypes.ComponentProperty => new UnrealObject<UComponentProperty>(),
-                    PropertyTypes.InterfaceProperty => new UnrealObject<UInterfaceProperty>(),
-                    PropertyTypes.ClassProperty => new UnrealObject<UClassProperty>(),
-                    PropertyTypes.NameProperty => new UnrealObject<UNameProperty>(),
-                    PropertyTypes.StructProperty => new UnrealObject<UStructProperty>(),
-                    PropertyTypes.StrProperty => new UnrealObject<UStrProperty>(),
-                    PropertyTypes.ArrayProperty => new UnrealObject<UArrayProperty>(),
-                    PropertyTypes.MapProperty => new UnrealObject<UMapProperty>(),
-                    _ => new UnrealObject<UObject>(),
-                };
+                var constructed = typeof(UnrealObject<>).MakeGenericType(type);
+                return (UnrealObjectBase)Activator.CreateInstance(constructed)!;
             }
 
-            Enum.TryParse(className, true, out ObjectTypes type);
-            
-            if (type == ObjectTypes.Unknown && ComponentRegistry.HasComponent(className) && !ObjectNameIndex.Name.StartsWith("Default__"))
-                type = ObjectTypes.Component;
+            if (ComponentRegistry.HasComponent(className) && !ObjectNameIndex.Name.StartsWith("Default__"))
+                return new UnrealObject<UComponent>();
 
-            return type switch
-            {
- /*             ObjectTypes.ArchetypeObjectReference => new UnrealObjectArchetypeBase(),                
-                ObjectTypes.ShadowMapTexture2D => new UnrealObjectShadowMapTexture2D(),
-                ObjectTypes.SoundNodeWave => new UnrealObjectSoundNodeWave(),                
-                ObjectTypes.TextureMovie => new UnrealObjectTextureMovie(),*/
-                ObjectTypes.Material => new UnrealObject<UMaterial>(),
-                ObjectTypes.MaterialInstance => new UnrealObject<UMaterialInstance>(),
-                ObjectTypes.Texture2D => new UnrealObject<UTexture2D>(),
-                ObjectTypes.LightMapTexture2D => new UnrealObject<ULightMapTexture2D>(),
-                ObjectTypes.AnimSequence => new UnrealObject<UAnimSequence>(),
-                ObjectTypes.RB_BodySetup => new UnrealObject<URB_BodySetup>(),
-
-                ObjectTypes.ObjectRedirector => new UnrealObject<UObjectRedirector>(),
-                ObjectTypes.Component => new UnrealObject<UComponent>(),
-                ObjectTypes.Const => new UnrealObject<UConst>(),
-                ObjectTypes.Enum => new UnrealObject<UEnum>(),
-                ObjectTypes.State => new UnrealObject<UState>(),
-                ObjectTypes.Function => new UnrealObject<UFunction>(),
-                ObjectTypes.ScriptStruct => new UnrealObject<UScriptStruct>(),
-                _ => new UnrealObject<UObject>(),
-            };
+            return new UnrealObject<UObject>();
         }
 
         #endregion Private Methods

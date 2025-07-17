@@ -2,6 +2,7 @@
 
 namespace UpkManager.Models.UpkFile.Classes
 {
+    [UnrealClass("Enum")]
     public class UEnum : UField
     {
         [TreeNodeField("UName")]

@@ -4,6 +4,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
+    [UnrealClass("ScriptStruct")]
     public class UScriptStruct : UStruct
     {
         [TreeNodeField]

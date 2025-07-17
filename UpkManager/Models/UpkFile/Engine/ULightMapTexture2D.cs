@@ -9,6 +9,7 @@ namespace UpkManager.Models.UpkFile.Engine
         LMF_Streamed = 0x00000001,
     }
 
+    [UnrealClass("LightMapTexture2D")]
     public class ULightMapTexture2D : UTexture2D
     {
         [TreeNodeField]

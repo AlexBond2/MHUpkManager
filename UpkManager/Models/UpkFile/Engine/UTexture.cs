@@ -3,6 +3,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
+    [UnrealClass("Texture")]
     public class UTexture: USurface
     {
         [TreeNodeField("UntypedBulkData")]

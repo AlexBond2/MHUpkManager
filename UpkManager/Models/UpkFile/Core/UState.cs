@@ -13,6 +13,7 @@ namespace UpkManager.Models.UpkFile.Classes
         Simulated = 0x00000004U,
     }
 
+    [UnrealClass("State")]
     public class UState : UStruct
     {
         [TreeNodeField]

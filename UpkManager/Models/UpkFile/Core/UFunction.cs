@@ -2,6 +2,7 @@
 
 namespace UpkManager.Models.UpkFile.Core
 {
+    [UnrealClass("Function")]
     public class UFunction : UStruct
     {
     }

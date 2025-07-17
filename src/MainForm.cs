@@ -21,6 +21,10 @@ namespace MHUpkManager
         public const string CoreJson = "MHCoreTypes.json";
         public const string ComponentsTxt = "MHComponents.txt";
         public UnrealUpkFile UpkFile { get; set; }
+
+        private HexViewForm hexViewForm;
+        private TextureViewForm textureViewForm;
+
         private List<TreeNode> rootNodes;
         private object currentObject;
 
@@ -35,6 +39,17 @@ namespace MHUpkManager
             EnableDoubleBuffering(exportGridView);
 
             LoadDataFiles();
+
+            hexViewForm = new HexViewForm();
+            textureViewForm = new TextureViewForm();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            hexViewForm?.Dispose();
+            textureViewForm?.Dispose();
         }
 
         private void LoadDataFiles()
@@ -384,7 +399,7 @@ namespace MHUpkManager
         private void openHexView(string name, byte[] data)
         {
             if (data == null || data.Length == 0) return;
-            using var hexViewForm = new HexViewForm();
+
             hexViewForm.SetTitle(name);
             hexViewForm.SetHexData(data);
             hexViewForm.ShowDialog();
@@ -461,7 +476,6 @@ namespace MHUpkManager
         {
             if (unrealObject is IUnrealObject uObject && uObject.UObject is UTexture2D data)
             {
-                using var textureViewForm = new TextureViewForm();
                 textureViewForm.SetTitle(name);
                 textureViewForm.SetTextureObject(data);
                 textureViewForm.ShowDialog();

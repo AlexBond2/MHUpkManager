@@ -4,6 +4,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
+    [UnrealClass("AnimSequence")]
     public class UAnimSequence : UObject
     {
         [PropertyField]
@@ -64,6 +65,11 @@ namespace UpkManager.Models.UpkFile.Engine
                 RotKeys = buffer.ReadArray(Quat.ReadData)
             };
             return track;
+        }
+
+        public override string ToString()
+        {
+            return $"PosKeys[{PosKeys.Count}] RotKeys[{RotKeys.Count}]";
         }
     }
 

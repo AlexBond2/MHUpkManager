@@ -5,6 +5,7 @@ using UpkManager.Constants;
 
 namespace UpkManager.Models.UpkFile.Classes
 {
+    [UnrealClass("Property")]
     public class UProperty : UField
     {
         [TreeNodeField]
@@ -35,6 +36,7 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+    [UnrealClass("ByteProperty")]
     public class UByteProperty : UProperty
     {
         [TreeNodeField("UEnum")]
@@ -47,21 +49,25 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+    [UnrealClass("BoolProperty")]
     public class UBoolProperty : UProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.BoolProperty;
     }
 
+    [UnrealClass("IntProperty")]
     public class UIntProperty : UProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.IntProperty;
     }
 
+    [UnrealClass("FloatProperty")]
     public class UFloatProperty : UProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.FloatProperty;
     }
 
+    [UnrealClass("ObjectProperty")]
     public class UObjectProperty : UProperty
     {
         [TreeNodeField("UObject")]
@@ -74,11 +80,13 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+    [UnrealClass("ComponentProperty")]
     public class UComponentProperty : UObjectProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.ComponentProperty;
     }
 
+    [UnrealClass("InterfaceProperty")]
     public class UInterfaceProperty : UProperty
     {
         [TreeNodeField("UClass")]
@@ -91,6 +99,7 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+    [UnrealClass("ClassProperty")]
     public class UClassProperty : UObjectProperty
     {
         [TreeNodeField("UClass")]
@@ -103,11 +112,13 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+    [UnrealClass("NameProperty")]
     public class UNameProperty : UProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.NameProperty;
     }
 
+    [UnrealClass("StructProperty")]
     public class UStructProperty : UProperty
     {
         [TreeNodeField("UStruct")]
@@ -120,6 +131,7 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+    [UnrealClass("MapProperty")]
     public class UMapProperty : UProperty
     {
         [TreeNodeField("UProperty")]
@@ -136,11 +148,15 @@ namespace UpkManager.Models.UpkFile.Classes
         }
     }
 
+
+    [UnrealClass("StrProperty")]
     public class UStrProperty : UProperty
     {
         public override PropertyTypes PropertyType => PropertyTypes.StrProperty;
     }
 
+
+    [UnrealClass("ArrayProperty")]
     public class UArrayProperty : UProperty
     {
         [TreeNodeField("UProperty")]

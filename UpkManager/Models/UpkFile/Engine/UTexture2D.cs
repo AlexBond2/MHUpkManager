@@ -11,6 +11,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
+    [UnrealClass("Texture2D")]
     public class UTexture2D : UTexture
     {
         [PropertyField]

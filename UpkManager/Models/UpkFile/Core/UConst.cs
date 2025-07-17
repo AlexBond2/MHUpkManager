@@ -2,6 +2,7 @@
 
 namespace UpkManager.Models.UpkFile.Classes
 {
+    [UnrealClass("Const")]
     public class UConst : UField
     {
         [TreeNodeField]
