@@ -76,12 +76,12 @@ namespace MHUpkManager
         {
             mipMapBox.Items.Clear();
             int index = 0;
-            minIndex = 0;
+            minIndex = -1;
             foreach (var mipMap in textureObject.Mips) 
             {
                 if (mipMap.Data != null)
                 {
-                    if (minIndex == 0) minIndex = index;
+                    if (minIndex == -1) minIndex = index;
                     mipMapBox.Items.Add(MipMapInfo.AddMipMap(mipMap, index));
                 }
                 index++;
