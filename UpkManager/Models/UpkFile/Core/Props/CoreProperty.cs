@@ -31,7 +31,6 @@ namespace UpkManager.Models.UpkFile.Core
         public string StructName { get; }
         public IAtomicStruct Atomic { get; private set; }
         public List<(string Name, UProperty Value)> Fields { get; } = [];
-        public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
 
         public CoreProperty(Type structType)
         {

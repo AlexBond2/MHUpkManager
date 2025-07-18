@@ -1,4 +1,3 @@
-using UpkManager.Constants;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Types;
 
@@ -7,21 +6,13 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("FloatProperty")]
     public class UFloatProperty : UProperty
     {
-        public override PropertyTypes PropertyType => PropertyTypes.FloatProperty;
-
-        #region Old
-        private float floatValue { get; set; }
-        public override object PropertyValue => floatValue;
-        public override string PropertyString => $"{floatValue}";
-        #endregion Old
-
-        #region OldMethods
+        private float Value { get; set; }
+        public override object PropertyValue => Value;
+        public override string PropertyString => $"{Value}";
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            floatValue = buffer.Reader.ReadSingle();
+            Value = buffer.Reader.ReadSingle();
         }
-
-        #endregion OldMethods
     }
 }

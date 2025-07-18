@@ -1,6 +1,5 @@
 ﻿using System;
-using UpkManager.Constants;
-using UpkManager.Helpers;
+
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
@@ -12,25 +11,19 @@ namespace UpkManager.Models.UpkFile.Core
     {
         [TreeNodeField("UEnum")]
         public UnrealNameTableIndex Enum { get; private set; } // UEnum
-        public override PropertyTypes PropertyType => PropertyTypes.ByteProperty;
 
-        #region Old
-        private byte? byteValue { get; set; }
+        private byte? Value { get; set; }
         public UnrealNameTableIndex EnumNameIndex { get; set; }
         public UnrealNameTableIndex EnumValueIndex { get; set; }
         public string EnumValue => EnumValueIndex?.Name;
+        public override object PropertyValue => Value ?? base.PropertyValue;
+        public override string PropertyString => Value.HasValue ? $"{Value.Value}" : $"({EnumNameIndex?.Name}){EnumValueIndex?.Name}";
 
-        public override object PropertyValue => byteValue ?? base.PropertyValue;
-
-        public override string PropertyString => byteValue.HasValue ? $"{byteValue.Value}" : $"({EnumNameIndex?.Name}){EnumValueIndex?.Name}";
-        #endregion Old
-
-        #region OldMethods
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
             EnumNameIndex = buffer.ReadNameIndex();
             if (EnumNameIndex?.Name == "none")
-                byteValue = buffer.Reader.ReadByte();
+                Value = buffer.Reader.ReadByte();
             else
                 EnumValueIndex = buffer.ReadNameIndex();
         }
@@ -43,10 +36,8 @@ namespace UpkManager.Models.UpkFile.Core
                 index.SetNameTableIndex(entry);
             }
 
-            if (value is bool && byteValue.HasValue) byteValue = Convert.ToByte(value);
+            if (value is bool && Value.HasValue) Value = Convert.ToByte(value);
         }
-
-        #endregion OldMethods
 
         public override void ReadBuffer(UBuffer buffer)
         {

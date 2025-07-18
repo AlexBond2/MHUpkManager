@@ -18,26 +18,14 @@ namespace UpkManager.Models.UpkFile.Core
 
     public sealed class UnrealProperty
     {
-
-        #region Properties
-
         public UnrealNameTableIndex NameIndex { get; set; }
-
         public UnrealNameTableIndex Category { get; set; }
-
         public int ElementSize { get; private set; }
-
         public int ArrayEnum { get; private set; }
-
         public UProperty Value { get; private set; }
 
         private VirtualNode propertyNode;
         public VirtualNode VirtualTree { get => GetVirtualTree(); }
-
-
-        #endregion Properties
-
-        #region Unreal Methods
 
         public ResultProperty ReadProperty(UBuffer buffer)
         {
@@ -74,10 +62,6 @@ namespace UpkManager.Models.UpkFile.Core
             return ResultProperty.Success;
         }
 
-        #endregion Unreal Methods
-
-        #region Private Methods
-
         private VirtualNode GetVirtualTree()
         {
             if (propertyNode == null)
@@ -92,9 +76,7 @@ namespace UpkManager.Models.UpkFile.Core
 
         private UProperty PropertyValueFactory()
         {
-            PropertyTypes type;
-
-            Enum.TryParse(Category?.Name, true, out type);
+            Enum.TryParse(Category?.Name, true, out PropertyTypes type);
 
             return type switch
             {
@@ -113,9 +95,6 @@ namespace UpkManager.Models.UpkFile.Core
                 _ => new UProperty(),
             };
         }
-
-        #endregion Private Methods
-
     }
 
 }

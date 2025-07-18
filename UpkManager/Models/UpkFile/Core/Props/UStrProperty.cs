@@ -1,4 +1,3 @@
-using UpkManager.Constants;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Types;
 
@@ -7,27 +6,19 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("StrProperty")]
     public class UStrProperty : UProperty
     {
-        public override PropertyTypes PropertyType => PropertyTypes.StrProperty;
-        #region Old
-        private UnrealString stringValue { get; }
-        public override object PropertyValue => stringValue;
-        public override string PropertyString => stringValue.String;
-        #endregion Old
-
-        #region OldMethods
+        private UnrealString Value { get; }
+        public override object PropertyValue => Value;
+        public override string PropertyString => Value.String;
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            stringValue.ReadString(buffer.Reader);
+            Value.ReadString(buffer.Reader);
         }
 
         public override void SetPropertyValue(object value)
         {
             if (value is not string str) return;
-
-            stringValue.SetString(str);
+            Value.SetString(str);
         }
-
-        #endregion OldMethods
     }
 }

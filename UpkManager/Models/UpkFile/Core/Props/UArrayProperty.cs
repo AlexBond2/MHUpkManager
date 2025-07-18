@@ -1,6 +1,5 @@
 using System;
 using UpkManager.Constants;
-using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Tables;
@@ -13,23 +12,18 @@ namespace UpkManager.Models.UpkFile.Core
     {
         [TreeNodeField("UProperty")]
         public UnrealNameTableIndex Inner { get; private set; } // UProperty
-        public override PropertyTypes PropertyType => PropertyTypes.ArrayProperty;
 
-        #region Old
         private bool showArray;
         private string itemType;
         public UProperty[] Array { get; private set; }
         public int ArraySize { get; private set; }
         public override string PropertyString => $"{itemType} [{ArraySize}]";
-        #endregion Old
 
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
             Inner = buffer.ReadObject();
         }
-
-        #region OldMethods
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
@@ -109,7 +103,5 @@ namespace UpkManager.Models.UpkFile.Core
                 }
             }
         }
-
-        #endregion OldMethods
     }
 }
