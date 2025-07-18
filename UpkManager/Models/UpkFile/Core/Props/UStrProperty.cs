@@ -6,12 +6,13 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("StrProperty")]
     public class UStrProperty : UProperty
     {
-        private UnrealString Value { get; }
+        private UnrealString Value { get; set; } // FString
         public override object PropertyValue => Value;
         public override string PropertyString => Value.String;
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
+            Value = new();
             Value.ReadString(buffer.Reader);
         }
 

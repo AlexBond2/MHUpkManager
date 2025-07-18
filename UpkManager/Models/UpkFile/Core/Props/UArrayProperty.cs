@@ -31,13 +31,13 @@ namespace UpkManager.Models.UpkFile.Core
             size -= 4;
             base.ReadPropertyValue(buffer, size, property);
 
-            int itemSize = 0;
-            if (ArraySize != 0) itemSize = size / ArraySize;
+            int elementSize = 0;
+            if (ArraySize != 0) elementSize = size / ArraySize;
 
-            itemType = $"{itemSize}byte";
+            itemType = $"{elementSize}byte";
             showArray = false;
             var arrayBuffer = new UBuffer(DataReader, buffer.Header);
-            BuildArrayFactory(property, arrayBuffer, itemSize);
+            BuildArrayFactory(property, arrayBuffer, elementSize);
         }
 
         protected override VirtualNode GetVirtualTree()
@@ -91,9 +91,9 @@ namespace UpkManager.Models.UpkFile.Core
             {
                 try
                 {
-                    var value = factory();
-                    value.ReadPropertyValue(buffer, size, property);
-                    Array[i] = value;
+                    var inner = factory();
+                    inner.ReadPropertyValue(buffer, size, property);
+                    Array[i] = inner;
                 }
                 catch (Exception ex)
                 {

@@ -7,19 +7,19 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("NameProperty")]
     public class UNameProperty : UProperty
     {
-        protected UnrealNameTableIndex NameIndexValue { get; set; }
-        public override object PropertyValue => NameIndexValue;
-        public override string PropertyString => NameIndexValue.Name;
+        protected UnrealNameTableIndex Value { get; set; }
+        public override object PropertyValue => Value;
+        public override string PropertyString => Value.Name;
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            NameIndexValue = buffer.ReadNameIndex();
+            Value = buffer.ReadNameIndex();
         }
 
         public override void SetPropertyValue(object value)
         {
             if (value is not UnrealNameTableIndex index) return;
-            NameIndexValue = index;
+            Value = index;
         }
     }
 }

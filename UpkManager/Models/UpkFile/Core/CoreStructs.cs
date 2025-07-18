@@ -99,7 +99,14 @@ namespace UpkManager.Models.UpkFile.Core
         [StructField]
         public int D { get; set; }
 
-        public string Format => $"{A:X}-{B:X}-{C:X}-{D:X}";
+        public System.Guid ToSystemGuid()
+        {
+            byte[] bytes = new byte[16];
+            Buffer.BlockCopy(new[] { A, B, C, D }, 0, bytes, 0, 16);
+            return new System.Guid(bytes);
+        }
+
+        public string Format => ToSystemGuid().ToString();
     }
 
     public class Rotator : IAtomicStruct

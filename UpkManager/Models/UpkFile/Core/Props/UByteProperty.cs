@@ -11,21 +11,19 @@ namespace UpkManager.Models.UpkFile.Core
     {
         [TreeNodeField("UEnum")]
         public UnrealNameTableIndex Enum { get; private set; } // UEnum
-
+        public UnrealNameTableIndex EnumValueName { get; set; } // FName
         private byte? Value { get; set; }
-        public UnrealNameTableIndex EnumNameIndex { get; set; }
-        public UnrealNameTableIndex EnumValueIndex { get; set; }
-        public string EnumValue => EnumValueIndex?.Name;
+        public string EnumValue => EnumValueName?.Name;
         public override object PropertyValue => Value ?? base.PropertyValue;
-        public override string PropertyString => Value.HasValue ? $"{Value.Value}" : $"({EnumNameIndex?.Name}){EnumValueIndex?.Name}";
+        public override string PropertyString => Value.HasValue ? $"{Value.Value}" : $"({Enum?.Name}){EnumValueName?.Name}";
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            EnumNameIndex = buffer.ReadNameIndex();
-            if (EnumNameIndex?.Name == "none")
+            Enum = buffer.ReadNameIndex();
+            if (Enum?.Name == "none")
                 Value = buffer.Reader.ReadByte();
             else
-                EnumValueIndex = buffer.ReadNameIndex();
+                EnumValueName = buffer.ReadNameIndex();
         }
 
         public override void SetPropertyValue(object value)
