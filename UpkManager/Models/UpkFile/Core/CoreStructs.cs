@@ -126,6 +126,17 @@ namespace UpkManager.Models.UpkFile.Core
         {
             return value / 32768.0f * 180.0f;
         }
+
+        public static Rotator ReadData(UBuffer buffer)
+        {
+            var rotator = new Rotator
+            {
+                Pitch = buffer.Reader.ReadInt32(),
+                Yaw = buffer.Reader.ReadInt32(),
+                Roll = buffer.Reader.ReadInt32()
+            };
+            return rotator;
+        }
     }
 
     public class Box : IAtomicStruct
@@ -176,4 +187,57 @@ namespace UpkManager.Models.UpkFile.Core
         public string Format => ""; 
     }
 
+    public class BoxSphereBounds : IAtomicStruct
+    {
+        [StructField]
+        public Vector Origin { get; set; }
+
+        [StructField]
+        public Vector BoxExtent { get; set; }
+
+        [StructField]
+        public float SphereRadius { get; set; }
+
+        public string Format => "";
+
+        public static BoxSphereBounds ReadData(UBuffer buffer)
+        {
+            var bounds = new BoxSphereBounds
+            {
+                Origin = Vector.ReadData(buffer),
+                BoxExtent = Vector.ReadData(buffer),
+                SphereRadius = buffer.Reader.ReadSingle()
+            };
+            return bounds;
+        }
+    }
+
+    public class Color : IAtomicStruct
+    {
+        [StructField]
+        public byte B { get; set; }
+
+        [StructField]
+        public byte G { get; set; }
+
+        [StructField]
+        public byte R { get; set; }
+
+        [StructField]
+        public byte A { get; set; }
+
+        public string Format => $"[{R};{G};{B};{A}]";
+
+        public static Color ReadData(UBuffer buffer)
+        {
+            var color = new Color
+            {
+                B = buffer.Reader.ReadByte(),
+                G = buffer.Reader.ReadByte(),
+                R = buffer.Reader.ReadByte(),
+                A = buffer.Reader.ReadByte()
+            };
+            return color;
+        }
+    }
 }

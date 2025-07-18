@@ -62,6 +62,11 @@ namespace UpkManager.Models.UpkFile.Types
             return Header.GetObjectTableEntry(Reader.ReadInt32())?.ObjectNameIndex;
         }
 
+        public static UnrealNameTableIndex ReadObject(UBuffer buffer)
+        {
+            return buffer.Header.GetObjectTableEntry(buffer.Reader.ReadInt32())?.ObjectNameIndex;
+        }
+
         public string ReadString()
         {
             var ustring = new UnrealString();
@@ -110,6 +115,11 @@ namespace UpkManager.Models.UpkFile.Types
         public int ReadInt32()
         {
             return Reader.ReadInt32();
+        }
+
+        public static int ReadInt32(UBuffer buffer)
+        {
+            return buffer.Reader.ReadInt32();
         }
     }
 }
