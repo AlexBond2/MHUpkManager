@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -45,51 +46,71 @@ namespace UpkManager.Models.UpkFile.Classes
 
             foreach (var prop in GetTreeViewFields(this))
             {
-                var attr = prop.GetCustomAttribute<TreeNodeFieldAttribute>();
-
-                string displayName = prop.Name;
-                string typeName = attr.TypeName ?? GetTypeName(prop.PropertyType);
-
-                var fieldNode = new VirtualNode($"{displayName} ::{typeName}");
-
-                object value = prop.GetValue(this);
-                if (value == null)
-                {
-                    fieldNode.Children.Add(new("null"));
-                }
-                else if (value is System.Collections.IEnumerable enumerable && value is not string)
-                {
-                    fieldNode.Text += "[]";
-                    var listNode = new VirtualNode();
-                    int count = 0;
-                    if (enumerable is byte[] data)
-                    {
-                        count = data.Length;
-                        listNode.Tag = data;
-                    }
-                    else
-                    {
-                        foreach (var item in enumerable)
-                        {
-                            listNode.Children.Add(new($"[{count}] {item}"));
-                            count++;
-                        }
-                    }
-                    listNode.Text = $"{typeName}[{count}]";
-                    fieldNode.Children.Add(listNode);
-                }
-                else
-                {
-                    fieldNode.Children.Add(new (value.ToString()));
-                }
-
+                var fieldNode = BuildPropVirtualTree(prop); 
                 node.Children.Add(fieldNode);
             }
 
             return node;
         }
 
-        private IEnumerable<PropertyInfo> GetTreeViewFields(UObject obj)
+        private VirtualNode BuildPropVirtualTree(PropertyInfo prop)
+        {
+            var attr = prop.GetCustomAttribute<TreeNodeFieldAttribute>();
+
+            string displayName = prop.Name;
+            string typeName = attr.TypeName ?? GetTypeName(prop.PropertyType);
+
+            var fieldNode = new VirtualNode($"{displayName} ::{typeName}");
+
+            object value = prop.GetValue(this);
+            if (value == null)
+            {
+                fieldNode.Children.Add(new("null"));
+            }
+            else if (value is IEnumerable enumerable && value is not string)
+            {
+                fieldNode.Text += "[]";
+                var arrayNode = BuildArrayVirtualTree(typeName, enumerable);
+                fieldNode.Children.Add(arrayNode);
+            }
+            else if (value is IAtomicStruct atomic)
+            {
+                CoreProperty.BuildStructVirtualTree(fieldNode, atomic);
+            }
+            else
+            {
+                fieldNode.Children.Add(new(value.ToString()));
+            }
+
+            return fieldNode;
+        }
+
+        public static VirtualNode BuildArrayVirtualTree(string typeName, IEnumerable enumerable)
+        {
+            var listNode = new VirtualNode();
+            int count = 0;
+            if (enumerable is byte[] data)
+            {
+                count = data.Length;
+                listNode.Tag = data;
+            }
+            else
+            {
+                foreach (var item in enumerable)
+                {
+                    var itemNode = new VirtualNode($"[{count}] {item}");
+                    if (item is IAtomicStruct atomic)
+                        CoreProperty.BuildStructVirtualTree(itemNode, atomic);
+
+                    listNode.Children.Add(itemNode);
+                    count++;
+                }
+            }
+            listNode.Text = $"{typeName}[{count}]";
+            return listNode;
+        }
+
+        public static IEnumerable<PropertyInfo> GetTreeViewFields(object obj)
         {
             Type type = obj.GetType();
             foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
@@ -99,7 +120,7 @@ namespace UpkManager.Models.UpkFile.Classes
             }
         }
 
-        private IEnumerable<PropertyInfo> GetPropertyFields(UObject obj)
+        public static IEnumerable<PropertyInfo> GetPropertyFields(object obj)
         {
             Type type = obj.GetType();
             foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))

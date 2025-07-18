@@ -44,13 +44,19 @@ namespace UpkManager.Models.UpkFile.Engine
         }
     }
 
-    public class MeshBone
+    public class MeshBone // : IAtomicStruct
     {
+        [StructField]
         public UnrealNameTableIndex Name { get; set; }
+        [StructField]
         public uint Flags { get; set; }
+        [StructField]
         public VJointPos BonePos { get; set; }
+        [StructField]
         public int NumChildren { get; set; }
+        [StructField]
         public int ParentIndex { get; set; }
+        [StructField]
         public Color BoneColor { get; set; }
 
         public static MeshBone ReadData(UBuffer buffer)
@@ -66,16 +72,20 @@ namespace UpkManager.Models.UpkFile.Engine
             };
             return bone;
         }
+        public string Format => "";
 
         public override string ToString()
         {
-            return $"{Name} {BonePos.Position.Format} [{NumChildren}] [{ParentIndex}]";
+            return $"{Name} [{NumChildren}] [{ParentIndex}]";
         }
     }
 
-    public class VJointPos
+    public class VJointPos //: IAtomicStruct
     {
+        [StructField]
         public Quat Orientation { get; set; }
+
+        [StructField]
         public Vector Position { get; private set; }
 
         public static VJointPos ReadData(UBuffer buffer)
@@ -87,6 +97,7 @@ namespace UpkManager.Models.UpkFile.Engine
             };
             return joint;
         }
+        public string Format => "";
     }
 
 }

@@ -11,6 +11,12 @@ namespace UpkManager.Models.UpkFile.Engine
         public int NumFrames { get; set; }
 
         [PropertyField]
+        public float SequenceLength { get; set; }
+
+        [PropertyField]
+        public float RateScale { get; set; } = 1.0f;
+
+        [PropertyField]
         public AnimationCompressionFormat RotationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_Float96NoW;
 
         [PropertyField]

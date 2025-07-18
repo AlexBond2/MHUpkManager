@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using UpkManager.Constants;
-using UpkManager.Helpers;
+using System.Windows.Media;
+using System.Xml.Linq;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Types;
 
@@ -37,13 +37,20 @@ namespace UpkManager.Models.UpkFile.Core
             StructName = structType.Name;
             Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
 
-            var props = structType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.GetCustomAttribute<StructFieldAttribute>() != null);
-
-            foreach (var prop in props)
+            foreach (var prop in GetStructFields(structType))
             {
                 var unrealValue = PropertyFactory.Create(prop.PropertyType.Name);
                 Fields.Add((prop.Name, unrealValue));
+            }
+        }
+
+        public static IEnumerable<PropertyInfo> GetStructFields(object obj)
+        {
+            Type type = obj.GetType();
+            foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (field.IsDefined(typeof(StructFieldAttribute)))
+                    yield return field;
             }
         }
 
@@ -91,7 +98,7 @@ namespace UpkManager.Models.UpkFile.Core
                     var (name, value) = Fields[i];
 
                     var prop = Atomic.GetType().GetProperty(name);
-                    string typeName = prop?.PropertyType.Name ?? "Unknown";
+                    string typeName = prop.PropertyType.Name ?? "Unknown";
 
                     var node = new VirtualNode($"{name} ::{typeName}");
                     value.BuildVirtualTree(node);
@@ -103,6 +110,32 @@ namespace UpkManager.Models.UpkFile.Core
         {
             foreach (var (_, value) in Fields)
                 value.ReadPropertyValue(buffer, size, property);
+        }
+
+        public static void BuildStructVirtualTree(VirtualNode fieldNode, IAtomicStruct atomic)
+        {
+            if (!string.IsNullOrEmpty(atomic.Format))
+                fieldNode.Children.Add(new(atomic.Format));
+            else
+            {
+                foreach (var field in GetStructFields(atomic))
+                {
+                    string typeName = field.PropertyType.Name ?? "Unknown";
+                    string fieldName = field.Name;
+
+                    var structNode = new VirtualNode($"{fieldName} ::{typeName}");
+                    
+                    object fieldValue = field.GetValue(atomic);
+                    if (fieldValue is IAtomicStruct chieldAtomic)
+                        BuildStructVirtualTree(structNode, chieldAtomic);
+                    else
+                    {
+                        var node = new VirtualNode(fieldValue.ToString());
+                        structNode.Children.Add(node);
+                    }
+                    fieldNode.Children.Add(structNode);
+                }
+            }
         }
     }
 }
