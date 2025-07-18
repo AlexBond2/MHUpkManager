@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UpkManager.Models.UpkFile.Properties
+namespace UpkManager.Models.UpkFile.Core
 {
     public class VirtualNode
     {

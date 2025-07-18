@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
-using UpkManager.Models.UpkFile.Properties;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Classes
@@ -212,7 +211,7 @@ namespace UpkManager.Models.UpkFile.Classes
             return Properties.FirstOrDefault(p => p.NameIndex.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public UnrealPropertyValueBase GetPropertyValue(string name)
+        public UProperty GetPropertyValue(string name)
         {
             return GetProperty(name)?.Value;
         }
@@ -223,30 +222,30 @@ namespace UpkManager.Models.UpkFile.Classes
             return value != null ? ExtractValue(value) : null;
         }
 
-        private object[] GetValueArray(UnrealPropertyValueBase[] array)
+        private object[] GetValueArray(UProperty[] array)
         {
             return [.. array.Select(ExtractValue)];
         }
 
-        private object ExtractValue(UnrealPropertyValueBase value)
+        private object ExtractValue(UProperty value)
         {
             return value switch
             {
-                UnrealPropertyByteValue b => b.EnumValue,
-                UnrealPropertyIntValue i => i.PropertyValue,
-                UnrealPropertyFloatValue f => f.PropertyValue,
-                UnrealPropertyBoolValue bo => bo.PropertyValue,
-                UnrealPropertyNameValue n => n.PropertyString,
-                UnrealPropertyStringValue s => s.PropertyString,
-                UnrealPropertyStructValue sv => sv.StructValue,
-                UnrealPropertyArrayValue av => GetValueArray(av.Array),
+                UByteProperty b => b.EnumValue,
+                UIntProperty i => i.PropertyValue,
+                UFloatProperty f => f.PropertyValue,
+                UBoolProperty bo => bo.PropertyValue,
+                UNameProperty n => n.PropertyString,
+                UStrProperty s => s.PropertyString,
+                UStructProperty sv => sv.StructValue,
+                UArrayProperty av => GetValueArray(av.Array),
                 _ => null
             };
         }
 
         public TEnum? GetPropertyEnum<TEnum>(string name) where TEnum : struct, Enum
         {
-            if (GetPropertyValue(name) is UnrealPropertyByteValue byteValue)
+            if (GetPropertyValue(name) is UByteProperty byteValue)
             {
                 string enumValueStr = byteValue.EnumValue;
                 if (!string.IsNullOrEmpty(enumValueStr) && Enum.TryParse(enumValueStr, true, out TEnum parsed))
@@ -255,19 +254,5 @@ namespace UpkManager.Models.UpkFile.Classes
 
             return null;
         }
-
-        /*
-        public override int GetBuilderSize()
-        {
-            BuilderSize = sizeof(int);
-
-            return BuilderSize;
-        }
-
-        public override Task WriteBuffer(ByteArrayWriter Writer, int CurrentOffset)
-        {
-            Writer.WriteInt32(NetIndex);
-            return Task.CompletedTask;
-        }*/
     }
 }

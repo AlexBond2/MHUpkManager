@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-[UnrealClass("MapProperty")]
+    [UnrealClass("MapProperty")]
     public class UMapProperty : UProperty
     {
         [TreeNodeField("UProperty")]

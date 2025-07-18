@@ -5,9 +5,9 @@ using System.Security.Cryptography;
 using UpkManager.Contracts;
 using UpkManager.Extensions;
 using UpkManager.Models;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Objects;
-using UpkManager.Models.UpkFile.Properties;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Repository;
 

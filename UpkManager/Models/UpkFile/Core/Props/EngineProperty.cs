@@ -1,32 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using UpkManager.Helpers;
+using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Properties
+namespace UpkManager.Models.UpkFile.Core
 {
-    public class UnrealPropertyEngineValue : UnrealPropertyValueBase
+    public class EngineProperty(string structType) : UProperty
     {
-        #region Constructor
-
-        public UnrealPropertyEngineValue(string structType)
-        {
-            StructType = structType;
-            Fields = [];
-        }
-
-        #endregion Constructor
-
-        #region Properties
-
-        public string StructType { get; private set; }
-        public List<UnrealProperty> Fields { get; set; }
+        public string StructType { get; private set; } = structType;
+        public List<UnrealProperty> Fields { get; set; } = [];
         public ResultProperty Result { get; private set; }
         public int RemainingData { get; private set; }
-
-        #endregion Properties
-
-        #region Unreal Methods
 
         public override string ToString()
         {
@@ -42,9 +27,9 @@ namespace UpkManager.Models.UpkFile.Properties
                 valueTree.Children.Add(new($"Data [{Result}][{RemainingData}]"));
         }
 
-        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            int offset = reader.CurrentOffset;
+            int offset = buffer.Reader.CurrentOffset;
             Fields.Clear();
             Result = ResultProperty.Success;
 
@@ -53,13 +38,13 @@ namespace UpkManager.Models.UpkFile.Properties
                 var prop = new UnrealProperty();
                 try
                 {
-                    Result = prop.ReadProperty(reader, header);
+                    Result = prop.ReadProperty(buffer);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error reading property: {ex.Message}");
                     Result = ResultProperty.Error;
-                    RemainingData = size - (reader.CurrentOffset - offset);
+                    RemainingData = size - (buffer.Reader.CurrentOffset - offset);
                     return;
                 }
 
@@ -69,9 +54,7 @@ namespace UpkManager.Models.UpkFile.Properties
             }
             while (Result == ResultProperty.Success);
 
-            RemainingData = size - (reader.CurrentOffset - offset);
+            RemainingData = size - (buffer.Reader.CurrentOffset - offset);
         }
-
-        #endregion Unreal Methods
     }
 }

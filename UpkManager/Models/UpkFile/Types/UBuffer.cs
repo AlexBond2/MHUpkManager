@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
-using UpkManager.Models.UpkFile.Properties;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Types
@@ -71,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Types
 
         public ResultProperty ReadProperty(UnrealProperty property)
         {
-            return property.ReadProperty(Reader, Header);
+            return property.ReadProperty(this);
         }
 
         public void SetDataOffset()
@@ -88,16 +88,28 @@ namespace UpkManager.Models.UpkFile.Types
             return reader?.GetBytes();
         }
 
-        public Guid ReadGuid()
+        public System.Guid ReadGuid()
         {
             byte[] bytes = Reader.ReadBytes(16);
-            return new Guid(bytes);
+            return new System.Guid(bytes);
         }
 
         public byte[] ReadBytes()
         {
             int size = Reader.ReadInt32();
             return Reader.ReadBytes(size);
+        }
+
+        public UnrealNameTableIndex ReadNameIndex()
+        {
+            var nameIndex = new UnrealNameTableIndex();
+            nameIndex.ReadNameTableIndex(Reader, Header);
+            return nameIndex;
+        }
+
+        public int ReadInt32()
+        {
+            return Reader.ReadInt32();
         }
     }
 }

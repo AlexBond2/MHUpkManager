@@ -4,35 +4,36 @@ using System.Linq;
 using System.Reflection;
 using UpkManager.Constants;
 using UpkManager.Helpers;
-using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Properties
+namespace UpkManager.Models.UpkFile.Core
 {
-    public static class UnrealPropertyFactory
+    public static class PropertyFactory
     {
-        public static UnrealPropertyValueBase Create(string type)
+        public static UProperty Create(string type)
         {
             if (CoreRegistry.Instance.TryGetProperty(type, out var prop))
-                return new UnrealPropertyCoreValue(prop);
+                return new CoreProperty(prop);
 
             return type switch
             {
-                "Int32" => new UnrealPropertyIntValue(),
-                "Boolean" => new UnrealPropertyBoolValue(),
-                "Single" => new UnrealPropertyFloatValue(),
-                _ => new UnrealPropertyValueBase()
+                "Int32" => new UIntProperty(),
+                "Boolean" => new UBoolProperty(),
+                "Single" => new UFloatProperty(),
+                _ => new UProperty()
             };
         }
     }
 
-    public class UnrealPropertyCoreValue : UnrealPropertyValueBase
+    public class CoreProperty : UProperty
     {
         public string StructName { get; }
         public IAtomicStruct Atomic { get; private set; }
-        public List<(string Name, UnrealPropertyValueBase Value)> Fields { get; } = [];
+        public List<(string Name, UProperty Value)> Fields { get; } = [];
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
 
-        public UnrealPropertyCoreValue(Type structType)
+        public CoreProperty(Type structType)
         {
             StructName = structType.Name;
             Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
@@ -42,7 +43,7 @@ namespace UpkManager.Models.UpkFile.Properties
 
             foreach (var prop in props)
             {
-                var unrealValue = UnrealPropertyFactory.Create(prop.PropertyType.Name);
+                var unrealValue = PropertyFactory.Create(prop.PropertyType.Name);
                 Fields.Add((prop.Name, unrealValue));
             }
         }
@@ -69,10 +70,10 @@ namespace UpkManager.Models.UpkFile.Properties
 
                 object val = value switch
                 {
-                    UnrealPropertyIntValue intVal => intVal.PropertyValue,
-                    UnrealPropertyFloatValue floatVal => floatVal.PropertyValue,
-                    UnrealPropertyBoolValue boolVal => boolVal.PropertyValue,
-                    UnrealPropertyCoreValue coreVal => coreVal.Atomic,
+                    UIntProperty intVal => intVal.PropertyValue,
+                    UFloatProperty floatVal => floatVal.PropertyValue,
+                    UBoolProperty boolVal => boolVal.PropertyValue,
+                    CoreProperty coreVal => coreVal.Atomic,
                     _ => null
                 };
 
@@ -99,11 +100,10 @@ namespace UpkManager.Models.UpkFile.Properties
                 }
         }
 
-        public override void ReadPropertyValue(ByteArrayReader reader, int size, UnrealHeader header, UnrealProperty property)
+        public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
             foreach (var (_, value) in Fields)
-                value.ReadPropertyValue(reader, size, header, property);
+                value.ReadPropertyValue(buffer, size, property);
         }
     }
-
 }

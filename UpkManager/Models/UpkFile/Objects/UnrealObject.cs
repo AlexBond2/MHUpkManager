@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
-using UpkManager.Models.UpkFile.Properties;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 

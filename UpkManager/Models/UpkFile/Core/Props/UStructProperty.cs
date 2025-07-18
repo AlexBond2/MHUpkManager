@@ -1,16 +1,58 @@
+using System;
 using UpkManager.Constants;
+using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-[UnrealClass("StructProperty")]
+    [UnrealClass("StructProperty")]
     public class UStructProperty : UProperty
     {
         [TreeNodeField("UStruct")]
         public UnrealNameTableIndex Struct { get; private set; } // UStruct
         public override PropertyTypes PropertyType => PropertyTypes.StructProperty;
+
+        #region Old
+        public override string PropertyString => Struct.Name;
+        public UProperty StructValue { get; private set; }
+        #endregion Old
+
+        #region OldMethods
+        protected override VirtualNode GetVirtualTree()
+        {
+            var valueTree = base.GetVirtualTree();
+
+            StructValue?.BuildVirtualTree(valueTree);
+
+            return valueTree;
+        }
+
+        public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
+        {
+            Struct = buffer.ReadNameIndex();
+
+            var structType = Struct.Name;
+            if (EngineRegistry.TryGetStruct(structType, out var type))
+            {
+                StructValue = new EngineProperty(type);
+                StructValue.ReadPropertyValue(buffer, size, property);
+            }
+            else if (CoreRegistry.Instance.TryGetProperty(structType, out var prop))
+            {
+                StructValue = new CoreProperty(prop);
+                StructValue.ReadPropertyValue(buffer, size, property);
+            }
+            else
+            {
+                base.ReadPropertyValue(buffer, size, property);
+            }
+        }
+
+        #endregion OldMethods
+
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);

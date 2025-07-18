@@ -1,8 +1,9 @@
 ﻿using System;
-
+using UpkManager.Constants;
+using UpkManager.Helpers;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
-using UpkManager.Constants;
 
 namespace UpkManager.Models.UpkFile.Classes
 {
@@ -25,6 +26,18 @@ namespace UpkManager.Models.UpkFile.Classes
         [TreeNodeField("UEnum")]
         public UnrealNameTableIndex ArrayEnum { get; private set; } // UEnum
 
+        #region Old
+
+        protected ByteArrayReader DataReader { get; set; }
+
+        public virtual object PropertyValue => DataReader.GetBytes();
+
+        public virtual string PropertyString => $"{DataReader.GetBytes().Length:N0} Bytes of Data";
+
+        public VirtualNode VirtualTree { get => GetVirtualTree(); }
+
+        #endregion Old
+
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
@@ -35,6 +48,37 @@ namespace UpkManager.Models.UpkFile.Classes
             Category = UName.ReadName(buffer);
             ArrayEnum = buffer.ReadObject();
         }
+
+        #region OldMethods
+
+        protected virtual VirtualNode GetVirtualTree()
+        {
+            return new(ToString());
+        }
+
+        public virtual void BuildVirtualTree(VirtualNode valueTree)
+        {
+            valueTree.Children.Add(new(PropertyString));
+        }
+
+        public override string ToString()
+        {
+            return PropertyString;
+        }
+
+        public virtual void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
+        {
+            DataReader = buffer.Reader.ReadByteArray(size);
+        }
+
+        public virtual void SetPropertyValue(object value)
+        {
+            if (value is not ByteArrayReader reader) return;
+
+            DataReader = reader;
+        }
+
+        #endregion OldMethods
     }
 
     [Flags]

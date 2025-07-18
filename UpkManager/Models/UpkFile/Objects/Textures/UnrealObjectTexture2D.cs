@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,10 +6,8 @@ using DDSLib;
 using DDSLib.Constants;
 
 using UpkManager.Constants;
-using UpkManager.Extensions;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
-using UpkManager.Models.UpkFile.Properties;
 using UpkManager.Models.UpkFile.Tables;
 
 
