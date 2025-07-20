@@ -322,6 +322,7 @@ namespace UpkManager.Models.UpkFile.Engine
 
     public class SkeletalMeshVertexColorBuffer : VertexBuffer
     {
+        [StructField("GPUSkinVertexColor", true)]
         public UArray<GPUSkinVertexColor> Colors { get; set; }
 
         public static SkeletalMeshVertexColorBuffer ReadData(UBuffer buffer)
