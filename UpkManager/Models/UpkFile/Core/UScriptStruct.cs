@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("ScriptStruct")]
     public class UScriptStruct : UStruct
     {
-        [TreeNodeField]
+        [StructField]
         public StructFlags StructFlags { get; private set; }
         public override void ReadBuffer(UBuffer buffer)
         {

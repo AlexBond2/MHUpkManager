@@ -12,7 +12,7 @@ namespace UpkManager.Models.UpkFile.Engine
     [UnrealClass("LightMapTexture2D")]
     public class ULightMapTexture2D : UTexture2D
     {
-        [TreeNodeField]
+        [StructField]
         public ELightMapFlags LightMapFlags { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)

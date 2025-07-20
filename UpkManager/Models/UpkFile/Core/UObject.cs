@@ -9,9 +9,10 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Classes
 {
     [AttributeUsage(AttributeTargets.Property, Inherited = true)]
-    public class TreeNodeFieldAttribute(string typeName = null) : Attribute
+    public class StructFieldAttribute(string typeName = null, bool skip = false) : Attribute
     {
         public string TypeName { get; } = typeName;
+        public bool Skip { get; } = skip;
     }
 
     [AttributeUsage(AttributeTargets.Property, Inherited = true)]
@@ -28,7 +29,7 @@ namespace UpkManager.Models.UpkFile.Classes
     [UnrealClass("Object")]
     public class UObject// : UnrealUpkBuilderBase
     {
-        [TreeNodeField]
+        [StructField]
         public int NetIndex { get; private set; } = -1;
         public List<UnrealProperty> Properties { get; } = [];
 
@@ -55,8 +56,8 @@ namespace UpkManager.Models.UpkFile.Classes
 
         private VirtualNode BuildPropVirtualTree(PropertyInfo prop)
         {
-            var attr = prop.GetCustomAttribute<TreeNodeFieldAttribute>();
-
+            var attr = prop.GetCustomAttribute<StructFieldAttribute>();
+            bool skip = attr.Skip;
             string displayName = prop.Name;
             string typeName = attr.TypeName ?? GetTypeName(prop.PropertyType);
 
@@ -70,7 +71,7 @@ namespace UpkManager.Models.UpkFile.Classes
             else if (value is IEnumerable enumerable && value is not string)
             {
                 fieldNode.Text += "[]";
-                var arrayNode = BuildArrayVirtualTree(typeName, enumerable);
+                var arrayNode = CoreProperty.BuildArrayVirtualTree(typeName, enumerable, skip);
                 fieldNode.Children.Add(arrayNode);
             }
             else if (value is IAtomicStruct atomic)
@@ -85,37 +86,12 @@ namespace UpkManager.Models.UpkFile.Classes
             return fieldNode;
         }
 
-        public static VirtualNode BuildArrayVirtualTree(string typeName, IEnumerable enumerable)
-        {
-            var listNode = new VirtualNode();
-            int count = 0;
-            if (enumerable is byte[] data)
-            {
-                count = data.Length;
-                listNode.Tag = data;
-            }
-            else
-            {
-                foreach (var item in enumerable)
-                {
-                    var itemNode = new VirtualNode($"[{count}] {item}");
-                    if (item is IAtomicStruct atomic)
-                        CoreProperty.BuildStructVirtualTree(itemNode, atomic);
-
-                    listNode.Children.Add(itemNode);
-                    count++;
-                }
-            }
-            listNode.Text = $"{typeName}[{count}]";
-            return listNode;
-        }
-
         public static IEnumerable<PropertyInfo> GetTreeViewFields(object obj)
         {
             Type type = obj.GetType();
             foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
-                if (field.IsDefined(typeof(TreeNodeFieldAttribute)))
+                if (field.IsDefined(typeof(StructFieldAttribute)))
                     yield return field;
             }
         }

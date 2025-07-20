@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Core
 [UnrealClass("InterfaceProperty")]
     public class UInterfaceProperty : UProperty
     {
-        [TreeNodeField("UClass")]
+        [StructField("UClass")]
         public FName InterfaceClass { get; private set; } // UClass
         public override void ReadBuffer(UBuffer buffer)
         {

@@ -9,7 +9,7 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("ByteProperty")]
     public class UByteProperty : UProperty
     {
-        [TreeNodeField("UEnum")]
+        [StructField("UEnum")]
         public FName Enum { get; private set; } // UEnum
         public FName EnumValueName { get; set; } // FName
         private byte? Value { get; set; }

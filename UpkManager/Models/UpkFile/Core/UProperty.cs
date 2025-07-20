@@ -10,17 +10,17 @@ namespace UpkManager.Models.UpkFile.Classes
     [UnrealClass("Property")]
     public class UProperty : UField
     {
-        [TreeNodeField]
+        [StructField]
         public int ArrayDim { get; private set; }
         public int ElementSize;
 
-        [TreeNodeField]
+        [StructField]
         public PropertyFlags PropertyFlags { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public UName Category { get; private set; }
 
-        [TreeNodeField("UEnum")]
+        [StructField("UEnum")]
         public FName ArrayEnum { get; private set; } // UEnum
 
         protected ByteArrayReader DataReader { get; set; }

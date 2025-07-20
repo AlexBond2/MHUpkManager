@@ -5,10 +5,10 @@ namespace UpkManager.Models.UpkFile.Classes
 {
     public class UField : UObject
     {
-        [TreeNodeField("UStruct")]
+        [StructField("UStruct")]
         public FName SuperIndex { get; protected set; }
 
-        [TreeNodeField("UField")]
+        [StructField("UField")]
         public FName NextFieldIndex { get; private set; }
 
         public override void ReadBuffer(UBuffer buffer)

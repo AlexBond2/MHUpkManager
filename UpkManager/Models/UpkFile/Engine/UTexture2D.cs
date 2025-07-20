@@ -20,25 +20,25 @@ namespace UpkManager.Models.UpkFile.Engine
         [PropertyField]
         public EPixelFormat Format { get; set; }
 
-        [TreeNodeField("Texture2DMipMap")]
+        [StructField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> Mips { get; set; }
 
-        [TreeNodeField]
+        [StructField]
         public Guid TextureFileCacheGuid { get; set; }
 
-        [TreeNodeField("Texture2DMipMap")]
+        [StructField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> CachedPVRTCMips { get; set; }
 
-        [TreeNodeField]
+        [StructField]
         public int CachedFlashMipMaxResolution { get; set; }
 
-        [TreeNodeField("Texture2DMipMap")]
+        [StructField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> CachedATITCMips { get; set; }
 
-        [TreeNodeField("UntypedBulkData")]
+        [StructField("UntypedBulkData")]
         public byte[] CachedFlashMipData { get; set; } // UntypedBulkData
 
-        [TreeNodeField("Texture2DMipMap")]
+        [StructField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> CachedETCMips { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)

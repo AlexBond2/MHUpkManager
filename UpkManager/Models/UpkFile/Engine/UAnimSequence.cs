@@ -29,17 +29,17 @@ namespace UpkManager.Models.UpkFile.Engine
         public int[] CompressedTrackOffsets { get; set; }
 
 
-        [TreeNodeField("RawAnimSequenceTrack")]
+        [StructField("RawAnimSequenceTrack")]
         public UArray<RawAnimSequenceTrack> RawAnimationData { get; set; }
 
-        [TreeNodeField("Data")]
+        [StructField("Data")]
         public byte[] CompressedByteStream { get; set; }
 
 
-        [TreeNodeField("TranslationTrack")]
+        [StructField("TranslationTrack")]
         public UArray<TranslationTrack> TranslationData { get; set; }
 
-        [TreeNodeField("RotationTrack")]
+        [StructField("RotationTrack")]
         public UArray<RotationTrack> RotationData { get; set; }
 
         public IAnimationCodec TranslationCodec { get; set; }

@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Core
 [UnrealClass("ClassProperty")]
     public class UClassProperty : UObjectProperty
     {
-        [TreeNodeField("UClass")]
+        [StructField("UClass")]
         public FName MetaClass { get; private set; } // UClass
         public override void ReadBuffer(UBuffer buffer)
         {

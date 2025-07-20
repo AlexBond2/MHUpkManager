@@ -16,16 +16,16 @@ namespace UpkManager.Models.UpkFile.Classes
     [UnrealClass("State")]
     public class UState : UStruct
     {
-        [TreeNodeField]
+        [StructField]
         public uint ProbeMask { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public ushort LabelTableOffset { get; private set; }
 
-        [TreeNodeField("UStateFlags")]
+        [StructField("UStateFlags")]
         public UStateFlags StateFlags { get; private set; } // UStateFlags 
 
-        [TreeNodeField("UMap<UName, UFunction>")]
+        [StructField("UMap<UName, UFunction>")]
         public UMap<UName, FName> FuncMap { get; private set; } // UMap<UName, UFunction>
 
         public override void ReadBuffer(UBuffer buffer)

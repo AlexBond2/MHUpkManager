@@ -5,7 +5,7 @@ namespace UpkManager.Models.UpkFile.Classes
     [UnrealClass("Const")]
     public class UConst : UField
     {
-        [TreeNodeField]
+        [StructField]
         public string Value { get; private set; }
 
         public override void ReadBuffer(UBuffer buffer)

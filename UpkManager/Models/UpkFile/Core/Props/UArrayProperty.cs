@@ -10,7 +10,7 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("ArrayProperty")]
     public class UArrayProperty : UProperty
     {
-        [TreeNodeField("UProperty")]
+        [StructField("UProperty")]
         public FName Inner { get; private set; } // UProperty
 
         private bool showArray;

@@ -12,7 +12,7 @@ namespace UpkManager.Models.UpkFile.Engine
     [UnrealClass("RB_BodySetup")]
     public class URB_BodySetup : UKMeshProps
     {
-        [TreeNodeField("KCachedConvexData")]
+        [StructField("KCachedConvexData")]
         public UArray<FKCachedConvexData> PreCachedPhysData { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)

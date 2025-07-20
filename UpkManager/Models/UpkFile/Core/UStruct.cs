@@ -6,25 +6,25 @@ namespace UpkManager.Models.UpkFile.Classes
     [UnrealClass("Struct")]
     public class UStruct : UField
     {
-        [TreeNodeField("UTextBuffer")]
+        [StructField("UTextBuffer")]
         public FName ScriptText { get; private set; }
 
-        [TreeNodeField("UField")]
+        [StructField("UField")]
         public FName Children { get; private set; }
 
-        [TreeNodeField("UTextBuffer")]
+        [StructField("UTextBuffer")]
         public FName CppText { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public int Line { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public int TextPos { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public int ByteScriptSize { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public int DataScriptSize { get; private set; }
 
         public override void ReadBuffer(UBuffer buffer)

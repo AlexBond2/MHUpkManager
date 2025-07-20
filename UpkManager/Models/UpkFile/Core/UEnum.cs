@@ -5,7 +5,7 @@ namespace UpkManager.Models.UpkFile.Classes
     [UnrealClass("Enum")]
     public class UEnum : UField
     {
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public UArray<UName> Names { get; private set; }
 
         public override void ReadBuffer(UBuffer buffer)

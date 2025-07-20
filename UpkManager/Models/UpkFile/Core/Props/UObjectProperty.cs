@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("ObjectProperty")]
     public class UObjectProperty : UProperty
     {
-        [TreeNodeField("UObject")]
+        [StructField("UObject")]
         public FName Object { get; private set; } // UObject
         public override string PropertyString => Object != null ? Object.Name : "null";
 

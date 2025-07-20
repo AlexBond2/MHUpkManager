@@ -10,46 +10,46 @@ namespace UpkManager.Models.UpkFile.Classes
 
     public class UClass : UState
     {
-        [TreeNodeField]
+        [StructField]
         public EClassFlags ClassFlags { get; private set; }
 
-        [TreeNodeField("UClass")]
+        [StructField("UClass")]
         public FName Within { get; private set; } // UClass 
 
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public UName ConfigName { get; private set; } // UName 
 
-        [TreeNodeField("UMap<UName, UObject>")]
+        [StructField("UMap<UName, UObject>")]
         public UMap<UName, FName> ComponentDefaultObjectMap { get; private set; } // UName, UObject
 
-        [TreeNodeField("FImplementedInterface")]
+        [StructField("FImplementedInterface")]
         public List<FImplementedInterface> Interfaces { get; private set; }
 
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public List<UName> DontSortCategories { get; private set; } // UName
 
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public List<UName> HideCategories { get; private set; } // UName
 
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public List<UName> AutoExpandCategories { get; private set; } // UName
 
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public List<UName> AutoCollapseCategories { get; private set; } // UName
 
-        [TreeNodeField]
+        [StructField]
         public bool ForceScriptOrder { get; private set; }
 
-        [TreeNodeField("UName")]
+        [StructField("UName")]
         public List<UName> ClassGroups { get; private set; } // UName
 
-        [TreeNodeField]
+        [StructField]
         public string NativeClassName { get; private set; }
 
-        [TreeNodeField]
+        [StructField]
         public UName DLLBindName { get; private set; } // UName
 
-        [TreeNodeField("UObject")]
+        [StructField("UObject")]
         public FName Default { get; private set; } // UObject
 
 

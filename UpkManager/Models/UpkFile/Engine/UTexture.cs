@@ -6,7 +6,7 @@ namespace UpkManager.Models.UpkFile.Engine
     [UnrealClass("Texture")]
     public class UTexture: USurface
     {
-        [TreeNodeField("UntypedBulkData")]
+        [StructField("UntypedBulkData")]
         public byte[] SourceArt { get; set; } // UntypedBulkData
 
         public override void ReadBuffer(UBuffer buffer)

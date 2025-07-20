@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Windows.Documents;
 using UpkManager.Models.UpkFile.Types;
+using UpkManager.Models.UpkFile.Classes;
 
 namespace UpkManager.Models.UpkFile.Core
 {
     public interface IAtomicStruct
     {
         string Format { get; }
-    }
-
-    [AttributeUsage(AttributeTargets.Property)]
-    public class StructFieldAttribute : Attribute
-    {
     }
 
     public class Vector : IAtomicStruct
