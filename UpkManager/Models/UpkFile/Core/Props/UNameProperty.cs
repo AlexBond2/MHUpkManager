@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Core
     [UnrealClass("NameProperty")]
     public class UNameProperty : UProperty
     {
-        protected UnrealNameTableIndex Value { get; set; }
+        protected FName Value { get; set; }
         public override object PropertyValue => Value;
         public override string PropertyString => Value.Name;
 
@@ -18,7 +18,7 @@ namespace UpkManager.Models.UpkFile.Core
 
         public override void SetPropertyValue(object value)
         {
-            if (value is not UnrealNameTableIndex index) return;
+            if (value is not FName index) return;
             Value = index;
         }
     }

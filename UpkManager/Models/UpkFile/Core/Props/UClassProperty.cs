@@ -8,7 +8,7 @@ namespace UpkManager.Models.UpkFile.Core
     public class UClassProperty : UObjectProperty
     {
         [TreeNodeField("UClass")]
-        public UnrealNameTableIndex MetaClass { get; private set; } // UClass
+        public FName MetaClass { get; private set; } // UClass
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);

@@ -224,6 +224,11 @@ namespace UpkManager.Helpers
             return value;
         }
 
+        public bool ReadBool()
+        {
+            return ReadInt32() > 0;
+        }
+
         public int CurrentOffset => index;
 
         public int Remaining => data.Length - index;

@@ -26,7 +26,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public UStateFlags StateFlags { get; private set; } // UStateFlags 
 
         [TreeNodeField("UMap<UName, UFunction>")]
-        public UMap<UName, UnrealNameTableIndex> FuncMap { get; private set; } // UMap<UName, UFunction>
+        public UMap<UName, FName> FuncMap { get; private set; } // UMap<UName, UFunction>
 
         public override void ReadBuffer(UBuffer buffer)
         {
@@ -35,7 +35,7 @@ namespace UpkManager.Models.UpkFile.Classes
             ProbeMask = buffer.Reader.ReadUInt32();
             LabelTableOffset = buffer.Reader.ReadUInt16();
             StateFlags = (UStateFlags)buffer.Reader.ReadUInt32();
-            FuncMap = buffer.ReadMap();
+            FuncMap = buffer.ReadUMap();
         }
     }
 }

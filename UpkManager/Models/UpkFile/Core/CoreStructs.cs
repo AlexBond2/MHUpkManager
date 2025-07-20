@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Documents;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
@@ -44,6 +45,154 @@ namespace UpkManager.Models.UpkFile.Core
                 Z = buffer.Reader.ReadSingle()
             };
             return vector;
+        }
+    }
+
+    public class PackedNormal : IAtomicStruct
+    {
+        [StructField]
+        public uint Packed { get; set; }
+
+        public sbyte X => (sbyte)(Packed & 0xFF);
+        public sbyte Y => (sbyte)((Packed >> 8) & 0xFF);
+        public sbyte Z => (sbyte)((Packed >> 16) & 0xFF);
+        public sbyte W => (sbyte)((Packed >> 24) & 0xFF);
+
+        public Vector ToVector()
+        {
+            return new Vector(
+                X / 127.0f,
+                Y / 127.0f,
+                Z / 127.0f
+            );
+        }
+
+        public string Format => ToVector().Format;
+
+        public static PackedNormal ReadData(UBuffer buffer)
+        {
+            PackedNormal normal = new()
+            {
+                Packed = buffer.Reader.ReadUInt32(),
+            };
+
+            return normal;
+        }
+    }
+
+    public class PackedPosition : IAtomicStruct
+    {
+        [StructField]
+        public uint Packed { get; set; }
+
+        public int X => (int)(Packed << 0) << (32 - 11) >> (32 - 11);
+        public int Y => (int)(Packed << 11) >> (32 - 11);
+        public int Z => (int)(Packed << 22) >> (32 - 10);
+
+        public Vector ToVector()
+        {
+            return new Vector(
+                X / 1023.0f,
+                Y / 1023.0f,
+                Z / 511.0f
+            );
+        }
+
+        public string Format => ToVector().Format;
+
+        public static PackedPosition ReadData(UBuffer buffer)
+        {
+            PackedPosition normal = new()
+            {
+                Packed = buffer.Reader.ReadUInt32(),
+            };
+
+            return normal;
+        }
+    }
+
+    public class Vector2D : IAtomicStruct
+    {
+        [StructField]
+        public float X { get; set; }
+
+        [StructField]
+        public float Y { get; set; }
+
+        public string Format => $"[{X:F4};{Y:F4}]";
+
+        public static Vector2D ReadData(UBuffer buffer)
+        {
+            var vector2D = new Vector2D
+            {
+                X = buffer.Reader.ReadSingle(),
+                Y = buffer.Reader.ReadSingle()
+            };
+            return vector2D;
+        }
+    }
+
+    public class Float16 : IAtomicStruct
+    {
+        [StructField]
+        public ushort Encoded { get; set; }
+
+        public float ToFloat()
+        {
+            int sign = (Encoded >> 15) & 0x1;
+            int exponent = (Encoded >> 10) & 0x1F;
+            int mantissa = Encoded & 0x3FF;
+
+            uint result;
+
+            if (exponent == 0)
+            {
+                result = (uint)(sign << 31);
+            }
+            else if (exponent == 0x1F)
+            {
+                result = ((uint)sign << 31) | ((uint)142 << 23) | 0x7FFFFF;
+            }
+            else
+            {
+                int newExp = exponent - 15 + 127; 
+                int newMantissa = mantissa << 13;
+
+                result = ((uint)sign << 31) | ((uint)newExp << 23) | (uint)newMantissa;
+            }
+
+            return BitConverter.Int32BitsToSingle((int)result);
+        }
+
+        public string Format => $"{ToFloat():F4}";
+
+        public static Float16 ReadData(UBuffer buffer)
+        {
+            return new Float16
+            {
+                Encoded = buffer.Reader.ReadUInt16()
+            };
+        }
+    }
+
+    public class Vector2DHalf : IAtomicStruct
+    {
+        [StructField]
+        public Float16 X { get; set; }
+
+        [StructField]
+        public Float16 Y { get; set; }
+
+        public string Format => $"[{X.ToFloat():F4};{Y.ToFloat():F4}]";
+
+        public static Vector2DHalf ReadData(UBuffer buffer)
+        {
+            var vector2D = new Vector2DHalf
+            {
+                X = Float16.ReadData(buffer),
+                Y = Float16.ReadData(buffer)
+            };
+            return vector2D;
         }
     }
 

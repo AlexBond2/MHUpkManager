@@ -14,13 +14,13 @@ namespace UpkManager.Models.UpkFile.Classes
         public EClassFlags ClassFlags { get; private set; }
 
         [TreeNodeField("UClass")]
-        public UnrealNameTableIndex Within { get; private set; } // UClass 
+        public FName Within { get; private set; } // UClass 
 
         [TreeNodeField("UName")]
         public UName ConfigName { get; private set; } // UName 
 
         [TreeNodeField("UMap<UName, UObject>")]
-        public UMap<UName, UnrealNameTableIndex> ComponentDefaultObjectMap { get; private set; } // UName, UObject
+        public UMap<UName, FName> ComponentDefaultObjectMap { get; private set; } // UName, UObject
 
         [TreeNodeField("FImplementedInterface")]
         public List<FImplementedInterface> Interfaces { get; private set; }
@@ -50,7 +50,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public UName DLLBindName { get; private set; } // UName
 
         [TreeNodeField("UObject")]
-        public UnrealNameTableIndex Default { get; private set; } // UObject
+        public FName Default { get; private set; } // UObject
 
 
         public override void ReadBuffer(UBuffer buffer)
@@ -61,7 +61,7 @@ namespace UpkManager.Models.UpkFile.Classes
             Within = buffer.ReadObject();
             ConfigName = UName.ReadName(buffer);
 
-            ComponentDefaultObjectMap = buffer.ReadMap();
+            ComponentDefaultObjectMap = buffer.ReadUMap();
 
             Interfaces = buffer.ReadList(FImplementedInterface.Read);
             DontSortCategories = buffer.ReadList(UName.ReadName);
@@ -80,8 +80,8 @@ namespace UpkManager.Models.UpkFile.Classes
 
     public struct FImplementedInterface(UBuffer buffer)
     {
-        public UnrealNameTableIndex Class = buffer.ReadObject();
-        public UnrealNameTableIndex Pointer = buffer.ReadObject();
+        public FName Class = buffer.ReadObject();
+        public FName Pointer = buffer.ReadObject();
 
         public static FImplementedInterface Read(UBuffer buffer)
         {

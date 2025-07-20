@@ -6,10 +6,10 @@ namespace UpkManager.Models.UpkFile.Classes
     public class UField : UObject
     {
         [TreeNodeField("UStruct")]
-        public UnrealNameTableIndex SuperIndex { get; protected set; }
+        public FName SuperIndex { get; protected set; }
 
         [TreeNodeField("UField")]
-        public UnrealNameTableIndex NextFieldIndex { get; private set; }
+        public FName NextFieldIndex { get; private set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {

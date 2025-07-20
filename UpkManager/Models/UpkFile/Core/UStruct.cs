@@ -7,13 +7,13 @@ namespace UpkManager.Models.UpkFile.Classes
     public class UStruct : UField
     {
         [TreeNodeField("UTextBuffer")]
-        public UnrealNameTableIndex ScriptText { get; private set; }
+        public FName ScriptText { get; private set; }
 
         [TreeNodeField("UField")]
-        public UnrealNameTableIndex Children { get; private set; }
+        public FName Children { get; private set; }
 
         [TreeNodeField("UTextBuffer")]
-        public UnrealNameTableIndex CppText { get; private set; }
+        public FName CppText { get; private set; }
 
         [TreeNodeField]
         public int Line { get; private set; }

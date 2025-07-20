@@ -2,7 +2,7 @@
 
 namespace UpkManager.Models.UpkFile.Types
 {
-    public class UName : UnrealNameTableIndex
+    public class UName : FName
     {
         public static UName ReadName(UBuffer buffer)
         {

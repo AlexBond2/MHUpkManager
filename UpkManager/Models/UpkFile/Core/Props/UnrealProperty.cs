@@ -18,8 +18,8 @@ namespace UpkManager.Models.UpkFile.Core
 
     public sealed class UnrealProperty
     {
-        public UnrealNameTableIndex NameIndex { get; set; }
-        public UnrealNameTableIndex Category { get; set; }
+        public FName NameIndex { get; set; }
+        public FName Category { get; set; }
         public int ElementSize { get; private set; }
         public int ArrayEnum { get; private set; }
         public UProperty Value { get; private set; }

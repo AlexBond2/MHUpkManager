@@ -21,7 +21,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override ObjectTypes ObjectType => ObjectTypes.ArchetypeObjectReference;
 
-        public UnrealNameTableIndex ArchetypeObjectNameIndex { get; private set; }
+        public FName ArchetypeObjectNameIndex { get; private set; }
 
         #endregion Unreal Properties
 

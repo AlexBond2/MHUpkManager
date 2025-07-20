@@ -10,7 +10,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public int OuterReference { get; protected set; }
 
-        public UnrealNameTableIndex ObjectNameIndex { get; protected set; }
+        public FName ObjectNameIndex { get; protected set; }
 
         #endregion Properties
 

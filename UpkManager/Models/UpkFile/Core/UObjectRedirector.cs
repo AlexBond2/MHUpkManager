@@ -8,7 +8,7 @@ namespace UpkManager.Models.UpkFile.Core
     public class UObjectRedirector : UObject
     {
         [TreeNodeField("UObject")]
-        public UnrealNameTableIndex DestinationObject { get; private set; } // UObject
+        public FName DestinationObject { get; private set; } // UObject
 
         public override void ReadBuffer(UBuffer buffer)
         {

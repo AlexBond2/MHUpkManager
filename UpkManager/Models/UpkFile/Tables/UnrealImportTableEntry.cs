@@ -13,18 +13,18 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public UnrealImportTableEntry()
         {
-            PackageNameIndex = new UnrealNameTableIndex();
-            ClassNameIndex = new UnrealNameTableIndex();
-            ObjectNameIndex = new UnrealNameTableIndex();
+            PackageNameIndex = new FName();
+            ClassNameIndex = new FName();
+            ObjectNameIndex = new FName();
         }
 
         #endregion Constructor
 
         #region Properties
 
-        public UnrealNameTableIndex PackageNameIndex { get; }
+        public FName PackageNameIndex { get; }
 
-        public UnrealNameTableIndex ClassNameIndex { get; }
+        public FName ClassNameIndex { get; }
         //
         // OwnerReference in ObjectTableEntryBase
         //
@@ -34,7 +34,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Unreal Properties
 
-        public UnrealNameTableIndex OuterReferenceNameIndex { get; set; }
+        public FName OuterReferenceNameIndex { get; set; }
 
         #endregion Unreal Properties
 

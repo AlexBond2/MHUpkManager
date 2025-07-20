@@ -8,10 +8,10 @@ namespace UpkManager.Models.UpkFile.Core
     public class UMapProperty : UProperty
     {
         [TreeNodeField("UProperty")]
-        public UnrealNameTableIndex Key { get; private set; } // UProperty
+        public FName Key { get; private set; } // UProperty
 
         [TreeNodeField("UProperty")]
-        public UnrealNameTableIndex Value { get; private set; } // UProperty
+        public FName Value { get; private set; } // UProperty
 
         public override void ReadBuffer(UBuffer buffer)
         {

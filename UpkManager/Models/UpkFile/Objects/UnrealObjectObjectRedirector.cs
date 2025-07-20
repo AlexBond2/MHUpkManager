@@ -21,7 +21,7 @@ namespace UpkManager.Models.UpkFile.Objects
 
         public override ObjectTypes ObjectType => ObjectTypes.ObjectRedirector;
 
-        public UnrealNameTableIndex ObjectReferenceNameIndex { get; set; }
+        public FName ObjectReferenceNameIndex { get; set; }
 
         #endregion Unreal Properties
 

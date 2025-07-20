@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Classes
     public class UComponent : UObject
     {
         [TreeNodeField("UClass")]
-        public UnrealNameTableIndex TemplateOwnerClass { get; set; } // UClass
+        public FName TemplateOwnerClass { get; set; } // UClass
 
         [TreeNodeField]
         public UName TemplateName { get; set; }

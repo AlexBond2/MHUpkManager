@@ -8,7 +8,7 @@ namespace UpkManager.Models.UpkFile.Core
     public class UObjectProperty : UProperty
     {
         [TreeNodeField("UObject")]
-        public UnrealNameTableIndex Object { get; private set; } // UObject
+        public FName Object { get; private set; } // UObject
         public override string PropertyString => Object != null ? Object.Name : "null";
 
         public override void ReadBuffer(UBuffer buffer)

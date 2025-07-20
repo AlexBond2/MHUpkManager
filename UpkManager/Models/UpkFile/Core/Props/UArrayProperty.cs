@@ -11,7 +11,7 @@ namespace UpkManager.Models.UpkFile.Core
     public class UArrayProperty : UProperty
     {
         [TreeNodeField("UProperty")]
-        public UnrealNameTableIndex Inner { get; private set; } // UProperty
+        public FName Inner { get; private set; } // UProperty
 
         private bool showArray;
         private string itemType;

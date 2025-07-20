@@ -9,7 +9,7 @@ namespace UpkManager.Models.UpkFile.Core
     public class UStructProperty : UProperty
     {
         [TreeNodeField("UStruct")]
-        public UnrealNameTableIndex Struct { get; private set; } // UStruct
+        public FName Struct { get; private set; } // UStruct
 
         public override string PropertyString => Struct.Name;
         public UProperty StructValue { get; private set; }

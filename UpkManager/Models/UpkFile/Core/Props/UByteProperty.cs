@@ -10,8 +10,8 @@ namespace UpkManager.Models.UpkFile.Core
     public class UByteProperty : UProperty
     {
         [TreeNodeField("UEnum")]
-        public UnrealNameTableIndex Enum { get; private set; } // UEnum
-        public UnrealNameTableIndex EnumValueName { get; set; } // FName
+        public FName Enum { get; private set; } // UEnum
+        public FName EnumValueName { get; set; } // FName
         private byte? Value { get; set; }
         public string EnumValue => EnumValueName?.Name;
         public override object PropertyValue => Value ?? base.PropertyValue;
@@ -30,7 +30,7 @@ namespace UpkManager.Models.UpkFile.Core
         {
             if (value is UnrealNameTableEntry entry)
             {
-                var index = new UnrealNameTableIndex();
+                var index = new FName();
                 index.SetNameTableIndex(entry);
             }
 

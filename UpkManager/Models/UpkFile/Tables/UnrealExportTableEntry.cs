@@ -50,7 +50,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal UnrealExportTableEntry()
         {
-            ObjectNameIndex = new UnrealNameTableIndex();
+            ObjectNameIndex = new FName();
             NetObjects = [];
         }
 
@@ -80,10 +80,10 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public ByteArrayReader UnrealObjectReader { get; private set; }
         public UnrealObjectBase UnrealObject { get; private set; }
-        public UnrealNameTableIndex ClassReferenceNameIndex { get; private set; }
-        public UnrealNameTableIndex SuperReferenceNameIndex { get; private set; }
-        public UnrealNameTableIndex OuterReferenceNameIndex { get; private set; }
-        public UnrealNameTableIndex ArchetypeReferenceNameIndex { get; private set; }
+        public FName ClassReferenceNameIndex { get; private set; }
+        public FName SuperReferenceNameIndex { get; private set; }
+        public FName OuterReferenceNameIndex { get; private set; }
+        public FName ArchetypeReferenceNameIndex { get; private set; }
 
         #endregion Unreal Properties
 

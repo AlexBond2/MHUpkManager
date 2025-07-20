@@ -127,8 +127,10 @@ namespace UpkManager.Models.UpkFile.Core
                     
                     object fieldValue = field.GetValue(atomic);
                     if (fieldValue is IAtomicStruct chieldAtomic)
+                    {
                         BuildStructVirtualTree(structNode, chieldAtomic);
-                    else
+                    }
+                    else if (fieldValue is not null)
                     {
                         var node = new VirtualNode(fieldValue.ToString());
                         structNode.Children.Add(node);
