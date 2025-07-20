@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
 using UpkManager.Models.UpkFile.Core;
-using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Models.UpkFile.Types
@@ -89,6 +88,13 @@ namespace UpkManager.Models.UpkFile.Types
             return ustring.String;
         }
 
+        public static string ReadString(UBuffer buffer)
+        {
+            var ustring = new UnrealString();
+            ustring.ReadString(buffer.Reader);
+            return ustring.String;
+        }
+
         public ResultProperty ReadProperty(UnrealProperty property)
         {
             return property.ReadProperty(this);
@@ -112,6 +118,18 @@ namespace UpkManager.Models.UpkFile.Types
         {
             var spanBytes = ReadBulkSpan<T>();
             return [.. spanBytes.ToArray()];
+        }
+
+        public UArray<byte[]> ReadArrayUnkElement()
+        {
+            int size = Reader.ReadInt32();
+
+            int count = Reader.ReadInt32();
+            var array = new UArray<byte[]>(count);
+            for (int i = 0; i < count; i++)
+                array.Add(Reader.ReadBytes(size));
+
+            return array;
         }
 
         public UArray<T> ReadArrayElement<T>(Func<UBuffer, T> readMethod, int size)

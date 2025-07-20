@@ -30,17 +30,29 @@ namespace UpkManager.Models.UpkFile.Engine
         [TreeNodeField]
         public int SkeletalDepth { get; set; }
 
-        [TreeNodeField("LODModels")]
+        [TreeNodeField("StaticLODModel")]
         public UArray<StaticLODModel> LODModels { get; set; }
 
         [TreeNodeField]
         public UMap<FName, int> NameIndexMap { get; set; }
 
-        [TreeNodeField]
-        public UArray<float> CachedStreamingTextureFactors { get; set; }
+        [TreeNodeField("PerPolyBoneCollisionData")]
+        public UArray<PerPolyBoneCollisionData> PerPolyBoneKDOPs { get; set; }
+
+        [TreeNodeField("BoneBreakName")]
+        public UArray<string> BoneBreakNames { get; set; }
+
+        [TreeNodeField("Index")]
+        public byte[] BoneBreakOptions { get; set; }
 
         [TreeNodeField("UApexClothingAsset")]
         public UArray<FName> ClothingAssets { get; set; } // UApexClothingAsset
+
+        [TreeNodeField("TexelRatio")]
+        public UArray<float> CachedStreamingTextureFactors { get; set; }
+
+        [TreeNodeField]
+        public SkeletalMeshSourceData SourceData { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {
@@ -56,13 +68,13 @@ namespace UpkManager.Models.UpkFile.Engine
             LODModels = ReadLODModels(buffer);
 
             NameIndexMap = buffer.ReadMap<FName, int>(UName.ReadName, UBuffer.ReadInt32);
-            // PerPolyBoneKDOPs
-            // BoneBreakNames
-            // BoneBreakOptions
+            PerPolyBoneKDOPs = buffer.ReadArray(PerPolyBoneCollisionData.ReadData);
+            BoneBreakNames = buffer.ReadArray(UBuffer.ReadString);
+            BoneBreakOptions = buffer.ReadBytes();
 
-            // ClothingAssets = buffer.ReadArray(UBuffer.ReadObject);
-            // CachedStreamingTextureFactors = buffer.ReadArray(UBuffer.ReadFloat);
-            // SourceData
+            ClothingAssets = buffer.ReadArray(UBuffer.ReadObject);
+            CachedStreamingTextureFactors = buffer.ReadArray(UBuffer.ReadFloat);
+            SourceData = SkeletalMeshSourceData.ReadData(buffer, this);
         }
 
         public UArray<StaticLODModel> ReadLODModels(UBuffer buffer)
@@ -74,6 +86,68 @@ namespace UpkManager.Models.UpkFile.Engine
 
             return array;
         }
+    }
+
+    public class SkeletalMeshSourceData : IAtomicStruct
+    {
+        [StructField]
+        public bool bHaveSourceData { get; set; }
+
+        [StructField]
+        public StaticLODModel LODModel { get; set; }
+
+        public static SkeletalMeshSourceData ReadData(UBuffer buffer, USkeletalMesh mesh)
+        {
+            var data = new SkeletalMeshSourceData();
+
+            data.bHaveSourceData = buffer.ReadBool();
+            if (data.bHaveSourceData)
+                data.LODModel = StaticLODModel.ReadData(buffer, mesh);
+
+            return data;
+        }
+
+        public string Format => "";
+    }
+
+    public class PerPolyBoneCollisionData : IAtomicStruct
+    {
+        [StructField]
+        public SkeletalKDOPTreeLegacy LegacykDOPTree { get; set; }
+
+        [StructField]
+        public UArray<Vector> CollisionVerts { get; set; }
+
+        public static PerPolyBoneCollisionData ReadData(UBuffer buffer)
+        {
+            return new PerPolyBoneCollisionData
+            {
+                LegacykDOPTree = SkeletalKDOPTreeLegacy.ReadData(buffer),
+                CollisionVerts = buffer.ReadArray(Vector.ReadData)
+            };
+        }
+
+        public string Format => "";
+    }
+
+    public class SkeletalKDOPTreeLegacy : IAtomicStruct
+    {
+        [StructField]
+        public UArray<byte[]> Nodes { get; set; } // FkDOPCollisionTriangle
+
+        [StructField]
+        public UArray<byte[]> Triangles { get; set; } // FSkelMeshCollisionDataProvider
+
+        public static SkeletalKDOPTreeLegacy ReadData(UBuffer buffer)
+        {
+            return new SkeletalKDOPTreeLegacy
+            {
+                Nodes = buffer.ReadArrayUnkElement(),
+                Triangles = buffer.ReadArrayUnkElement()
+            };
+        }
+
+        public string Format => "";
     }
 
     public class StaticLODModel : IAtomicStruct

@@ -45,7 +45,7 @@ namespace UpkManager.Models.UpkFile.Core
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error reading property '{NameIndex.Name}': {ex.Message}");
+                Console.WriteLine($"Error reading property '{NameIndex?.Name}': {ex.Message}");
                 return ResultProperty.Error;
             }
  
