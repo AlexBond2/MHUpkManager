@@ -86,6 +86,7 @@
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
+            viewModelMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -398,9 +399,9 @@
             // 
             // propertiesMenu
             // 
-            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem });
+            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem, viewModelMenuItem });
             propertiesMenu.Name = "propertiesMenu";
-            propertiesMenu.Size = new Size(185, 126);
+            propertiesMenu.Size = new Size(185, 148);
             propertiesMenu.Opening += propertiesMenu_Opening;
             // 
             // objectNameClassMenuItem
@@ -667,6 +668,14 @@
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
+            // viewModelMenuItem
+            // 
+            viewModelMenuItem.Enabled = false;
+            viewModelMenuItem.Name = "viewModelMenuItem";
+            viewModelMenuItem.Size = new Size(184, 22);
+            viewModelMenuItem.Text = "View Model...";
+            viewModelMenuItem.Click += viewModelMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -764,5 +773,6 @@
         private ContextMenuStrip objectMenu;
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem viewTextureMenuItem;
+        private ToolStripMenuItem viewModelMenuItem;
     }
 }

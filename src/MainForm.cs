@@ -24,6 +24,7 @@ namespace MHUpkManager
 
         private HexViewForm hexViewForm;
         private TextureViewForm textureViewForm;
+        private ModelViewForm modelViewForm;
 
         private List<TreeNode> rootNodes;
         private object currentObject;
@@ -42,6 +43,7 @@ namespace MHUpkManager
 
             hexViewForm = new HexViewForm();
             textureViewForm = new TextureViewForm();
+            modelViewForm = new ModelViewForm();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -50,6 +52,7 @@ namespace MHUpkManager
 
             hexViewForm?.Dispose();
             textureViewForm?.Dispose();
+            modelViewForm?.Dispose();
         }
 
         private void LoadDataFiles()
@@ -275,6 +278,7 @@ namespace MHUpkManager
             viewObjectMenuItem.Enabled = false;
             viewParentMenuItem.Enabled = false;
             viewTextureMenuItem.Enabled = false;
+            viewModelMenuItem.Enabled = false;
 
             if (currentObject is null) return;
 
@@ -336,6 +340,7 @@ namespace MHUpkManager
             }
 
             if (uObject.UObject is UTexture2D) viewTextureMenuItem.Enabled = true;
+            if (uObject.UObject is USkeletalMesh) viewModelMenuItem.Enabled = true;
 
             ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();
@@ -479,6 +484,22 @@ namespace MHUpkManager
                 textureViewForm.SetTitle(name);
                 textureViewForm.SetTextureObject(data);
                 textureViewForm.ShowDialog();
+            }
+        }
+
+        private void viewModelMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentObject is UnrealExportTableEntry export)
+                openModelView(export.ObjectNameIndex.Name, export.UnrealObject);
+        }
+
+        private void openModelView(string name, UnrealObjectBase unrealObject)
+        {
+            if (unrealObject is IUnrealObject uObject && uObject.UObject is USkeletalMesh mesh)
+            {
+                modelViewForm.SetTitle(name);
+                modelViewForm.SetMeshObject(mesh);
+                modelViewForm.ShowDialog();
             }
         }
     }
