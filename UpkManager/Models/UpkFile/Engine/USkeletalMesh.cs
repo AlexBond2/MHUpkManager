@@ -333,6 +333,16 @@ namespace UpkManager.Models.UpkFile.Engine
         }
     }
 
+    public struct GLVertex
+    {
+        public Vector Position;
+        public Vector Normal;
+        public Vector Tangent;
+        public Vector2D TexCoord;
+        public byte[] Bones;
+        public byte[] Weights;
+    }
+
     public class SkeletalMeshVertexBuffer : VertexBuffer
     {
         [StructField]
@@ -365,6 +375,23 @@ namespace UpkManager.Models.UpkFile.Engine
                 if (VertsF32 != null) return VertsF32;
 
                 return [];
+            }
+        }
+
+        public IEnumerable<GLVertex> GetGLVertexData()
+        { 
+            foreach (var vertex in VertexData)
+            {
+                GLVertex glVertex = new()
+                {
+                    Position = vertex.GetPositionF32(),
+                    Normal = vertex.TangentZ.ToVector(),
+                    Tangent = vertex.TangentX.ToVector(),
+                    TexCoord = vertex.GetUVsF32(0), // Assuming we only need the first UV set
+                    Bones = vertex.InfluenceBones,
+                    Weights = vertex.InfluenceWeights
+                };
+                yield return glVertex;
             }
         }
 
@@ -449,6 +476,16 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public byte[] InfluenceWeights { get; set; }
 
+        public virtual Vector GetPositionF32()
+        {
+            return new Vector(0.0f, 0.0f, 0.0f);
+        }
+
+        public virtual Vector2D GetUVsF32(int index)
+        {
+            return new Vector2D(0.0f, 0.0f);
+        }
+
         public virtual void ReadData(UBuffer buffer, int num)
         {
             TangentX = PackedNormal.ReadData(buffer);
@@ -502,6 +539,18 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public Vector2DHalf[] UVs { get; set; }
 
+        public override Vector GetPositionF32()
+        {
+            return Positon.ToVector();
+        }
+
+        public override Vector2D GetUVsF32(int index)
+        {
+            if (index < 0 || index >= UVs.Length)
+                throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
+            return new Vector2D(UVs[index].X.ToFloat(), UVs[index].Y.ToFloat());
+        }
+
         public override void ReadData(UBuffer buffer, int num)
         {
             base.ReadData(buffer, num);
@@ -519,6 +568,18 @@ namespace UpkManager.Models.UpkFile.Engine
 
         [StructField]
         public Vector2DHalf[] UVs { get; set; }
+
+        public override Vector GetPositionF32()
+        {
+            return Positon;
+        }
+
+        public override Vector2D GetUVsF32(int index)
+        {
+            if (index < 0 || index >= UVs.Length)
+                throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
+            return new Vector2D(UVs[index].X.ToFloat(), UVs[index].Y.ToFloat());
+        }
 
         public override void ReadData(UBuffer buffer, int num)
         {
@@ -538,6 +599,18 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public Vector2D[] UVs { get; set; }
 
+        public override Vector GetPositionF32()
+        {
+            return Positon.ToVector();
+        }
+
+        public override Vector2D GetUVsF32(int index)
+        {
+            if (index < 0 || index >= UVs.Length)
+                throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
+            return UVs[index];
+        }
+
         public override void ReadData(UBuffer buffer, int num)
         {
             base.ReadData(buffer, num);
@@ -555,6 +628,18 @@ namespace UpkManager.Models.UpkFile.Engine
 
         [StructField]
         public Vector2D[] UVs { get; set; }
+
+        public override Vector GetPositionF32()
+        {
+            return Positon;
+        }
+
+        public override Vector2D GetUVsF32(int index)
+        {
+            if (index < 0 || index >= UVs.Length)
+                throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
+            return UVs[index];
+        }
 
         public override void ReadData(UBuffer buffer, int num)
         {

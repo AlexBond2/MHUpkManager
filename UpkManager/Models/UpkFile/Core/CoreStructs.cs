@@ -1,6 +1,6 @@
 ﻿using System;
-using UpkManager.Models.UpkFile.Types;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
@@ -48,17 +48,20 @@ namespace UpkManager.Models.UpkFile.Core
         [StructField]
         public uint Packed { get; set; }
 
-        public sbyte X => (sbyte)(Packed & 0xFF);
-        public sbyte Y => (sbyte)((Packed >> 8) & 0xFF);
-        public sbyte Z => (sbyte)((Packed >> 16) & 0xFF);
-        public sbyte W => (sbyte)((Packed >> 24) & 0xFF);
+        public byte X => (byte)(Packed & 0xFF);
+        public byte Y => (byte)((Packed >> 8) & 0xFF);
+        public byte Z => (byte)((Packed >> 16) & 0xFF);
+        public byte W => (byte)((Packed >> 24) & 0xFF);
+
+        private const float Scale = 1.0f / 127.5f; 
+        private const float Offset = -1.0f;
 
         public Vector ToVector()
-        {
+        {            
             return new Vector(
-                X / 127.0f,
-                Y / 127.0f,
-                Z / 127.0f
+                X * Scale + Offset,
+                Y * Scale + Offset,
+                Z * Scale + Offset
             );
         }
 
@@ -115,6 +118,14 @@ namespace UpkManager.Models.UpkFile.Core
         public float Y { get; set; }
 
         public string Format => $"[{X:F4};{Y:F4}]";
+
+        public Vector2D() { }
+
+        public Vector2D(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
 
         public static Vector2D ReadData(UBuffer buffer)
         {

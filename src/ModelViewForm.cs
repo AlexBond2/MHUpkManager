@@ -1,5 +1,6 @@
 ﻿using SharpGL;
 using System.Text;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine;
 
 namespace MHUpkManager
@@ -7,6 +8,8 @@ namespace MHUpkManager
     public partial class ModelViewForm : Form
     {
         private string title;
+        private USkeletalMesh mesh;
+        private SkeletalMeshData model;
 
         private const uint OBJ_AXES = 1;
         private const uint OBJ_TARGET = 2;
@@ -29,15 +32,57 @@ namespace MHUpkManager
         private void InitializeScene()
         {
             sceneControl.MouseWheel += sceneControl_MouseWheel;
-            ResetTransView();
+
+            transView = new TransView
+            {
+                xpos = 0,
+                ypos = 0,
+                zpos = 0,
+                xrot = 20.0f,
+                yrot = 0,
+                zrot = 225.0f,
+                zoom = 60f,
+                Per = 35.0f
+            };
         }
 
         private void sceneControl_OpenGLInitialized(object sender, EventArgs e)
         {
             var gl = sceneControl.OpenGL;
 
+            SetupLighting(gl);
             GenerateDisplayLists(gl);
             InitializeFont(gl);
+        }
+
+        private void SetupLighting(OpenGL gl)
+        {
+            float[] ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
+            float[] lightPos = { 400.0f, 400.0f, 400f, 1.0f }; 
+            float[] light1Pos = { -200.0f, -200.0f, 200f, 1.0f };
+
+            float[] matDiffuse1 = { 0.9f, 0.9f, 0.9f, 1.0f };
+            float[] matDiffuse2 = { 0.6f, 0.6f, 0.6f, 1.0f };
+            float[] matSpecular = { 1.0f, 1.0f, 1.0f, 1.0f };
+            float shininess = 50.0f;
+
+            gl.Enable(OpenGL.GL_LIGHTING);
+
+            gl.Enable(OpenGL.GL_LIGHT0);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, lightPos);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, matDiffuse1);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, matSpecular);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SHININESS, shininess);
+
+            gl.Enable(OpenGL.GL_LIGHT1);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, ambient);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, light1Pos);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, matDiffuse2);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPECULAR, matSpecular);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SHININESS, shininess);
+
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_TWO_SIDE, 1);
         }
 
         private void InitializeFont(OpenGL gl)
@@ -50,15 +95,24 @@ namespace MHUpkManager
             Win32.wglUseFontBitmaps(hdc, 0, 255, FONT_GL);
         }
 
-        public void SetMeshObject(USkeletalMesh mesh)
+        public void SetMeshObject(USkeletalMesh obj)
         {
-            // TODO add mesh to scene
+            mesh = obj;
+
+            if (mesh == null)
+            {
+                MessageBox.Show("No mesh object set.");
+                return;
+            }
+
+            model = new SkeletalMeshData(mesh);
+            ResetTransView();
         }
 
         public void SetTitle(string name)
         {
             title = name;
-            Text = $"Hex Viewer - [{title}]";
+            Text = $"Model Viewer - [{title}]";
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -79,13 +133,13 @@ namespace MHUpkManager
         private void sceneControl_MouseMove(object sender, MouseEventArgs e)
         {
             Point cur = e.Location;
-            int dx = lastMousePos.X - cur.X;
-            int dy = lastMousePos.Y - cur.Y;
+            int dx = cur.X - lastMousePos.X;
+            int dy = cur.Y - lastMousePos.Y;
 
             if (isPanning)
             {
-                float sinY = (float)Math.Sin((transView.yrot - 90) * Math.PI / 180.0);
-                float cosY = (float)Math.Cos((transView.yrot - 90) * Math.PI / 180.0);
+                float sinY = (float)Math.Sin((transView.zrot - 90) * Math.PI / 180.0);
+                float cosY = (float)Math.Cos((transView.zrot - 90) * Math.PI / 180.0);
                 float sinX = (float)Math.Sin(transView.xrot * Math.PI / 180.0);
                 float cosX = (float)Math.Cos(transView.xrot * Math.PI / 180.0);
 
@@ -96,16 +150,16 @@ namespace MHUpkManager
                 float stepY = dy / (float)sceneControl.Height * zoom * perRad;
 
                 transView.xpos -= stepX * sinY;
-                transView.zpos += stepX * cosY;
+                transView.ypos -= stepX * cosY;
 
-                transView.ypos += stepY * cosX;
-                transView.zpos += stepY * sinY * sinX;
-                transView.xpos += stepY * cosY * sinX;
+                transView.xpos -= stepY * cosY * sinX;
+                transView.ypos += stepY * sinY * sinX;
+                transView.zpos += stepY * cosX;
             }
             else if (isRotating)
             {
                 transView.xrot += dy / 5.0f;
-                transView.yrot -= dx / 5.0f;
+                transView.zrot += dx / 5.0f;
             }
 
             lastMousePos = cur;
@@ -132,6 +186,10 @@ namespace MHUpkManager
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
 
+            // face culling
+            gl.Enable(OpenGL.GL_CULL_FACE);
+            gl.FrontFace(OpenGL.GL_CW);
+
             // --- perspective ---
             gl.MatrixMode(OpenGL.GL_PROJECTION);
             gl.LoadIdentity();
@@ -139,14 +197,14 @@ namespace MHUpkManager
 
             gl.Perspective(transView.Per, aspect, transView.zoom / 50.0f, MaxDepth);
 
-            if (transView.yrot > 360.0f) transView.yrot -= 360.0f;
-            if (transView.yrot < -360.0f) transView.yrot += 360.0f;
+            if (transView.zrot > 360.0f) transView.zrot -= 360.0f;
+            if (transView.zrot < -360.0f) transView.zrot += 360.0f;
 
             // camera
-            gl.LookAt(0, 0, -transView.zoom, 0, 0, 0, 0, 1, 0);
+            gl.LookAt(0, -transView.zoom, 0, 0, 0, 0, 0, 0, 1);
             gl.Rotate(transView.xrot, 1, 0, 0);
-            gl.Rotate(transView.yrot, 0, 1, 0);
-            gl.Translate(transView.xpos, transView.ypos, transView.zpos);
+            gl.Rotate(transView.zrot, 0, 0, 1);
+            gl.Translate(transView.xpos, transView.ypos, -transView.zpos);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
@@ -170,9 +228,9 @@ namespace MHUpkManager
             gl.Viewport(0, 0, width / 7, height / 7);
 
             gl.Perspective(20.0f, aspect, 5.0f, 20.0f);
-            gl.LookAt(0, 0, -10, 0, 0, 0, 0, 1, 0);
+            gl.LookAt(0, -10, 0, 0, 0, 0, 0, 0, 1);
             gl.Rotate(transView.xrot, 1, 0, 0);
-            gl.Rotate(transView.yrot, 0, 1, 0);
+            gl.Rotate(transView.zrot, 0, 0, 1);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
@@ -184,7 +242,20 @@ namespace MHUpkManager
 
         private void DrawModel(OpenGL gl)
         {
-            // TODO
+            if (mesh == null) return;
+
+            gl.Begin(OpenGL.GL_TRIANGLES);
+
+            foreach (var index in model.Indices)
+            {
+                var vertex = model.Vertices[index];
+
+                gl.Normal(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
+                gl.TexCoord(vertex.TexCoord.X, vertex.TexCoord.Y);
+                gl.Vertex(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+            }
+
+            gl.End();
         }
 
         private void sceneControl_MouseWheel(object sender, MouseEventArgs e)
@@ -219,10 +290,10 @@ namespace MHUpkManager
             gl.Begin(OpenGL.GL_LINES);
             for (int i = -gridMax; i <= gridMax; i++)
             {
-                gl.Vertex(-gridMax * size, 0, i * size);
-                gl.Vertex(gridMax * size, 0, i * size);
-                gl.Vertex(i * size, 0, -gridMax * size);
-                gl.Vertex(i * size, 0, gridMax * size);
+                gl.Vertex(-gridMax * size, i * size, 0);
+                gl.Vertex(gridMax * size, i * size, 0);
+                gl.Vertex(i * size, -gridMax * size, 0);
+                gl.Vertex(i * size, gridMax * size, 0);
             }
             gl.End();
         }
@@ -317,15 +388,64 @@ namespace MHUpkManager
         {
             transView = new TransView
             {
-                xpos = 0,
-                ypos = 0,
-                zpos = 0,
-                xrot = -20.0f,
-                yrot = 136.0f,
-                zrot = 0,
-                zoom = 50.0f,
+                xpos = model.Center.X,
+                ypos = model.Center.Y,
+                zpos = model.Center.Z,
+                xrot = 20.0f,
+                yrot = 0,
+                zrot = 225.0f,
+                zoom = model.Radius * 2f,
                 Per = 35.0f
             };
+        }
+
+        public struct SkeletalMeshData
+        {
+            public USkeletalMesh Mesh;
+            public uint[] Indices;
+            public Vector Center;
+            public float Radius;
+            public GLVertex[] Vertices;
+
+            public SkeletalMeshData(USkeletalMesh mesh)
+            {
+                Mesh = mesh;
+
+                var lod = mesh.LODModels[0];
+
+                Vertices = [.. lod.VertexBufferGPUSkin.GetGLVertexData()];
+                Indices = [.. lod.MultiSizeIndexContainer.IndexBuffer];
+
+                Center = CalculateCenter(Vertices);
+                Radius = mesh.Bounds.SphereRadius;
+            }
+
+            private static Vector CalculateCenter(GLVertex[] vertices)
+            {
+                if (vertices == null || vertices.Length == 0)
+                    return new Vector(0, 0, 0);
+
+                float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
+                float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
+
+                foreach (var v in vertices)
+                {
+                    var p = v.Position;
+                    if (p.X < minX) minX = p.X;
+                    if (p.Y < minY) minY = p.Y;
+                    if (p.Z < minZ) minZ = p.Z;
+
+                    if (p.X > maxX) maxX = p.X;
+                    if (p.Y > maxY) maxY = p.Y;
+                    if (p.Z > maxZ) maxZ = p.Z;
+                }
+
+                return new Vector(
+                    (minX + maxX) * 0.5f,
+                    (minY + maxY) * 0.5f,
+                    (minZ + maxZ) * 0.5f
+                );
+            }
         }
 
         public struct TransView
