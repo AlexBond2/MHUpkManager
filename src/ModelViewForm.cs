@@ -1,4 +1,5 @@
 ﻿using SharpGL;
+using System.Drawing.Imaging;
 using System.Numerics;
 using System.Text;
 
@@ -121,7 +122,7 @@ namespace MHUpkManager
         {
             var sfd = new SaveFileDialog
             {
-                Filter = "Wavefront OBJ (*.obj)|*.obj|glTF Binary (*.glb)|*.glb|glTF Text (*.gltf)|*.gltf|Collada DAE (*.dae)|*.dae",
+                Filter = "Wavefront OBJ (*.obj)|*.obj|glTF 2.0 Binary (*.glb)|*.glb|glTF 2.0 (*.gltf)|*.gltf|Collada DAE (*.dae)|*.dae",
                 Title = "Save Model As",
                 FileName = title
             };
@@ -204,6 +205,32 @@ namespace MHUpkManager
                 isRotating = false;
         }
 
+        public uint LoadTextureFromPng(string filePath, OpenGL gl)
+        {
+            Bitmap bitmap = new Bitmap(filePath);
+
+            uint[] textureIds = new uint[1];
+            gl.GenTextures(1, textureIds);
+            uint textureId = textureIds[0];
+
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, textureId);
+
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);
+
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA, bitmap.Width, bitmap.Height, 0,
+                OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, data.Scan0);
+
+            bitmap.UnlockBits(data);
+
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+
+            return textureId;
+        }
+
         private void sceneControl_OpenGLDraw(object sender, RenderEventArgs args)
         {
             var gl = sceneControl.OpenGL;
@@ -271,7 +298,8 @@ namespace MHUpkManager
         private void DrawModel(OpenGL gl)
         {
             if (mesh == null) return;
-
+            
+            // gl.BindTexture(OpenGL.GL_TEXTURE_2D, textureId);  
             gl.Begin(OpenGL.GL_TRIANGLES);
 
             foreach (var index in model.Indices)

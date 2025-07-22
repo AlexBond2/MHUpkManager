@@ -84,7 +84,7 @@ namespace MHUpkManager
             foreach (var v in model.Vertices)
             {
                 writer.WriteLine($"v {v.Position.X} {v.Position.Y} {v.Position.Z}");
-                writer.WriteLine($"vt {v.TexCoord.X} {1.0f - v.TexCoord.Y}"); // flip Y?
+                writer.WriteLine($"vt {v.TexCoord.X} {1.0f - v.TexCoord.Y}"); // flip Y
                 writer.WriteLine($"vn {v.Normal.X} {v.Normal.Y} {v.Normal.Z}");
             }
 
@@ -134,7 +134,7 @@ namespace MHUpkManager
 
         private static VertexTexture1 ToVertexTexture1(GLVertex v)
         {
-            return new VertexTexture1(new Vector2(v.TexCoord.X, 1.0f - v.TexCoord.Y));
+            return new VertexTexture1(new Vector2(v.TexCoord.X, v.TexCoord.Y)); // No flip Y !!!
         }
 
         private static VertexPositionNormal ToVertexPositionNormal(GLVertex v)
