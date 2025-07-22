@@ -67,7 +67,7 @@ namespace MHUpkManager
             }
             else
             {
-                warning = EngineRegistry.LoadFromJson(path);
+                warning = EngineRegistry.Instance.LoadFromJson(path);
                 if (!string.IsNullOrEmpty(warning))
                     WarningBox($"Warning while loading Engine types from {EngineJson}:\n\n{warning}");
             }

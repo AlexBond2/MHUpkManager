@@ -15,6 +15,12 @@ namespace UpkManager.Models.UpkFile.Engine
         [PropertyField]
         public bool bHasVertexColors { get; set; }
 
+        [PropertyField]
+        public UArray<FName> Sockets { get; set; } // SkeletalMeshSocket
+
+        [PropertyField]
+        public UArray<SkeletalMeshLODInfo> LODInfo { get; set; }
+
         [StructField]
         public BoxSphereBounds Bounds { get; set; }
 
@@ -48,6 +54,7 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField("Index")]
         public byte[] BoneBreakOptions { get; set; }
 
+        [PropertyField]
         [StructField("UApexClothingAsset")]
         public UArray<FName> ClothingAssets { get; set; } // UApexClothingAsset
 
@@ -90,6 +97,66 @@ namespace UpkManager.Models.UpkFile.Engine
             return array;
         }
     }
+
+    [UnrealStruct("SkeletalMeshLODInfo")]
+    public class SkeletalMeshLODInfo : IAtomicStruct
+    {
+        [StructField]
+        public float DisplayFactor { get; set; }
+
+        [StructField]
+        public float LODHysteresis { get; set; }
+
+        [StructField]
+        public UArray<int> LODMaterialMap { get; set; }
+
+        [StructField]
+        public UArray<bool> bEnableShadowCasting { get; set; }
+
+        [StructField]
+        public UArray<TriangleSortSettings> TriangleSortSettings { get; set; }
+
+        [StructField]
+        public bool bDisableCompression { get; set; }
+
+        [StructField]
+        public bool bHasBeenSimplified { get; set; }
+
+        public string Format => "";
+    }
+
+    [UnrealStruct("TriangleSortSettings")]
+    public class TriangleSortSettings : IAtomicStruct
+    {
+        [StructField]
+        public TriangleSortOption TriangleSorting { get; set; }
+
+        [StructField]
+        public TriangleSortAxis CustomLeftRightAxis { get; set; }
+
+        [StructField]
+        public FName CustomLeftRightBoneName { get; set; }
+        public string Format => "";
+    }
+
+    public enum  TriangleSortOption
+    {
+        TRISORT_None,                   // 0
+        TRISORT_CenterRadialDistance,   // 1
+        TRISORT_Random,                 // 2
+        TRISORT_MergeContiguous,        // 3
+        TRISORT_Custom,                 // 4
+        TRISORT_CustomLeftRight,        // 5
+        TRISORT_MAX                     // 6
+    };
+
+    public enum TriangleSortAxis
+    {
+        TSA_X_Axis,                     // 0
+        TSA_Y_Axis,                     // 1
+        TSA_Z_Axis,                     // 2
+        TSA_MAX                         // 3
+    };
 
     public class SkeletalMeshSourceData : IAtomicStruct
     {

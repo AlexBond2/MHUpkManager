@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("BoolProperty")]
-    public class UBoolProperty : UProperty
+    public class UBoolProperty(UObject parent) : UProperty(parent)
     {
         private byte Value { get; set; }
         public override object PropertyValue => Value;

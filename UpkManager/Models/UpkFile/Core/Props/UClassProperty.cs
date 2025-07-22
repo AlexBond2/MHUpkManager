@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
 [UnrealClass("ClassProperty")]
-    public class UClassProperty : UObjectProperty
+    public class UClassProperty(UObject parent) : UObjectProperty(parent)
     {
         [StructField("UClass")]
         public FName MetaClass { get; private set; } // UClass

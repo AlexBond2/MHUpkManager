@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UpkManager.Helpers;
+using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Compression;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
@@ -95,9 +96,9 @@ namespace UpkManager.Models.UpkFile.Types
             return ustring.String;
         }
 
-        public ResultProperty ReadProperty(UnrealProperty property)
+        public ResultProperty ReadProperty(UnrealProperty property, UObject uObject)
         {
-            return property.ReadProperty(this);
+            return property.ReadProperty(this, uObject);
         }
 
         public void SetDataOffset()

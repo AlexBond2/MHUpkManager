@@ -6,17 +6,14 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-    public class EngineProperty(string structType) : UProperty
+    public class EngineProperty(string structType, UObject parent) : UProperty(parent)
     {
         public string StructType { get; private set; } = structType;
         public List<UnrealProperty> Fields { get; set; } = [];
         public ResultProperty Result { get; private set; }
         public int RemainingData { get; private set; }
 
-        public override string ToString()
-        {
-            return StructType;
-        }
+        public override string ToString() => StructType;
 
         public override void BuildVirtualTree(VirtualNode valueTree)
         {
@@ -38,7 +35,7 @@ namespace UpkManager.Models.UpkFile.Core
                 var prop = new UnrealProperty();
                 try
                 {
-                    Result = prop.ReadProperty(buffer);
+                    Result = prop.ReadProperty(buffer, Parent);
                 }
                 catch (Exception ex)
                 {

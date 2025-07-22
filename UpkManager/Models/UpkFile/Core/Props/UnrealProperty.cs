@@ -27,7 +27,7 @@ namespace UpkManager.Models.UpkFile.Core
         private VirtualNode propertyNode;
         public VirtualNode VirtualTree { get => GetVirtualTree(); }
 
-        public ResultProperty ReadProperty(UBuffer buffer)
+        public ResultProperty ReadProperty(UBuffer buffer, UObject parent)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace UpkManager.Models.UpkFile.Core
  
             try
             {
-                Value = PropertyValueFactory();
+                Value = PropertyValueFactory(parent);
                 Value.ReadPropertyValue(buffer, ElementSize, this);
             }
             catch (Exception ex)
@@ -74,25 +74,25 @@ namespace UpkManager.Models.UpkFile.Core
             return propertyNode;
         }
 
-        private UProperty PropertyValueFactory()
+        private UProperty PropertyValueFactory(UObject parent)
         {
             Enum.TryParse(Category?.Name, true, out PropertyTypes type);
 
             return type switch
             {
-                PropertyTypes.BoolProperty => new UBoolProperty(),
-                PropertyTypes.IntProperty => new UIntProperty(),
-                PropertyTypes.FloatProperty => new UFloatProperty(),
-                PropertyTypes.ObjectProperty => new UObjectProperty(),
-                PropertyTypes.InterfaceProperty => new UInterfaceProperty(),
-                PropertyTypes.ComponentProperty => new UComponentProperty(),
-                PropertyTypes.ClassProperty => new UClassProperty(),
-                PropertyTypes.NameProperty => new UNameProperty(),
-                PropertyTypes.ByteProperty => new UByteProperty(),
-                PropertyTypes.StrProperty => new UStrProperty(),
-                PropertyTypes.StructProperty => new UStructProperty(),
-                PropertyTypes.ArrayProperty => new UArrayProperty(),
-                _ => new UProperty(),
+                PropertyTypes.BoolProperty => new UBoolProperty(parent),
+                PropertyTypes.IntProperty => new UIntProperty(parent),
+                PropertyTypes.FloatProperty => new UFloatProperty(parent),
+                PropertyTypes.ObjectProperty => new UObjectProperty(parent),
+                PropertyTypes.InterfaceProperty => new UInterfaceProperty(parent),
+                PropertyTypes.ComponentProperty => new UComponentProperty(parent),
+                PropertyTypes.ClassProperty => new UClassProperty(parent),
+                PropertyTypes.NameProperty => new UNameProperty(parent),
+                PropertyTypes.ByteProperty => new UByteProperty(parent),
+                PropertyTypes.StrProperty => new UStrProperty(parent),
+                PropertyTypes.StructProperty => new UStructProperty(parent),
+                PropertyTypes.ArrayProperty => new UArrayProperty(parent),
+                _ => new UProperty(parent),
             };
         }
     }

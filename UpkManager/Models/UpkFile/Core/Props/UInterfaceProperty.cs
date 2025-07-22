@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
 [UnrealClass("InterfaceProperty")]
-    public class UInterfaceProperty : UProperty
+    public class UInterfaceProperty(UObject parent) : UProperty(parent)
     {
         [StructField("UClass")]
         public FName InterfaceClass { get; private set; } // UClass

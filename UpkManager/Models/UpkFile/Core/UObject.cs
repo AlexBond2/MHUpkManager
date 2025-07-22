@@ -26,6 +26,12 @@ namespace UpkManager.Models.UpkFile.Classes
         public string ClassName { get; } = className;
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public class UnrealStructAttribute(string structName) : Attribute
+    {
+        public string StructName { get; } = structName;
+    }
+
     [UnrealClass("Object")]
     public class UObject// : UnrealUpkBuilderBase
     {
@@ -192,7 +198,7 @@ namespace UpkManager.Models.UpkFile.Classes
             while (true)
             {
                 var property = new UnrealProperty();
-                result = buffer.ReadProperty(property);
+                result = buffer.ReadProperty(property, this);
                 if (result != ResultProperty.Success)
                 {                    
                     buffer.SetDataOffset();

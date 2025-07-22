@@ -1,5 +1,6 @@
 ﻿using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
@@ -8,19 +9,25 @@ namespace UpkManager.Models.UpkFile.Engine
     public class UAnimSequence : UObject
     {
         [PropertyField]
-        public int NumFrames { get; set; }
+        public FName SequenceName { get; set; }
+
+        [PropertyField]
+        public UArray<AnimNotifyEvent> Notifies { get; set; }
 
         [PropertyField]
         public float SequenceLength { get; set; }
 
         [PropertyField]
+        public int NumFrames { get; set; }
+
+        [PropertyField]
         public float RateScale { get; set; } = 1.0f;
 
         [PropertyField]
-        public AnimationCompressionFormat RotationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_Float96NoW;
+        public AnimationCompressionFormat TranslationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_None;
 
         [PropertyField]
-        public AnimationCompressionFormat TranslationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_None;
+        public AnimationCompressionFormat RotationCompressionFormat { get; set; } = AnimationCompressionFormat.ACF_Float96NoW;
 
         [PropertyField]
         public AnimationKeyFormat KeyEncodingFormat { get; set; }
@@ -57,7 +64,24 @@ namespace UpkManager.Models.UpkFile.Engine
                 AnimationEncodingCodec.Decompress(this, CompressedByteStream);            
         }
     }
-    
+
+    public class AnimNotifyEvent : IAtomicStruct
+    {
+        [StructField]
+        public float Time { get; set; }
+
+        [StructField("UAnimNotify")]
+        public FName Notify { get; set; } // UAnimNotify
+
+        [StructField]
+        public FName Comment { get; set; }
+
+        [StructField]
+        public float Duration { get; set; }
+
+        public string Format => "";
+    }
+
     public class RawAnimSequenceTrack
     {
         public UArray<Vector> PosKeys { get; set; }

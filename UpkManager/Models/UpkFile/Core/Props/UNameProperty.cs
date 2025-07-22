@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("NameProperty")]
-    public class UNameProperty : UProperty
+    public class UNameProperty(UObject parent) : UProperty(parent)
     {
         protected FName Value { get; set; }
         public override object PropertyValue => Value;
