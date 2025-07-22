@@ -1,7 +1,9 @@
 ﻿using SharpGL;
+using System.Numerics;
 using System.Text;
-using UpkManager.Models.UpkFile.Core;
+
 using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Types;
 
 namespace MHUpkManager
 {
@@ -117,7 +119,34 @@ namespace MHUpkManager
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO save mesh
+            var sfd = new SaveFileDialog
+            {
+                Filter = "Wavefront OBJ (*.obj)|*.obj|glTF Binary (*.glb)|*.glb|glTF Text (*.gltf)|*.gltf|Collada DAE (*.dae)|*.dae",
+                Title = "Save Model As",
+                FileName = title
+            };
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                string ext = Path.GetExtension(sfd.FileName).ToLower();
+                try
+                {
+                    Cursor.Current = Cursors.WaitCursor;
+
+                    if (ext == ".gltf")
+                        ModelFormats.ExportToGLTF(sfd.FileName, model, true);
+                    else if (ext == ".glb")
+                        ModelFormats.ExportToGLTF(sfd.FileName, model, false);
+                    else if (ext == ".obj")
+                        ModelFormats.ExportToOBJ(sfd.FileName, model);
+                    else if (ext == ".dae")
+                        ModelFormats.ExportToDAE(sfd.FileName, model);
+                }
+                finally
+                {
+                    Cursor.Current = Cursors.Default;
+                }
+            }
         }
 
         private void sceneControl_MouseDown(object sender, MouseEventArgs e)
@@ -188,7 +217,6 @@ namespace MHUpkManager
 
             // face culling
             gl.Enable(OpenGL.GL_CULL_FACE);
-            gl.FrontFace(OpenGL.GL_CW);
 
             // --- perspective ---
             gl.MatrixMode(OpenGL.GL_PROJECTION);
@@ -402,8 +430,8 @@ namespace MHUpkManager
         public struct SkeletalMeshData
         {
             public USkeletalMesh Mesh;
-            public uint[] Indices;
-            public Vector Center;
+            public int[] Indices;
+            public Vector3 Center;
             public float Radius;
             public GLVertex[] Vertices;
 
@@ -414,16 +442,33 @@ namespace MHUpkManager
                 var lod = mesh.LODModels[0];
 
                 Vertices = [.. lod.VertexBufferGPUSkin.GetGLVertexData()];
-                Indices = [.. lod.MultiSizeIndexContainer.IndexBuffer];
+                Indices = ConvertIndices(lod.MultiSizeIndexContainer.IndexBuffer);
 
                 Center = CalculateCenter(Vertices);
                 Radius = mesh.Bounds.SphereRadius;
             }
 
-            private static Vector CalculateCenter(GLVertex[] vertices)
+            public int[] ConvertIndices(UArray<uint> indices)
+            {
+                if (indices.Count % 3 != 0) return [];
+
+                int[] flipped = new int[indices.Count];
+
+                for (int i = 0; i < indices.Count; i += 3)
+                {
+                    flipped[i] = (int)indices[i + 2];
+                    flipped[i + 1] = (int)indices[i + 1];
+                    flipped[i + 2] = (int)indices[i];
+                }
+
+                return flipped;
+
+            }
+
+            private static Vector3 CalculateCenter(GLVertex[] vertices)
             {
                 if (vertices == null || vertices.Length == 0)
-                    return new Vector(0, 0, 0);
+                    return new Vector3(0, 0, 0);
 
                 float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
                 float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
@@ -440,7 +485,7 @@ namespace MHUpkManager
                     if (p.Z > maxZ) maxZ = p.Z;
                 }
 
-                return new Vector(
+                return new Vector3(
                     (minX + maxX) * 0.5f,
                     (minY + maxY) * 0.5f,
                     (minZ + maxZ) * 0.5f

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
@@ -7,6 +8,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
+    using Vector = Core.Vector;
     [UnrealClass("SkeletalMesh")]
     public class USkeletalMesh: UObject
     {
@@ -335,10 +337,10 @@ namespace UpkManager.Models.UpkFile.Engine
 
     public struct GLVertex
     {
-        public Vector Position;
-        public Vector Normal;
-        public Vector Tangent;
-        public Vector2D TexCoord;
+        public Vector3 Position;
+        public Vector3 Normal;
+        public Vector3 Tangent;
+        public Vector2 TexCoord;
         public byte[] Bones;
         public byte[] Weights;
     }
@@ -384,10 +386,10 @@ namespace UpkManager.Models.UpkFile.Engine
             {
                 GLVertex glVertex = new()
                 {
-                    Position = vertex.GetPositionF32(),
-                    Normal = vertex.TangentZ.ToVector(),
-                    Tangent = vertex.TangentX.ToVector(),
-                    TexCoord = vertex.GetUVsF32(0), // Assuming we only need the first UV set
+                    Position = vertex.GetVector3(),
+                    Normal = vertex.TangentZ.ToVector().ToVector3(),
+                    Tangent = vertex.TangentX.ToVector().ToVector3(),
+                    TexCoord = vertex.GetVector2(0), // Assuming we only need the first UV set
                     Bones = vertex.InfluenceBones,
                     Weights = vertex.InfluenceWeights
                 };
@@ -476,14 +478,14 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public byte[] InfluenceWeights { get; set; }
 
-        public virtual Vector GetPositionF32()
+        public virtual Vector3 GetVector3()
         {
-            return new Vector(0.0f, 0.0f, 0.0f);
+            return new Vector3(0.0f, 0.0f, 0.0f);
         }
 
-        public virtual Vector2D GetUVsF32(int index)
+        public virtual Vector2 GetVector2(int index)
         {
-            return new Vector2D(0.0f, 0.0f);
+            return new Vector2(0.0f, 0.0f);
         }
 
         public virtual void ReadData(UBuffer buffer, int num)
@@ -539,16 +541,16 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public Vector2DHalf[] UVs { get; set; }
 
-        public override Vector GetPositionF32()
+        public override Vector3 GetVector3()
         {
-            return Positon.ToVector();
+            return Positon.ToVector().ToVector3();
         }
 
-        public override Vector2D GetUVsF32(int index)
+        public override Vector2 GetVector2(int index)
         {
             if (index < 0 || index >= UVs.Length)
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
-            return new Vector2D(UVs[index].X.ToFloat(), UVs[index].Y.ToFloat());
+            return new Vector2(UVs[index].X.ToFloat(), UVs[index].Y.ToFloat());
         }
 
         public override void ReadData(UBuffer buffer, int num)
@@ -569,16 +571,16 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public Vector2DHalf[] UVs { get; set; }
 
-        public override Vector GetPositionF32()
+        public override Vector3 GetVector3()
         {
-            return Positon;
+            return Positon.ToVector3();
         }
 
-        public override Vector2D GetUVsF32(int index)
+        public override Vector2 GetVector2(int index)
         {
             if (index < 0 || index >= UVs.Length)
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
-            return new Vector2D(UVs[index].X.ToFloat(), UVs[index].Y.ToFloat());
+            return new Vector2(UVs[index].X.ToFloat(), UVs[index].Y.ToFloat());
         }
 
         public override void ReadData(UBuffer buffer, int num)
@@ -599,16 +601,16 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public Vector2D[] UVs { get; set; }
 
-        public override Vector GetPositionF32()
+        public override Vector3 GetVector3()
         {
-            return Positon.ToVector();
+            return Positon.ToVector().ToVector3();
         }
 
-        public override Vector2D GetUVsF32(int index)
+        public override Vector2 GetVector2(int index)
         {
             if (index < 0 || index >= UVs.Length)
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
-            return UVs[index];
+            return UVs[index].ToVector2();
         }
 
         public override void ReadData(UBuffer buffer, int num)
@@ -629,16 +631,16 @@ namespace UpkManager.Models.UpkFile.Engine
         [StructField]
         public Vector2D[] UVs { get; set; }
 
-        public override Vector GetPositionF32()
+        public override Vector3 GetVector3()
         {
-            return Positon;
+            return Positon.ToVector3();
         }
 
-        public override Vector2D GetUVsF32(int index)
+        public override Vector2 GetVector2(int index)
         {
             if (index < 0 || index >= UVs.Length)
                 throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range for UVs array.");
-            return UVs[index];
+            return UVs[index].ToVector2();
         }
 
         public override void ReadData(UBuffer buffer, int num)

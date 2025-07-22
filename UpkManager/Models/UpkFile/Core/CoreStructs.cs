@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Types;
 
@@ -30,6 +31,8 @@ namespace UpkManager.Models.UpkFile.Core
             Y = y;
             Z = z;
         }
+
+        public Vector3 ToVector3() => new Vector3(X, Y, Z);
 
         public static Vector ReadData(UBuffer buffer)
         {
@@ -136,6 +139,8 @@ namespace UpkManager.Models.UpkFile.Core
             };
             return vector2D;
         }
+
+        public Vector2 ToVector2() => new Vector2(X, Y);
     }
 
     public class Float16 : IAtomicStruct
