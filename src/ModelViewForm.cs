@@ -52,10 +52,10 @@ namespace MHUpkManager
         private void sceneControl_OpenGLInitialized(object sender, EventArgs e)
         {
             var gl = sceneControl.OpenGL;
-
-            SetupLighting(gl);
-            GenerateDisplayLists(gl);
+            
             InitializeFont(gl);
+            GenerateDisplayLists(gl);
+            SetupLighting(gl);
         }
 
         private void SetupLighting(OpenGL gl)
