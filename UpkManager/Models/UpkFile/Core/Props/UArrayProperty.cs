@@ -8,7 +8,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("ArrayProperty")]
-    public class UArrayProperty(UObject parent) : UProperty(parent)
+    public class UArrayProperty : UProperty
     {
         [StructField("UProperty")]
         public FName Inner { get; private set; } // UProperty
@@ -81,6 +81,7 @@ namespace UpkManager.Models.UpkFile.Core
                 try
                 {
                     var inner = factory();
+                    inner.Parent = Parent;
                     inner.ReadPropertyValue(buffer, size, property);
                     Array[i] = inner;
                 }
@@ -93,17 +94,17 @@ namespace UpkManager.Models.UpkFile.Core
             }
         }
 
-        private Func<UProperty> GetFactory(CustomStructJson def)
+        private Func<UProperty> GetFactory(StructInfo def)
         {
             return def.Type switch
             {
-                PropertyTypes.FloatProperty => () => new UFloatProperty(Parent),
-                PropertyTypes.IntProperty => () => new UIntProperty(Parent),
-                PropertyTypes.BoolProperty => () => new UBoolProperty(Parent),
-                PropertyTypes.StrProperty => () => new UStrProperty(Parent),
-                PropertyTypes.NameProperty => () => new UNameProperty(Parent),
-                PropertyTypes.ObjectProperty => () => new UObjectProperty(Parent),
-                PropertyTypes.StructProperty => () => new EngineProperty(def.Struct!, Parent),
+                PropertyTypes.FloatProperty => () => new UFloatProperty(),
+                PropertyTypes.IntProperty => () => new UIntProperty(),
+                PropertyTypes.BoolProperty => () => new UBoolProperty(),
+                PropertyTypes.StrProperty => () => new UStrProperty(),
+                PropertyTypes.NameProperty => () => new UNameProperty(),
+                PropertyTypes.ObjectProperty => () => new UObjectProperty(),
+                PropertyTypes.StructProperty => () => new EngineProperty(def.Struct!),
                 _ => null
             };
         }

@@ -7,7 +7,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Classes
 {
     [UnrealClass("Property")]
-    public class UProperty(UObject parent) : UField
+    public class UProperty : UField
     {
         [StructField]
         public int ArrayDim { get; private set; }
@@ -26,7 +26,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public virtual object PropertyValue => DataReader.GetBytes();
         public virtual string PropertyString => $"{DataReader.GetBytes().Length:N0} Bytes of Data";
         public VirtualNode VirtualTree { get => GetVirtualTree(); }
-        public UObject Parent { get; private set; } = parent;
+        public UObject Parent { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {

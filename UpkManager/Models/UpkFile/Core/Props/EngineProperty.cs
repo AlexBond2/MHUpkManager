@@ -6,7 +6,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-    public class EngineProperty(string structType, UObject parent) : UProperty(parent)
+    public class EngineProperty(string structType) : UProperty
     {
         public string StructType { get; private set; } = structType;
         public List<UnrealProperty> Fields { get; set; } = [];

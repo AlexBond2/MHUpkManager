@@ -9,17 +9,17 @@ namespace UpkManager.Models.UpkFile.Core
 {
     public static class PropertyFactory
     {
-        public static UProperty Create(string type, UObject parent)
+        public static UProperty Create(string type)
         {
             if (CoreRegistry.Instance.TryGetProperty(type, out var prop))
-                return new CoreProperty(prop, parent);
+                return new CoreProperty(prop, null);
 
             return type switch
             {
-                "Int32" => new UIntProperty(parent),
-                "Boolean" => new UBoolProperty(parent),
-                "Single" => new UFloatProperty(parent),
-                _ => new UProperty(parent)
+                "Int32" => new UIntProperty(),
+                "Boolean" => new UBoolProperty(),
+                "Single" => new UFloatProperty(),
+                _ => new UProperty()
             };
         }
     }
@@ -30,14 +30,16 @@ namespace UpkManager.Models.UpkFile.Core
         public IAtomicStruct Atomic { get; private set; }
         public List<(string Name, UProperty Value)> Fields { get; } = [];
 
-        public CoreProperty(Type structType, UObject parent) : base(parent)
+        public CoreProperty(Type structType, UObject parent)
         {            
+            Parent = parent;
             StructName = structType.Name;
             Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
 
             foreach (var prop in GetStructFields(Atomic))
             {
-                var unrealValue = PropertyFactory.Create(prop.PropertyType.Name, Parent);
+                var unrealValue = PropertyFactory.Create(prop.PropertyType.Name);
+                unrealValue.Parent = Parent;
                 Fields.Add((prop.Name, unrealValue));
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
@@ -429,5 +430,44 @@ namespace UpkManager.Models.UpkFile.Core
             };
             return color;
         }
+    }
+
+    [UnrealStruct("RawDistribution")]
+    public class RawDistribution
+    {
+        [StructField]
+        public byte Type { get; set; }
+
+        [StructField]
+        public byte Op { get; set; }
+
+        [StructField]
+        public byte LookupTableNumElements { get; set; }
+
+        [StructField]
+        public byte LookupTableChunkSize { get; set; }
+
+        [StructField]
+        public UArray<float> LookupTable { get; set; }
+
+        [StructField]
+        public float LookupTableTimeScale { get; set; }
+
+        [StructField]
+        public float LookupTableStartTime { get; set; }
+
+        public string Format => "";
+    }
+
+    [UnrealStruct("RawDistributionFloat")]
+    public class RawDistributionFloat
+    {
+        [StructField]
+        public FObject Distribution { get; set; } // DistributionFloat
+
+        [StructField]
+        public RawDistribution Base { get; set; }
+
+        public string Format => "";
     }
 }

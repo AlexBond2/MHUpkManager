@@ -6,7 +6,6 @@ using UpkManager.Contracts;
 using UpkManager.Extensions;
 using UpkManager.Models;
 using UpkManager.Models.UpkFile.Core;
-using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Objects;
@@ -19,8 +18,6 @@ namespace MHUpkManager
     {
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
-        public const string EngineJson = "MHEngineTypes.json";
-        public const string CoreJson = "MHCoreTypes.json";
         public const string ComponentsTxt = "MHComponents.txt";
         public UnrealUpkFile UpkFile { get; set; }
 
@@ -59,22 +56,7 @@ namespace MHUpkManager
 
         private void LoadDataFiles()
         {
-            string warning;
-            string path = Path.Combine("Data", EngineJson);
-
-            if (!File.Exists(path))
-            {
-                WarningBox($"File with Engine types not found. Path: {path}");
-                return;
-            }
-            else
-            {
-                warning = EngineRegistry.Instance.LoadFromJson(path);
-                if (!string.IsNullOrEmpty(warning))
-                    WarningBox($"Warning while loading Engine types from {EngineJson}:\n\n{warning}");
-            }
-
-            path = Path.Combine("Data", ComponentsTxt);
+            string path = Path.Combine("Data", ComponentsTxt);
             if (!File.Exists(path))
                 WarningBox($"File with component list not found. {path}");
             else

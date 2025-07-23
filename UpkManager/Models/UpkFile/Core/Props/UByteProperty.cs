@@ -7,7 +7,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("ByteProperty")]
-    public class UByteProperty(UObject parent) : UProperty(parent)
+    public class UByteProperty : UProperty
     {
         [StructField("UEnum")]
         public FName Enum { get; private set; } // UEnum

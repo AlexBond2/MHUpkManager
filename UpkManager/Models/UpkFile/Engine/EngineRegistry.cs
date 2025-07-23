@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using UpkManager.Constants;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Tables;
@@ -12,60 +9,22 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine
 {
-    public class CustomStructJson
+    public class StructInfo
     {
         public string Parent { get; set; }
         public string Name { get; set; } 
-        [JsonConverter(typeof(PropertyTypesConverter))]
         public PropertyTypes Type { get; set; }
         public string Struct { get; set; } // Type == Struct
     }
 
-    public class PropertyTypesConverter : JsonConverter<PropertyTypes>
-    {
-        public override PropertyTypes Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            string str = reader.GetString();
-            if (str == null) return PropertyTypes.UnknownProperty;
-
-            return str.ToLowerInvariant() switch
-            {
-                "int" => PropertyTypes.IntProperty,
-                "float" => PropertyTypes.FloatProperty,
-                "bool" => PropertyTypes.BoolProperty,
-                "struct" => PropertyTypes.StructProperty,
-                "object" => PropertyTypes.ObjectProperty,
-                "name" => PropertyTypes.NameProperty,
-                "string" => PropertyTypes.StrProperty,
-                _ => PropertyTypes.UnknownProperty
-            };
-        }
-
-        public override void Write(Utf8JsonWriter writer, PropertyTypes value, JsonSerializerOptions options)
-        {
-            string str = value switch
-            {
-                PropertyTypes.IntProperty => "Int",
-                PropertyTypes.FloatProperty => "Float",
-                PropertyTypes.BoolProperty => "Bool",
-                PropertyTypes.StructProperty => "Struct",
-                PropertyTypes.ObjectProperty => "Object",
-                PropertyTypes.NameProperty => "Name",
-                PropertyTypes.StrProperty => "String",
-                _ => "Unknown"
-            };
-            writer.WriteStringValue(str);
-        }
-    }
-
     public class EngineRegistry
     {
-        private readonly Dictionary<string, CustomStructJson> _structs;
+        private readonly Dictionary<string, StructInfo> _structs;
         public static EngineRegistry Instance { get; } = new EngineRegistry();
 
         private EngineRegistry()
         {
-            _structs = new Dictionary<string, CustomStructJson>(StringComparer.OrdinalIgnoreCase);
+            _structs = new Dictionary<string, StructInfo>(StringComparer.OrdinalIgnoreCase);
 
             var unrealObjectType = typeof(UObject);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -107,7 +66,7 @@ namespace UpkManager.Models.UpkFile.Engine
 
             //var key = $"{parentName}.{prop.Name}";
             var key = prop.Name;
-            _structs[key] = new CustomStructJson
+            _structs[key] = new StructInfo
             {
                 Parent = parentName,
                 Name = prop.Name,
@@ -153,44 +112,6 @@ namespace UpkManager.Models.UpkFile.Engine
             return PropertyTypes.UnknownProperty;
         }
 
-        public string LoadFromJson(string jsonPath)
-        {
-            string json = File.ReadAllText(jsonPath);
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-            List<CustomStructJson> loadedStructs;
-            try
-            {
-                loadedStructs = JsonSerializer.Deserialize<List<CustomStructJson>>(json, options);
-            }
-            catch (Exception ex)
-            {
-                return $"Failed to deserialize JSON: {ex.Message}";
-            }
-
-            if (loadedStructs == null)
-                return "No structs found in JSON.";
-
-            var errors = new List<string>();
-
-            foreach (var csj in loadedStructs)
-            {
-                if (csj.Type == PropertyTypes.UnknownProperty)
-                    errors.Add($"Unknown property type in struct '{csj.Name}'.");
-
-                _structs[csj.Name] = csj;
-            }
-
-            if (errors.Count > 0)
-                return "Warning: " + string.Join("; ", errors);
-
-            return string.Empty;
-        }
-
         public bool TryGetStruct(string name, UObject parent, out string definition)
         {
             var found = _structs.Values
@@ -208,7 +129,7 @@ namespace UpkManager.Models.UpkFile.Engine
             return false;
         }
 
-        public bool TryGetProperty(string name, UObject parent, out CustomStructJson definition)
+        public bool TryGetProperty(string name, UObject parent, out StructInfo definition)
         {
             return _structs.TryGetValue(name, out definition);
         }

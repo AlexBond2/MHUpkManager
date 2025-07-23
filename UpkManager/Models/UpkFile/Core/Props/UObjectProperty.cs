@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("ObjectProperty")]
-    public class UObjectProperty(UObject parent) : UProperty(parent)
+    public class UObjectProperty : UProperty
     {
         [StructField("UObject")]
         public FName Object { get; private set; } // UObject

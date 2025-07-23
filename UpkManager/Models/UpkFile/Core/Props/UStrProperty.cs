@@ -4,7 +4,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("StrProperty")]
-    public class UStrProperty(UObject parent) : UProperty(parent)
+    public class UStrProperty : UProperty
     {
         private UnrealString Value { get; set; } // FString
         public override object PropertyValue => Value;

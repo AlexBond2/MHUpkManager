@@ -6,7 +6,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("StructProperty")]
-    public class UStructProperty(UObject parent) : UProperty(parent)
+    public class UStructProperty : UProperty
     {
         [StructField("UStruct")]
         public FName Struct { get; private set; } // UStruct
@@ -30,7 +30,7 @@ namespace UpkManager.Models.UpkFile.Core
             var structType = Struct.Name;
             if (EngineRegistry.Instance.TryGetStruct(structType, Parent, out var type))
             {
-                StructValue = new EngineProperty(type, Parent);
+                StructValue = new EngineProperty(type);
                 StructValue.ReadPropertyValue(buffer, size, property);
             }
             else if (CoreRegistry.Instance.TryGetProperty(structType, out var prop))

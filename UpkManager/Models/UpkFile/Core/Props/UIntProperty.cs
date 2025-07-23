@@ -4,7 +4,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("IntProperty")]
-    public class UIntProperty(UObject parent) : UProperty(parent)
+    public class UIntProperty : UProperty
     {
         protected int Value { get; set; }
         public override object PropertyValue => Value;

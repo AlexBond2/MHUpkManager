@@ -5,7 +5,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("MapProperty")]
-    public class UMapProperty(UObject parent) : UProperty(parent)
+    public class UMapProperty : UProperty
     {
         [StructField("UProperty")]
         public FName Key { get; private set; } // UProperty

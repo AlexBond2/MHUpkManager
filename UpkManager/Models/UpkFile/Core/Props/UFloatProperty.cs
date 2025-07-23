@@ -4,7 +4,7 @@ using UpkManager.Models.UpkFile.Types;
 namespace UpkManager.Models.UpkFile.Core
 {
     [UnrealClass("FloatProperty")]
-    public class UFloatProperty(UObject parent) : UProperty(parent)
+    public class UFloatProperty : UProperty
     {
         private float Value { get; set; }
         public override object PropertyValue => Value;

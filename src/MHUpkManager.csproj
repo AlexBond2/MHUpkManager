@@ -49,9 +49,6 @@
     <None Update="Data\MHComponents.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Data\MHEngineTypes.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   
   <Target Name="CopyDlls" AfterTargets="AfterBuild">
