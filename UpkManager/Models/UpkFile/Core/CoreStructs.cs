@@ -268,6 +268,18 @@ namespace UpkManager.Models.UpkFile.Core
         }
 
         public string Format => ToSystemGuid().ToString();
+
+        public static Guid ReadData(UBuffer buffer)
+        {
+            var guid = new Guid
+            {
+                A = buffer.Reader.ReadInt32(),
+                B = buffer.Reader.ReadInt32(),
+                C = buffer.Reader.ReadInt32(),
+                D = buffer.Reader.ReadInt32()
+            };
+            return guid;
+        }
     }
 
     public class Rotator : IAtomicStruct
@@ -311,7 +323,18 @@ namespace UpkManager.Models.UpkFile.Core
         [StructField]
         public bool IsValid { get; set; }
 
-        public string Format => ""; 
+        public string Format => "";
+
+        public static Box ReadData(UBuffer buffer)
+        {
+            var box = new Box
+            {
+                Min = Vector.ReadData(buffer),
+                Max = Vector.ReadData(buffer),
+                IsValid = buffer.ReadAtomicBool()
+            };
+            return box;
+        }
     }
 
     public class Plane : IAtomicStruct
@@ -329,6 +352,18 @@ namespace UpkManager.Models.UpkFile.Core
         public float Z { get; set; }
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}; {W:F4}]";
+
+        public static Plane ReadData(UBuffer buffer)
+        {
+            var quad = new Plane
+            {
+                W = buffer.Reader.ReadSingle(),
+                X = buffer.Reader.ReadSingle(),
+                Y = buffer.Reader.ReadSingle(),
+                Z = buffer.Reader.ReadSingle()
+            };
+            return quad;
+        }
     }
 
     public class Matrix : IAtomicStruct
@@ -345,7 +380,19 @@ namespace UpkManager.Models.UpkFile.Core
         [StructField]
         public Plane WPlane { get; set; }
 
-        public string Format => ""; 
+        public string Format => "";
+
+        public static Matrix ReadData(UBuffer buffer)
+        {
+            var matrix = new Matrix
+            {
+                XPlane = Plane.ReadData(buffer),
+                YPlane = Plane.ReadData(buffer),
+                ZPlane = Plane.ReadData(buffer),
+                WPlane = Plane.ReadData(buffer),
+            };
+            return matrix;
+        }
     }
 
     public class BoxSphereBounds : IAtomicStruct
@@ -432,7 +479,6 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
-    [UnrealStruct("RawDistribution")]
     public class RawDistribution
     {
         [StructField]
@@ -459,7 +505,6 @@ namespace UpkManager.Models.UpkFile.Core
         public string Format => "";
     }
 
-    [UnrealStruct("RawDistributionFloat")]
     public class RawDistributionFloat
     {
         [StructField]

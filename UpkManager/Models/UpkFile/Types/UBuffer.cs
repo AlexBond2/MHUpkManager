@@ -46,6 +46,12 @@ namespace UpkManager.Models.UpkFile.Types
             return count == 1;
         }
 
+        public bool ReadAtomicBool()
+        {
+            byte count = Reader.ReadByte();
+            return count == 1;
+        }
+
         public UMap<UName, FObject> ReadUMap()
         {
             int size = Reader.ReadInt32();

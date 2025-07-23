@@ -7,41 +7,18 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-    public static class PropertyFactory
-    {
-        public static UProperty Create(string type)
-        {
-            if (CoreRegistry.Instance.TryGetProperty(type, out var prop))
-                return new CoreProperty(prop, null);
-
-            return type switch
-            {
-                "Int32" => new UIntProperty(),
-                "Boolean" => new UBoolProperty(),
-                "Single" => new UFloatProperty(),
-                _ => new UProperty()
-            };
-        }
-    }
-
     public class CoreProperty : UProperty
     {
         public string StructName { get; }
         public IAtomicStruct Atomic { get; private set; }
+        public Type StructType { get; }
         public List<(string Name, UProperty Value)> Fields { get; } = [];
 
         public CoreProperty(Type structType, UObject parent)
         {            
             Parent = parent;
+            StructType = structType;
             StructName = structType.Name;
-            Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
-
-            foreach (var prop in GetStructFields(Atomic))
-            {
-                var unrealValue = PropertyFactory.Create(prop.PropertyType.Name);
-                unrealValue.Parent = Parent;
-                Fields.Add((prop.Name, unrealValue));
-            }
         }
 
         public static IEnumerable<PropertyInfo> GetStructFields(object obj)
@@ -54,62 +31,27 @@ namespace UpkManager.Models.UpkFile.Core
             }
         }
 
-        public override string PropertyString
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Atomic.Format)) return StructName;
-
-                SetValuesToStruct();
-                return Atomic.Format;
-            }
-        }
-
-        private void SetValuesToStruct()
-        {
-            var structType = Atomic.GetType();
-
-            foreach (var (name, value) in Fields)
-            {
-                var prop = structType.GetProperty(name);
-                if (prop == null) continue;
-
-                object val = value switch
-                {
-                    UIntProperty intVal => intVal.PropertyValue,
-                    UFloatProperty floatVal => floatVal.PropertyValue,
-                    UBoolProperty boolVal => boolVal.PropertyValue,
-                    CoreProperty coreVal => coreVal.Atomic,
-                    _ => null
-                };
-
-                if (val != null)
-                    prop.SetValue(Atomic, val);
-            }
-        }
+        public override string PropertyString => Atomic?.Format ?? StructName;
 
         public override void BuildVirtualTree(VirtualNode valueTree)
         {
-            if (!string.IsNullOrEmpty(Atomic.Format))
-                base.BuildVirtualTree(valueTree);
+            if (Atomic != null)
+                BuildStructVirtualTree(valueTree, Atomic);
             else
-                for (int i = 0; i < Fields.Count; i++)
-                {
-                    var (name, value) = Fields[i];
-
-                    var prop = Atomic.GetType().GetProperty(name);
-                    string typeName = prop.PropertyType.Name ?? "Unknown";
-
-                    var node = new VirtualNode($"{name} ::{typeName}");
-                    value.BuildVirtualTree(node);
-                    valueTree.Children.Add(node);
-                }
+                valueTree.Children.Add(new VirtualNode(StructName));
         }
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            foreach (var (_, value) in Fields)
-                value.ReadPropertyValue(buffer, size, property);
+            var readMethod = StructType.GetMethod("ReadData", BindingFlags.Public | BindingFlags.Static);
+            if (readMethod == null)
+                throw new InvalidOperationException($"{StructType.Name} not have static ReadData(UBuffer)");
+
+            var result = readMethod.Invoke(null, [buffer]);
+            if (result is IAtomicStruct atomic)
+            {
+                Atomic = atomic;
+            }
         }
 
         public static void BuildStructVirtualTree(VirtualNode fieldNode, IAtomicStruct atomic)

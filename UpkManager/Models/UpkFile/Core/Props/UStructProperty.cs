@@ -28,16 +28,17 @@ namespace UpkManager.Models.UpkFile.Core
             Struct = buffer.ReadNameIndex();
 
             var structType = Struct.Name;
-            if (EngineRegistry.Instance.TryGetStruct(structType, Parent, out var type))
-            {
-                StructValue = new EngineProperty(type);
-                StructValue.ReadPropertyValue(buffer, size, property);
-            }
-            else if (CoreRegistry.Instance.TryGetProperty(structType, out var prop))
+            if (CoreRegistry.Instance.TryGetProperty(structType, out var prop))
             {
                 StructValue = new CoreProperty(prop, Parent);
                 StructValue.ReadPropertyValue(buffer, size, property);
             }
+            else if (EngineRegistry.Instance.TryGetStruct(structType, Parent, out var type))
+            {
+                StructValue = new EngineProperty(type);
+                StructValue.ReadPropertyValue(buffer, size, property);
+            }
+            
             else
             {
                 base.ReadPropertyValue(buffer, size, property);
