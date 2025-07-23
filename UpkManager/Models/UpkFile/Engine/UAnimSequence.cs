@@ -65,13 +65,14 @@ namespace UpkManager.Models.UpkFile.Engine
         }
     }
 
+    [UnrealStruct("AnimNotifyEvent")]
     public class AnimNotifyEvent : IAtomicStruct
     {
         [StructField]
         public float Time { get; set; }
 
         [StructField("UAnimNotify")]
-        public FName Notify { get; set; } // UAnimNotify
+        public FObject Notify { get; set; } // UAnimNotify
 
         [StructField]
         public FName Comment { get; set; }

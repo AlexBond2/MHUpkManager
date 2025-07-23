@@ -7,7 +7,7 @@ namespace UpkManager.Models.UpkFile.Classes
     public class UComponent : UObject
     {
         [StructField("UClass")]
-        public FName TemplateOwnerClass { get; set; } // UClass
+        public FObject TemplateOwnerClass { get; set; } // UClass
 
         [StructField]
         public UName TemplateName { get; set; }

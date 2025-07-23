@@ -8,7 +8,7 @@ namespace UpkManager.Models.UpkFile.Core
     public class UObjectRedirector : UObject
     {
         [StructField("UObject")]
-        public FName DestinationObject { get; private set; } // UObject
+        public FObject DestinationObject { get; private set; } // UObject
 
         public override void ReadBuffer(UBuffer buffer)
         {

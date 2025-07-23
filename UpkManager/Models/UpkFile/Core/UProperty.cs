@@ -20,7 +20,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public UName Category { get; private set; }
 
         [StructField("UEnum")]
-        public FName ArrayEnum { get; private set; } // UEnum
+        public FObject ArrayEnum { get; private set; } // UEnum
 
         protected ByteArrayReader DataReader { get; set; }
         public virtual object PropertyValue => DataReader.GetBytes();

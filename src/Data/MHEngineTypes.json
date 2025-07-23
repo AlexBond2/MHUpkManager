@@ -1,46 +1,18 @@
 [
-  { "Parent": "ObjectReferencer", "Name": "ReferencedObjects", "Type": "Object" },
-  { "Parent": "AnimSet", "Name": "Sequences", "Type": "Object" },
-  { "Parent": "PhysicsAsset", "Name": "BodySetup", "Type": "Object" },
-  { "Parent": "PhysicsAssetInstance", "Name": "Bodies", "Type": "Object" },
-  { "Parent": "SkeletalMeshComponent", "Name": "ConstraintSetup", "Type": "Object" },
-  { "Parent": "MarvelAttachment_Models", "Name": "ModelMesh", "Type": "Object" },
-  { "Parent": "MarvelAttachmentAnimated", "Name": "AnimationSet", "Type": "Object" },
-  { "Parent": "MarvelEntity", "Name": "MAttachmentClasses", "Type": "Object" },
-  { "Parent": "MarvelEntity", "Name": "ThrowPowerWeakComponents", "Type": "Object" },
-  { "Parent": "MarvelEntity", "Name": "ThrowPowerStrongComponents", "Type": "Object" },
-  { "Parent": "MarvelEntity", "Name": "ThrowPutdownPowerWeakComponents", "Type": "Object" },
-  { "Parent": "MarvelEntity", "Name": "ThrowPutdownPowerStrongComponents", "Type": "Object" },
-  { "Parent": "Actor", "Name": "Components", "Type": "Object" },
-
   { "Parent": "MaterialFunction", "Name": "FunctionExpressions", "Type": "Object" },
   { "Parent": "WorldInfo", "Name": "Emitters", "Type": "Object" },
   { "Parent": "ParticleEmitter", "Name": "LODLevels", "Type": "Object" },
   { "Parent": "ParticleLODLevel", "Name": "Modules", "Type": "Object" },
   { "Parent": "Material", "Name": "Expressions", "Type": "Object" },
-  { "Parent": "SkeletalMeshComponent", "Name": "AnimSets", "Type": "Object" },
 
   { "Parent": "ParticleSystem", "Name": "LODDistances", "Type": "Float" },
   { "Parent": "RawDistribution", "Name": "LookupTable", "Type": "Float" },
-  { "Parent": "AnimNodeBlendBySpeed", "Name": "Constraints", "Type": "Float" },
-
-  { "Parent": "PhysicsAsset", "Name": "BoundsBodies", "Type": "Int" },
 
   { "Parent": "MaterialFunction", "Name": "LibraryCategories", "Type": "String" },
 
-  { "Parent": "AnimSet", "Name": "TrackBoneNames", "Type": "Name" },
-  { "Parent": "AnimSet", "Name": "UseTranslationBoneNames", "Type": "Name" },
-  { "Parent": "LODSettings", "Name": "AttachmentBones", "Type": "Name" },
-  { "Parent": "FXAttachmentMaterialParameter", "Name": "WeaponSlot", "Type": "Name" },
-  { "Parent": "MarvelEntity", "Name": "PhysicsFloppyBones", "Type": "Name" },
-
-  { "Parent": "MaterialInstanceConstant", "Name": "ScalarParameterValues", "Type": "Struct", "Struct": "FScalarParameterValue" },
-  { "Parent": "MaterialInstanceConstant", "Name": "TextureParameterValues", "Type": "Struct", "Struct": "FTextureParameterValue" },
-  { "Parent": "MarvelEntity", "Name": "AnimationSetAliases", "Type": "Struct", "Struct": "FAnimationSetAlias" },
   { "Parent": "ParticleSystem", "Name": "LODSettings", "Type": "Struct", "Struct": "FParticleSystemLOD" },
   { "Parent": "ParticleModuleRequired", "Name": "BurstList", "Type": "Struct", "Struct": "FParticleBurst" },
   { "Parent": "Material", "Name": "MaterialFunctionInfos", "Type": "Struct", "Struct": "FMaterialFunctionInfo" },
-  { "Parent": "MaterialInstanceConstant", "Name": "VectorParameterValues", "Type": "Struct", "Struct": "FVectorParameterValue" },
   { "Parent": "KMeshProps", "Name": "AggGeom", "Type": "Struct", "Struct": "KAggregateGeom" },
   { "Parent": "KMeshProps", "Name": "SphylElems", "Type": "Struct", "Struct": "KSphylElem" }
 ]

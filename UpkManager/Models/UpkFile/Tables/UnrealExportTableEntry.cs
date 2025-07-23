@@ -50,7 +50,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal UnrealExportTableEntry()
         {
-            ObjectNameIndex = new FName();
+            ObjectNameIndex = new FObject();
             NetObjects = [];
         }
 
@@ -208,13 +208,16 @@ namespace UpkManager.Models.UpkFile.Tables
 
             string className = ClassReferenceNameIndex?.Name;
 
+            if (ObjectNameIndex.Name.StartsWith("Default__"))
+                return new UnrealObject<UObject>();
+
             if (ClassRegistry.Instance.TryGetType(className, out var type))
             {
                 var constructed = typeof(UnrealObject<>).MakeGenericType(type);
                 return (UnrealObjectBase)Activator.CreateInstance(constructed)!;
             }
 
-            if (ComponentRegistry.HasComponent(className) && !ObjectNameIndex.Name.StartsWith("Default__"))
+            if (ComponentRegistry.HasComponent(className))
                 return new UnrealObject<UComponent>();
 
             return new UnrealObject<UObject>();

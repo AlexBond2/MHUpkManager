@@ -7,13 +7,13 @@ namespace UpkManager.Models.UpkFile.Classes
     public class UStruct : UField
     {
         [StructField("UTextBuffer")]
-        public FName ScriptText { get; private set; }
+        public FObject ScriptText { get; private set; }
 
         [StructField("UField")]
-        public FName Children { get; private set; }
+        public FObject Children { get; private set; }
 
         [StructField("UTextBuffer")]
-        public FName CppText { get; private set; }
+        public FObject CppText { get; private set; }
 
         [StructField]
         public int Line { get; private set; }

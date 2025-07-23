@@ -16,7 +16,7 @@ namespace UpkManager.Models.UpkFile.Engine
         public bool bHasVertexColors { get; set; }
 
         [PropertyField]
-        public UArray<FName> Sockets { get; set; } // SkeletalMeshSocket
+        public UArray<FObject> Sockets { get; set; } // SkeletalMeshSocket
 
         [PropertyField]
         public UArray<SkeletalMeshLODInfo> LODInfo { get; set; }
@@ -25,7 +25,7 @@ namespace UpkManager.Models.UpkFile.Engine
         public BoxSphereBounds Bounds { get; set; }
 
         [StructField("UMaterialInterface")]
-        public UArray<FName> Materials { get; set; } // UMaterialInterface
+        public UArray<FObject> Materials { get; set; } // UMaterialInterface
 
         [StructField]
         public Vector Origin { get; set; }
@@ -56,7 +56,7 @@ namespace UpkManager.Models.UpkFile.Engine
 
         [PropertyField]
         [StructField("UApexClothingAsset")]
-        public UArray<FName> ClothingAssets { get; set; } // UApexClothingAsset
+        public UArray<FObject> ClothingAssets { get; set; } // UApexClothingAsset
 
         [StructField("TexelRatio")]
         public UArray<float> CachedStreamingTextureFactors { get; set; }
@@ -96,6 +96,25 @@ namespace UpkManager.Models.UpkFile.Engine
 
             return array;
         }
+    }
+
+    [UnrealClass("SkeletalMeshComponent")]
+    public class USkeletalMeshComponent : UMeshComponent
+    {
+        [PropertyField]
+        public FObject SkeletalMesh { get; set; } // USkeletalMesh
+
+        [PropertyField]
+        public FObject PhysicsAsset { get; set; } // PhysicsAsset
+
+        [PropertyField]
+        public UArray<FObject> AnimSets { get; set; } // UAnimSet
+    }
+
+    [UnrealClass("MeshComponent")]
+    public class UMeshComponent : UPrimitiveComponent
+    {
+
     }
 
     [UnrealStruct("SkeletalMeshLODInfo")]

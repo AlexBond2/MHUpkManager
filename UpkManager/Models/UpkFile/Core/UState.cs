@@ -26,7 +26,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public UStateFlags StateFlags { get; private set; } // UStateFlags 
 
         [StructField("UMap<UName, UFunction>")]
-        public UMap<UName, FName> FuncMap { get; private set; } // UMap<UName, UFunction>
+        public UMap<UName, FObject> FuncMap { get; private set; } // UMap<UName, UFunction>
 
         public override void ReadBuffer(UBuffer buffer)
         {

@@ -6,6 +6,7 @@ using UpkManager.Helpers;
 
 namespace UpkManager.Models.UpkFile.Tables
 {
+    public class FObject : FName { }
 
     public class FName : UnrealUpkBuilderBase
     {

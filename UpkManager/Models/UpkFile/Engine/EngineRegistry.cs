@@ -145,8 +145,8 @@ namespace UpkManager.Models.UpkFile.Engine
             if (type == typeof(float)) return PropertyTypes.FloatProperty;
             if (type == typeof(bool)) return PropertyTypes.BoolProperty;
             if (type == typeof(string)) return PropertyTypes.StrProperty;
-            if (type == typeof(UName)) return PropertyTypes.NameProperty;
-            if (type == typeof(FName)) return PropertyTypes.ObjectProperty;
+            if (type == typeof(UName) || type == typeof(FName)) return PropertyTypes.NameProperty;
+            if (type == typeof(FObject)) return PropertyTypes.ObjectProperty;
             if (typeof(UObject).IsAssignableFrom(type)) return PropertyTypes.ObjectProperty;
             if (type.IsClass || type.IsValueType) return PropertyTypes.StructProperty;
 

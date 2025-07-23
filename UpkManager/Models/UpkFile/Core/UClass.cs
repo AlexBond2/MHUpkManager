@@ -14,13 +14,13 @@ namespace UpkManager.Models.UpkFile.Classes
         public EClassFlags ClassFlags { get; private set; }
 
         [StructField("UClass")]
-        public FName Within { get; private set; } // UClass 
+        public FObject Within { get; private set; } // UClass 
 
         [StructField("UName")]
         public UName ConfigName { get; private set; } // UName 
 
         [StructField("UMap<UName, UObject>")]
-        public UMap<UName, FName> ComponentDefaultObjectMap { get; private set; } // UName, UObject
+        public UMap<UName, FObject> ComponentDefaultObjectMap { get; private set; } // UName, UObject
 
         [StructField("FImplementedInterface")]
         public List<FImplementedInterface> Interfaces { get; private set; }
@@ -50,7 +50,7 @@ namespace UpkManager.Models.UpkFile.Classes
         public UName DLLBindName { get; private set; } // UName
 
         [StructField("UObject")]
-        public FName Default { get; private set; } // UObject
+        public FObject Default { get; private set; } // UObject
 
 
         public override void ReadBuffer(UBuffer buffer)

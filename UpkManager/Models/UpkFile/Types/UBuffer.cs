@@ -46,10 +46,10 @@ namespace UpkManager.Models.UpkFile.Types
             return count == 1;
         }
 
-        public UMap<UName, FName> ReadUMap()
+        public UMap<UName, FObject> ReadUMap()
         {
             int size = Reader.ReadInt32();
-            UMap<UName, FName> map = new(size);
+            UMap<UName, FObject> map = new(size);
             for (var i = 0; i < size; i++)
             {
                 var key = UName.ReadName(this);
@@ -72,12 +72,12 @@ namespace UpkManager.Models.UpkFile.Types
             return map;
         }
 
-        public FName ReadObject()
+        public FObject ReadObject()
         {
             return Header.GetObjectTableEntry(Reader.ReadInt32())?.ObjectNameIndex;
         }
 
-        public static FName ReadObject(UBuffer buffer)
+        public static FObject ReadObject(UBuffer buffer)
         {
             return buffer.Header.GetObjectTableEntry(buffer.Reader.ReadInt32())?.ObjectNameIndex;
         }

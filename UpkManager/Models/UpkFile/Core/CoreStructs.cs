@@ -400,4 +400,34 @@ namespace UpkManager.Models.UpkFile.Core
             return color;
         }
     }
+
+    public class LinearColor : IAtomicStruct
+    {
+
+        [StructField]
+        public float R { get; set; }
+
+        [StructField]
+        public float G { get; set; }
+
+        [StructField]
+        public float B { get; set; }
+
+        [StructField]
+        public float A { get; set; }
+
+        public string Format => $"[{R};{G};{B};{A}]";
+
+        public static LinearColor ReadData(UBuffer buffer)
+        {
+            var color = new LinearColor
+            {
+                R = buffer.Reader.ReadSingle(),
+                G = buffer.Reader.ReadSingle(),
+                B = buffer.Reader.ReadSingle(),
+                A = buffer.Reader.ReadSingle()
+            };
+            return color;
+        }
+    }
 }
