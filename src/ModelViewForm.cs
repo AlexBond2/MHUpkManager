@@ -2,8 +2,7 @@
 using System.Drawing.Imaging;
 using System.Numerics;
 using System.Text;
-
-using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Types;
 
 namespace MHUpkManager

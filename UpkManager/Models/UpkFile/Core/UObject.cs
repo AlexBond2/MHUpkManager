@@ -238,7 +238,7 @@ namespace UpkManager.Models.UpkFile.Classes
                 UIntProperty i => i.PropertyValue,
                 UFloatProperty f => f.PropertyValue,
                 UBoolProperty bo => bo.PropertyValue,
-                UNameProperty n => n.PropertyString,
+                UNameProperty n => n.PropertyValue,
                 UStrProperty s => s.PropertyString,
                 UStructProperty sv => sv.StructValue,
                 UArrayProperty av => GetValueArray(av.Array),

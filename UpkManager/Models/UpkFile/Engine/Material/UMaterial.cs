@@ -3,7 +3,7 @@ using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Material
 {
     [UnrealClass("UMaterialInterface")]
     public class UMaterialInterface : USurface

@@ -1,7 +1,7 @@
 ﻿
 using DDSLib;
 using System.Windows.Media.Imaging;
-using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Objects.Textures;
 
 namespace MHUpkManager
@@ -66,7 +66,7 @@ namespace MHUpkManager
             textureNameLabel.Text = title;
             textureGuidLabel.Text = textureObject.TextureFileCacheGuid.ToString();
             mipMapsLabel.Text = textureObject.Mips.Count.ToString();
-            textureFileLabel.Text = textureObject.TextureFileCacheName;
+            textureFileLabel.Text = textureObject.TextureFileCacheName.Name;
 
             UpdateMipMapBox();
             LoadTexture(minIndex);

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Mesh
 {
     using Vector = Core.Vector;
     [UnrealClass("SkeletalMesh")]
@@ -96,6 +97,25 @@ namespace UpkManager.Models.UpkFile.Engine
 
             return array;
         }
+    }
+
+    [UnrealClass("SkeletalMeshSocket")]
+    public class USkeletalMeshSocket : UObject
+    {
+        [PropertyField]
+        public FName SocketName { get; set; }
+
+        [PropertyField]
+        public FName BoneName { get; set; }
+
+        [PropertyField]
+        public Vector RelativeLocation { get; set; }
+
+        [PropertyField]
+        public Rotator RelativeRotation { get; set; }
+
+        [PropertyField]
+        public Vector RelativeScale { get; set; }
     }
 
     [UnrealClass("SkeletalMeshComponent")]

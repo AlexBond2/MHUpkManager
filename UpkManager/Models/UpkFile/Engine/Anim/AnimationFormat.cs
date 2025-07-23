@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Core;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Anim
 {
     public enum AnimationCompressionFormat
     {
@@ -89,7 +88,7 @@ namespace UpkManager.Models.UpkFile.Engine
     {
         public override void RotationDecode(UAnimSequence sequence, ByteArrayReader reader, int numKeys)
         {
-            var format = (numKeys == 1)
+            var format = numKeys == 1
                 ? AnimationCompressionFormat.ACF_Float96NoW
                 : sequence.RotationCompressionFormat;
 
@@ -149,7 +148,7 @@ namespace UpkManager.Models.UpkFile.Engine
 
         public override void TranslationDecode(UAnimSequence sequence, ByteArrayReader reader, int numKeys)
         {
-            var format = (numKeys == 1)
+            var format = numKeys == 1
                 ? AnimationCompressionFormat.ACF_None
                 : sequence.TranslationCompressionFormat;
 

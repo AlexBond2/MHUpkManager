@@ -2,7 +2,7 @@
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.MarvelGame
 {
     [UnrealClass("MarvelEntity")]
     public class UMarvelEntity : UActor
@@ -44,17 +44,17 @@ namespace UpkManager.Models.UpkFile.Engine
     {
         [PropertyField]
         public EVisibilityPoint VisibilityPoint { get; set; }
-    }
 
-    public enum EVisibilityPoint
-    {
-        VISIBLE_ON_SPAWN,               // 0
-        VISIBLE_ON_AGGRO,               // 1
-        VISIBLE_ON_ENDURANCE_CHANGE,    // 2
-        VISIBLE_ON_THROW,               // 3
-        VISIBLE_ON_DEMAND,              // 4
-        VISIBLE_ON_MAX                  // 5
-    };
+        public enum EVisibilityPoint
+        {
+            VISIBLE_ON_SPAWN,               // 0
+            VISIBLE_ON_AGGRO,               // 1
+            VISIBLE_ON_ENDURANCE_CHANGE,    // 2
+            VISIBLE_ON_THROW,               // 3
+            VISIBLE_ON_DEMAND,              // 4
+            VISIBLE_ON_MAX                  // 5
+        };
+    }
 
     [UnrealClass("MarvelAttachmentMeshBase")]
     public class UMarvelAttachmentMeshBase : UMarvelAttachment

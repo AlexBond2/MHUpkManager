@@ -1,24 +1,41 @@
-﻿using System;
+﻿using DDSLib;
+using DDSLib.Constants;
+using System;
 using System.IO;
 using System.Linq;
-
-using DDSLib;
-using DDSLib.Constants;
-
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Objects.Textures;
+using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Texture
 {
     [UnrealClass("Texture2D")]
     public class UTexture2D : UTexture
     {
         [PropertyField]
-        public string TextureFileCacheName { get; set; }
+        public int SizeX { get; set; }
+
+        [PropertyField]
+        public int SizeY { get; set; }
+
+        [PropertyField]
+        public int OriginalSizeX { get; set; }
+
+        [PropertyField]
+        public int OriginalSizeY { get; set; }
 
         [PropertyField]
         public EPixelFormat Format { get; set; }
+
+        [PropertyField]
+        public FName TextureFileCacheName { get; set; }
+
+        [PropertyField]
+        public int MipTailBaseIdx { get; set; }
+
+        [PropertyField]
+        public int FirstResourceMemMip { get; set; }
 
         [StructField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> Mips { get; set; }

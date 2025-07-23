@@ -3,7 +3,7 @@ using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Anim
 {
     [UnrealClass("AnimSequence")]
     public class UAnimSequence : UObject
@@ -65,24 +65,6 @@ namespace UpkManager.Models.UpkFile.Engine
         }
     }
 
-    [UnrealStruct("AnimNotifyEvent")]
-    public class AnimNotifyEvent : IAtomicStruct
-    {
-        [StructField]
-        public float Time { get; set; }
-
-        [StructField("UAnimNotify")]
-        public FObject Notify { get; set; } // UAnimNotify
-
-        [StructField]
-        public FName Comment { get; set; }
-
-        [StructField]
-        public float Duration { get; set; }
-
-        public string Format => "";
-    }
-
     public class RawAnimSequenceTrack
     {
         public UArray<Vector> PosKeys { get; set; }
@@ -112,7 +94,7 @@ namespace UpkManager.Models.UpkFile.Engine
         public override string ToString()
         {
             int count = PosKeys.Count;
-            string data = (count > 0) ? PosKeys[0].Format : "";
+            string data = count > 0 ? PosKeys[0].Format : "";
             return $"{data} PosKeys[{count}] Times[{Times.Count}]";
         }
     }
@@ -125,7 +107,7 @@ namespace UpkManager.Models.UpkFile.Engine
         public override string ToString()
         {
             int count = RotKeys.Count;
-            string data = (count > 0) ? RotKeys[0].Format : "";
+            string data = count > 0 ? RotKeys[0].Format : "";
             return $"{data} RotKeys[{RotKeys.Count}] Times[{Times.Count}]";
         }
     }

@@ -1,7 +1,7 @@
 ﻿using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Texture
 {
     public enum ELightMapFlags
     {

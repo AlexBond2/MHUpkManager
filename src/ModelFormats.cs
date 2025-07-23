@@ -2,7 +2,7 @@
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using System.Numerics;
-using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Engine.Mesh;
 using static MHUpkManager.ModelViewForm;
 
 namespace MHUpkManager

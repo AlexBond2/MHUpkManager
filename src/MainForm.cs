@@ -7,6 +7,8 @@ using UpkManager.Extensions;
 using UpkManager.Models;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine;
+using UpkManager.Models.UpkFile.Engine.Mesh;
+using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Repository;

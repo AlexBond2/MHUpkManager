@@ -2,7 +2,7 @@
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Engine
+namespace UpkManager.Models.UpkFile.Engine.Physics
 {
     [UnrealClass("PhysicsAsset")]
     public class UPhysicsAsset : UObject
