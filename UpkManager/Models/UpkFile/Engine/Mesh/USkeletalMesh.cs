@@ -998,7 +998,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         {
             MeshBone bone = new()
             {
-                Name = buffer.ReadNameIndex(),
+                Name = buffer.ReadName(),
                 Flags = buffer.Reader.ReadUInt32(),
                 BonePos = VJointPos.ReadData(buffer),
                 NumChildren = buffer.ReadInt32(),

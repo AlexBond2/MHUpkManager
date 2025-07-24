@@ -31,12 +31,12 @@ namespace UpkManager.Models.UpkFile.Core
         {
             try
             {
-                NameIndex = buffer.ReadNameIndex(); 
+                NameIndex = buffer.ReadName(); 
 
                 if (NameIndex.IsNone()) return ResultProperty.None;
                 if (NameIndex.Name == null) return ResultProperty.Null;
 
-                Category = buffer.ReadNameIndex();
+                Category = buffer.ReadName();
 
                 ElementSize = buffer.ReadInt32(); 
                 if (ElementSize == 0 && Category.IsNotBool()) return ResultProperty.Size;

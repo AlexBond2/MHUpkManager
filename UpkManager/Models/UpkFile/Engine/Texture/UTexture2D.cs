@@ -41,7 +41,7 @@ namespace UpkManager.Models.UpkFile.Engine.Texture
         public UArray<Texture2DMipMap> Mips { get; set; }
 
         [StructField]
-        public Guid TextureFileCacheGuid { get; set; }
+        public Core.Guid TextureFileCacheGuid { get; set; }
 
         [StructField("Texture2DMipMap")]
         public UArray<Texture2DMipMap> CachedPVRTCMips { get; set; }

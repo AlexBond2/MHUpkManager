@@ -25,7 +25,7 @@ namespace UpkManager.Models.UpkFile.Core
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            Struct = buffer.ReadNameIndex();
+            Struct = buffer.ReadName();
 
             var structType = Struct.Name;
             if (CoreRegistry.Instance.TryGetProperty(structType, out var prop))

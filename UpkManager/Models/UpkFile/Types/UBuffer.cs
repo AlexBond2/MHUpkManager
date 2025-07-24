@@ -168,10 +168,9 @@ namespace UpkManager.Models.UpkFile.Types
             return MemoryMarshal.Cast<byte, T>(bytes.AsSpan());
         }
 
-        public System.Guid ReadGuid()
-        {
-            byte[] bytes = Reader.ReadBytes(16);
-            return new System.Guid(bytes);
+        public Core.Guid ReadGuid()
+        {            
+            return Core.Guid.ReadData(this);
         }
 
         public byte[] ReadBytes()
@@ -180,7 +179,7 @@ namespace UpkManager.Models.UpkFile.Types
             return Reader.ReadBytes(size);
         }
 
-        public FName ReadNameIndex()
+        public FName ReadName()
         {
             var nameIndex = new FName();
             nameIndex.ReadNameTableIndex(Reader, Header);

@@ -268,6 +268,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
 
         public string Format => ToSystemGuid().ToString();
+        public override string ToString() => ToSystemGuid().ToString();
 
         public static Guid ReadData(UBuffer buffer)
         {

@@ -13,7 +13,7 @@ namespace UpkManager.Models.UpkFile.Core
 
         public override void ReadPropertyValue(UBuffer buffer, int size, UnrealProperty property)
         {
-            Value = buffer.ReadNameIndex();
+            Value = buffer.ReadName();
         }
 
         public override void SetPropertyValue(object value)
