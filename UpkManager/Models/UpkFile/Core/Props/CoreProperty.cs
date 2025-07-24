@@ -7,6 +7,23 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
+    public static class PropertyFactory
+    {
+        public static UProperty Create(string type)
+        {
+            if (CoreRegistry.Instance.TryGetProperty(type, out var prop))
+                return new CoreProperty(prop, null);
+
+            return type switch
+            {
+                "Int32" => new UIntProperty(),
+                "Boolean" => new UBoolProperty(),
+                "Single" => new UFloatProperty(),
+                _ => new UProperty()
+            };
+        }
+    }
+
     public class CoreProperty : UProperty
     {
         public string StructName { get; }
@@ -19,6 +36,15 @@ namespace UpkManager.Models.UpkFile.Core
             Parent = parent;
             StructType = structType;
             StructName = structType.Name;
+
+            Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
+
+            foreach (var prop in GetStructFields(Atomic))
+            {
+                var unrealValue = PropertyFactory.Create(prop.PropertyType.Name);
+                unrealValue.Parent = Parent;
+                Fields.Add((prop.Name, unrealValue));
+            }
         }
 
         public static IEnumerable<PropertyInfo> GetStructFields(object obj)

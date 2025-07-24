@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
 using UpkManager.Constants;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Tables;
@@ -59,23 +60,45 @@ namespace UpkManager.Models.UpkFile.Engine
 
         private void RegisterPropertyIfArray(PropertyInfo prop, string parentName)
         {
-            if (!TryGetElementTypeIfArray(prop.PropertyType, out var elementType)) return;
+            var type = prop.PropertyType;
+            var name = prop.Name;
 
-            var propertyKind = GetPropertyType(elementType);
-            var structName = propertyKind == PropertyTypes.StructProperty ? elementType.Name : null;
-
-            //var key = $"{parentName}.{prop.Name}";
-            var key = prop.Name;
-            _structs[key] = new StructInfo
+            if (_structs.ContainsKey(name))
             {
-                Parent = parentName,
-                Name = prop.Name,
-                Type = propertyKind,
-                Struct = structName
-            };
+                System.Diagnostics.Debug.WriteLine($"⚠️ Warning: Duplicate property name detected: '{name}' (parent: {parentName})");
+                System.Diagnostics.Debug.WriteLine($"    Existing parent: {_structs[name].Parent}, New parent: {parentName}");
+            }
+
+            if (TryGetElementTypeIfArray(type, out var elementType))
+            {
+                var propertyKind = GetPropertyType(elementType);
+                var structName = propertyKind == PropertyTypes.StructProperty ? elementType.Name : null;
+
+                _structs[name] = new StructInfo
+                {
+                    Parent = parentName,
+                    Name = name,
+                    Type = propertyKind,
+                    Struct = structName
+                };
+            }
+            else
+            {
+                var propertyKind = GetPropertyType(type);
+                if (propertyKind == PropertyTypes.StructProperty)
+                {
+                    _structs[name] = new StructInfo
+                    {
+                        Parent = parentName,
+                        Name = name,
+                        Type = propertyKind,
+                        Struct = type.Name
+                    };
+                }
+            }
         }
 
-        private static bool TryGetElementTypeIfArray(Type propertyType, out Type elementType)
+        public static bool TryGetElementTypeIfArray(Type propertyType, out Type elementType)
         {
             elementType = null;
 

@@ -87,6 +87,22 @@ namespace UpkManager.Models.UpkFile.Engine.Particle
         public UArray<ParticleBurst> BurstList { get; set; }
     }
 
+    [UnrealClass("ParticleModuleColorBase")]
+    public class UParticleModuleColorBase : UParticleModule
+    {
+    }
+
+    [UnrealClass("ParticleModuleColorOverLife")]
+    public class UParticleModuleColorOverLife : UParticleModuleColorBase
+    {
+        [PropertyField]
+        public RawDistributionVector ColorOverLife { get; set; }
+
+        [PropertyField]
+        public RawDistributionFloat AlphaOverLife { get; set; }
+    }
+
+
     [UnrealStruct("ParticleBurst")]
     public class ParticleBurst
     {

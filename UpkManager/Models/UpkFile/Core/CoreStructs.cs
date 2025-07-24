@@ -464,7 +464,7 @@ namespace UpkManager.Models.UpkFile.Core
         [StructField]
         public float A { get; set; }
 
-        public string Format => $"[{R};{G};{B};{A}]";
+        public string Format => $"[{R:F4}; {G:F4}; {B:F4}; {A:F4}]";
 
         public static LinearColor ReadData(UBuffer buffer)
         {
@@ -479,9 +479,10 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [UnrealStruct("RawDistribution")]
     public class RawDistribution
     {
-        [StructField]
+        [StructField] 
         public byte Type { get; set; }
 
         [StructField]
@@ -501,18 +502,19 @@ namespace UpkManager.Models.UpkFile.Core
 
         [StructField]
         public float LookupTableStartTime { get; set; }
-
-        public string Format => "";
     }
 
-    public class RawDistributionFloat
+    [UnrealStruct("RawDistributionFloat")]
+    public class RawDistributionFloat : RawDistribution
     {
         [StructField]
         public FObject Distribution { get; set; } // DistributionFloat
+    }
 
+    [UnrealStruct("RawDistributionVector")]
+    public class RawDistributionVector : RawDistribution
+    {
         [StructField]
-        public RawDistribution Base { get; set; }
-
-        public string Format => "";
+        public FObject Distribution { get; set; } // DistributionVector
     }
 }
