@@ -11,6 +11,13 @@ namespace UpkManager.Models.UpkFile.Core
         string Format { get; }
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public class AtomicStructAttribute(string name) : Attribute
+    {
+        public string Name { get; } = name;
+    }
+
+    [AtomicStruct("Vector")]
     public class Vector : IAtomicStruct
     {
         [StructField]
@@ -208,6 +215,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Quat")]
     public class Quat : IAtomicStruct
     {
         [StructField]
@@ -246,6 +254,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Guid")]
     public class Guid : IAtomicStruct
     {
         [StructField]
@@ -283,6 +292,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Rotator")]
     public class Rotator : IAtomicStruct
     {
         [StructField]
@@ -313,6 +323,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Box")]
     public class Box : IAtomicStruct
     {
         [StructField]
@@ -338,6 +349,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Plane")]
     public class Plane : IAtomicStruct
     {
         [StructField]
@@ -367,6 +379,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Matrix")]
     public class Matrix : IAtomicStruct
     {
         [StructField]
@@ -421,6 +434,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("Color")]
     public class Color : IAtomicStruct
     {
         [StructField]
@@ -450,6 +464,7 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
+    [AtomicStruct("LinearColor")]
     public class LinearColor : IAtomicStruct
     {
 

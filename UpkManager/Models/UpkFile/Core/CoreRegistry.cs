@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace UpkManager.Models.UpkFile.Core
 {
@@ -13,8 +14,12 @@ namespace UpkManager.Models.UpkFile.Core
         {
             _types = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
-                .Where(t => typeof(IAtomicStruct).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
-                .ToDictionary(t => t.Name, t => t, StringComparer.OrdinalIgnoreCase);
+                .Where(t => t.GetCustomAttribute<AtomicStructAttribute>() != null && !t.IsInterface && !t.IsAbstract)
+                .ToDictionary(
+                    t => t.GetCustomAttribute<AtomicStructAttribute>()!.Name, 
+                    t => t, 
+                    StringComparer.OrdinalIgnoreCase
+                );
         }
 
         public bool TryGetProperty(string name, out Type definition)

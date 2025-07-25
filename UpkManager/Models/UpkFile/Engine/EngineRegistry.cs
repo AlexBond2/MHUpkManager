@@ -20,12 +20,16 @@ namespace UpkManager.Models.UpkFile.Engine
 
     public class EngineRegistry
     {
-        private readonly Dictionary<string, StructInfo> _structs;
+        private readonly List<StructInfo> _structs; 
+        private readonly Dictionary<Type, string> _unrealClassNames;
+        private readonly Dictionary<Type, string> _unrealStructNames;
         public static EngineRegistry Instance { get; } = new EngineRegistry();
 
         private EngineRegistry()
         {
-            _structs = new Dictionary<string, StructInfo>(StringComparer.OrdinalIgnoreCase);
+            _structs = [];
+            _unrealClassNames = [];
+            _unrealStructNames = [];
 
             var unrealObjectType = typeof(UObject);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -33,18 +37,22 @@ namespace UpkManager.Models.UpkFile.Engine
             foreach (var assembly in assemblies)
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (unrealObjectType.IsAssignableFrom(type))
+                    var classAttr = type.GetCustomAttribute<UnrealClassAttribute>();
+                    if (classAttr != null)
                     {
-                        var classAttr = type.GetCustomAttribute<UnrealClassAttribute>();
-                        if (classAttr != null)
+                        _unrealClassNames[type] = classAttr.ClassName;
+
+                        if (unrealObjectType.IsAssignableFrom(type))
                             RegisterFieldsWithAttribute(type, classAttr.ClassName, typeof(PropertyFieldAttribute));
                     }
 
                     var structAttr = type.GetCustomAttribute<UnrealStructAttribute>();
                     if (structAttr != null)
+                    {
+                        _unrealStructNames[type] = structAttr.StructName;
                         RegisterFieldsWithAttribute(type, structAttr.StructName, typeof(StructFieldAttribute));
+                    }
                 }
-
         }
 
         private void RegisterFieldsWithAttribute(Type type, string parentName, Type attributeType)
@@ -58,42 +66,40 @@ namespace UpkManager.Models.UpkFile.Engine
             }
         }
 
-        private void RegisterPropertyIfArray(PropertyInfo prop, string parentName)
+        private void RegisterPropertyIfArray(PropertyInfo prop, string parent)
         {
             var type = prop.PropertyType;
             var name = prop.Name;
-
-            if (_structs.ContainsKey(name))
-            {
-                System.Diagnostics.Debug.WriteLine($"⚠️ Warning: Duplicate property name detected: '{name}' (parent: {parentName})");
-                System.Diagnostics.Debug.WriteLine($"    Existing parent: {_structs[name].Parent}, New parent: {parentName}");
-            }
 
             if (TryGetElementTypeIfArray(type, out var elementType))
             {
                 var propertyKind = GetPropertyType(elementType);
                 var structName = propertyKind == PropertyTypes.StructProperty ? elementType.Name : null;
 
-                _structs[name] = new StructInfo
+                var info = new StructInfo
                 {
-                    Parent = parentName,
+                    Parent = parent,
                     Name = name,
                     Type = propertyKind,
                     Struct = structName
                 };
+
+                _structs.Add(info);
             }
             else
             {
                 var propertyKind = GetPropertyType(type);
                 if (propertyKind == PropertyTypes.StructProperty)
                 {
-                    _structs[name] = new StructInfo
+                    var info = new StructInfo
                     {
-                        Parent = parentName,
+                        Parent = parent,
                         Name = name,
                         Type = propertyKind,
                         Struct = type.Name
                     };
+
+                    _structs.Add(info);
                 }
             }
         }
@@ -135,26 +141,60 @@ namespace UpkManager.Models.UpkFile.Engine
             return PropertyTypes.UnknownProperty;
         }
 
-        public bool TryGetStruct(string name, UObject parent, out string definition)
+        private IEnumerable<string> EnumerateParentClassNames(object obj)
         {
-            var found = _structs.Values
-                .FirstOrDefault(s =>
-                    s.Type == PropertyTypes.StructProperty &&
-                    string.Equals(s.Struct, name, StringComparison.OrdinalIgnoreCase));
+            var type = obj.GetType();
 
-            if (found != null)
+            while (type != null && type != typeof(UObject))
             {
-                definition = found.Name;
+                if (_unrealClassNames.TryGetValue(type, out var className))
+                    yield return className;
+                else if (_unrealStructNames.TryGetValue(type, out var structName))
+                    yield return structName;
+
+                type = type.BaseType;
+            }
+        }
+
+        private HashSet<string> GetParentClassChain(UObject parent)
+        {
+            if (parent == null || parent.GetType() == typeof(UObject))
+                return null;
+
+            return EnumerateParentClassNames(parent).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        }
+
+        public bool TryGetStruct(string structName, UObject parent, out string propertyName)
+        {
+            var classChain = GetParentClassChain(parent);
+
+            var match = _structs.FirstOrDefault(info =>
+                info.Type == PropertyTypes.StructProperty &&
+                string.Equals(info.Struct, structName, StringComparison.OrdinalIgnoreCase) &&
+                (classChain == null || classChain.Contains(info.Parent)));
+
+            if (match != null)
+            {
+                propertyName = match.Name;
                 return true;
             }
 
-            definition = null;
+            propertyName = null;
             return false;
         }
 
-        public bool TryGetProperty(string name, UObject parent, out StructInfo definition)
+        public bool TryGetProperty(string name, UObject parent, out StructInfo result)
         {
-            return _structs.TryGetValue(name, out definition);
+            result = null;
+            if (string.IsNullOrEmpty(name)) return false;
+
+            var classChain = GetParentClassChain(parent);
+
+            result = _structs.FirstOrDefault(info =>
+                string.Equals(info.Name, name, StringComparison.OrdinalIgnoreCase) &&
+                (classChain == null || classChain.Contains(info.Parent)));
+
+            return result != null;
         }
     }
 

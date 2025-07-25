@@ -6,6 +6,7 @@ using UpkManager.Contracts;
 using UpkManager.Extensions;
 using UpkManager.Models;
 using UpkManager.Models.UpkFile.Core;
+using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Objects;
@@ -56,6 +57,9 @@ namespace MHUpkManager
 
         private void LoadDataFiles()
         {
+            _ = CoreRegistry.Instance;
+            _ = EngineRegistry.Instance;
+
             string path = Path.Combine("Data", ComponentsTxt);
             if (!File.Exists(path))
                 WarningBox($"File with component list not found. {path}");

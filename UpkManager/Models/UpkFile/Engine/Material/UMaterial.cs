@@ -6,7 +6,7 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine.Material
 {
-    [UnrealClass("UMaterialInterface")]
+    [UnrealClass("MaterialInterface")]
     public class UMaterialInterface : USurface
     {
         [PropertyField]

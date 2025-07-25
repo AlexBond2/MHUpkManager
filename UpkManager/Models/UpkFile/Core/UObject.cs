@@ -167,10 +167,25 @@ namespace UpkManager.Models.UpkFile.Classes
                         prop.SetValue(this, typedArray);
                     }
                 }
+                else if (value is CoreProperty coreProp && typeof(IAtomicStruct).IsAssignableFrom(targetType))
+                {
+                    if (targetType.IsInstanceOfType(coreProp.Atomic))
+                        prop.SetValue(this, coreProp.Atomic);
+                }
                 else if (targetType.IsInstanceOfType(value))
                 {
                     prop.SetValue(this, value);
                 }
+                /*else if (value is EngineProperty engineProp)
+                {
+                    var structType = EngineProperty.GetStructType(prop, engineProp.StructType);
+                    if (structType != null)
+                    {
+                        var instance = Activator.CreateInstance(structType);
+                        ApplyEngineFields(instance, engineProp.Fields);
+                        prop.SetValue(this, instance);
+                    }
+                }*/
                 else
                 {
                     var converted = TryChangeType(value, targetType);
