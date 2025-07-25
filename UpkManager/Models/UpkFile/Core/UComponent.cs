@@ -19,4 +19,14 @@ namespace UpkManager.Models.UpkFile.Classes
             base.ReadBuffer(buffer);
         }
     }
+
+    [UnrealClass("DistributionFloat")]
+    public class UDistributionFloat : UComponent
+    {
+    }
+
+    [UnrealClass("DistributionVector")]
+    public class UDistributionVector : UComponent
+    {
+    }
 }

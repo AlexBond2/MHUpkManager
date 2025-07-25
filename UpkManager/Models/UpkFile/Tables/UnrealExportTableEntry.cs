@@ -217,9 +217,6 @@ namespace UpkManager.Models.UpkFile.Tables
                 return (UnrealObjectBase)Activator.CreateInstance(constructed)!;
             }
 
-            if (ComponentRegistry.HasComponent(className))
-                return new UnrealObject<UComponent>();
-
             return new UnrealObject<UObject>();
         }
 

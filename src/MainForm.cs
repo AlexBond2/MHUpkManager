@@ -19,7 +19,6 @@ namespace MHUpkManager
     {
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
-        public const string ComponentsTxt = "MHComponents.txt";
         public UnrealUpkFile UpkFile { get; set; }
 
         private HexViewForm hexViewForm;
@@ -39,7 +38,7 @@ namespace MHUpkManager
             EnableDoubleBuffering(importGridView);
             EnableDoubleBuffering(exportGridView);
 
-            LoadDataFiles();
+            RegistryInstances();
 
             hexViewForm = new HexViewForm();
             textureViewForm = new TextureViewForm();
@@ -55,16 +54,10 @@ namespace MHUpkManager
             modelViewForm?.Dispose();
         }
 
-        private void LoadDataFiles()
+        private void RegistryInstances()
         {
             _ = CoreRegistry.Instance;
             _ = EngineRegistry.Instance;
-
-            string path = Path.Combine("Data", ComponentsTxt);
-            if (!File.Exists(path))
-                WarningBox($"File with component list not found. {path}");
-            else
-                ComponentRegistry.LoadFromFile(path);
         }
 
         private void WarningBox(string msg)
