@@ -63,6 +63,25 @@ namespace UpkManager.Models.UpkFile.Engine.Material
 
         [PropertyField]
         public UArray<MaterialFunctionInfo> MaterialFunctionInfos { get; set; }
+
+        [StructField("MaterialResource")]
+        public FMaterialResource[] MaterialResource { get; set; }
+
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+
+            MaterialResource = new FMaterialResource[2];
+
+            uint qualityMask = buffer.Reader.ReadUInt32();
+
+            for (int qIndex = 0; qIndex < 2; qIndex++)
+            {
+                if ((qualityMask & (1 << qIndex)) == 0) continue;
+
+                MaterialResource[qIndex] = FMaterialResource.ReadData(buffer);
+            }
+        }
     }
 
     public enum EBlendMode
@@ -127,7 +146,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public bool bHasStaticPermutationResource { get; set; }
 
         [StructField("MaterialResource")]
-        public MaterialResource[] StaticPermutationResources { get; set; }
+        public FMaterialResource[] StaticPermutationResources { get; set; }
 
         [StructField("StaticParameterSet")]
         public StaticParameterSet[] StaticParameters { get; set; }
@@ -136,7 +155,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         {
             base.ReadBuffer(buffer);
 
-            StaticPermutationResources = new MaterialResource[2];
+            StaticPermutationResources = new FMaterialResource[2];
             StaticParameters = new StaticParameterSet[2];
 
             uint qualityMask = 0x1;
@@ -149,7 +168,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             {
                 if ((qualityMask & (1 << qIndex)) == 0) continue;
 
-                StaticPermutationResources[qIndex] = MaterialResource.ReadData(buffer);
+                StaticPermutationResources[qIndex] = FMaterialResource.ReadData(buffer);
                 StaticParameters[qIndex] = StaticParameterSet.ReadData(buffer);
             }
         }
@@ -245,7 +264,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         }
     }
 
-    public class MaterialResource : FMaterial
+    public class FMaterialResource : FMaterial
     {
         [StructField]
         public EBlendMode BlendModeOverrideValue { get; set; }
@@ -266,9 +285,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             bIsMaskedOverrideValue = buffer.ReadBool();
         }
 
-        public static MaterialResource ReadData(UBuffer buffer)
+        public static FMaterialResource ReadData(UBuffer buffer)
         {
-            var mat = new MaterialResource();
+            var mat = new FMaterialResource();
             mat.ReadFields(buffer);
             return mat;
         }
