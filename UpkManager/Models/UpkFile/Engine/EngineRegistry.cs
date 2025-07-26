@@ -16,6 +16,7 @@ namespace UpkManager.Models.UpkFile.Engine
         public string Name { get; set; } 
         public PropertyTypes Type { get; set; }
         public string Struct { get; set; } // Type == Struct
+        public Type StuctType { get; set; }
     }
 
     public class EngineRegistry
@@ -81,7 +82,8 @@ namespace UpkManager.Models.UpkFile.Engine
                     Parent = parent,
                     Name = name,
                     Type = propertyKind,
-                    Struct = structName
+                    Struct = structName,
+                    StuctType = elementType
                 };
 
                 _structs.Add(info);
@@ -96,7 +98,8 @@ namespace UpkManager.Models.UpkFile.Engine
                         Parent = parent,
                         Name = name,
                         Type = propertyKind,
-                        Struct = type.Name
+                        Struct = type.Name,
+                        StuctType = type
                     };
 
                     _structs.Add(info);
@@ -164,7 +167,7 @@ namespace UpkManager.Models.UpkFile.Engine
             return EnumerateParentClassNames(parent).ToHashSet(StringComparer.OrdinalIgnoreCase);
         }
 
-        public bool TryGetStruct(string structName, UObject parent, out string propertyName)
+        public bool TryGetStruct(string structName, UObject parent, out Type structType)
         {
             var classChain = GetParentClassChain(parent);
 
@@ -173,13 +176,17 @@ namespace UpkManager.Models.UpkFile.Engine
                 string.Equals(info.Struct, structName, StringComparison.OrdinalIgnoreCase) &&
                 (classChain == null || classChain.Contains(info.Parent)));
 
+            match ??= _structs.FirstOrDefault(info =>
+                    info.Type == PropertyTypes.StructProperty &&
+                    string.Equals(info.Struct, structName, StringComparison.OrdinalIgnoreCase));
+
             if (match != null)
             {
-                propertyName = match.Name;
+                structType = match.StuctType;
                 return true;
             }
 
-            propertyName = null;
+            structType = null;
             return false;
         }
 
@@ -191,11 +198,18 @@ namespace UpkManager.Models.UpkFile.Engine
             var classChain = GetParentClassChain(parent);
 
             result = _structs.FirstOrDefault(info =>
-                string.Equals(info.Name, name, StringComparison.OrdinalIgnoreCase) &&
-                (classChain == null || classChain.Contains(info.Parent)));
+                    string.Equals(info.Name, name, StringComparison.OrdinalIgnoreCase) &&
+                    classChain != null &&
+                    classChain.Contains(info.Parent));
+
+            if (result != null)
+                return true;
+
+            result = _structs.FirstOrDefault(info =>
+                string.Equals(info.Name, name, StringComparison.OrdinalIgnoreCase));
 
             return result != null;
         }
-    }
 
+    }
 }

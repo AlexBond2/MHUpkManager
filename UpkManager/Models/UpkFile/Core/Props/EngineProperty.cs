@@ -1,19 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Core
 {
-    public class EngineProperty(string structType) : UProperty
+    public class EngineProperty : UProperty
     {
-        public string StructType { get; private set; } = structType;
+        public Type StructType { get; private set; }
+        public string StructName { get; private set; }
         public List<UnrealProperty> Fields { get; set; } = [];
         public ResultProperty Result { get; private set; }
         public int RemainingData { get; private set; }
 
-        public override string ToString() => StructType;
+        public override string ToString() => StructName;
+
+        public EngineProperty(Type type)
+        {
+            StructType = type;
+            var attr = type.GetCustomAttribute<UnrealStructAttribute>();
+            StructName =  attr?.StructName ?? type.Name;
+        }
 
         public override void BuildVirtualTree(VirtualNode valueTree)
         {

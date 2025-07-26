@@ -37,8 +37,7 @@ namespace UpkManager.Models.UpkFile.Core
             {
                 StructValue = new EngineProperty(type);
                 StructValue.ReadPropertyValue(buffer, size, property);
-            }
-            
+            }            
             else
             {
                 base.ReadPropertyValue(buffer, size, property);

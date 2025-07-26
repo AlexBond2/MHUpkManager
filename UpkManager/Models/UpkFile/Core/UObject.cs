@@ -112,6 +112,16 @@ namespace UpkManager.Models.UpkFile.Classes
             }
         }
 
+        public static IEnumerable<PropertyInfo> GetStructFields(object obj)
+        {
+            Type type = obj.GetType();
+            foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+            {
+                if (field.IsDefined(typeof(StructFieldAttribute)) && field.CanWrite)
+                    yield return field;
+            }
+        }
+
         private string GetTypeName(Type type)
         {
             if (type.IsGenericType)
@@ -138,61 +148,91 @@ namespace UpkManager.Models.UpkFile.Classes
             foreach (var prop in GetPropertyFields(this))
             {
                 object value = GetPropertyObjectValue(prop.Name);
-                if (value == null) continue;
-                var targetType = prop.PropertyType;
+                AssignValue(prop, this, value);
+            }
+        }
 
-                if (targetType.IsEnum && value is string str)
+        private static void AssignValue(PropertyInfo prop, object target, object value)
+        {
+            if (value == null) return;
+
+            var targetType = prop.PropertyType;
+
+            if (targetType.IsEnum && value is string str)
+            {
+                if (Enum.TryParse(targetType, str, ignoreCase: true, out var enumValue))
+                    prop.SetValue(target, enumValue);
+            }
+            else if (value is object[] objArray)
+            {
+                AssignArrayValues(prop, target, objArray, targetType);
+            }
+            else if (value is CoreProperty coreProp && typeof(IAtomicStruct).IsAssignableFrom(targetType))
+            {
+                if (targetType.IsInstanceOfType(coreProp.Atomic))
+                    prop.SetValue(target, coreProp.Atomic);
+            }
+            else if (value is EngineProperty engineProp) 
+            { 
+                var structObj = ReconstructStructure(engineProp.StructType, engineProp.Fields);
+                if (structObj != null && targetType.IsInstanceOfType(structObj))
+                    prop.SetValue(target, structObj);
+            }
+            else if (targetType.IsInstanceOfType(value))
+            {
+                prop.SetValue(target, value);
+            }
+            else
+            {
+                var converted = TryChangeType(value, targetType);
+                if (converted != null)
+                    prop.SetValue(target, converted);
+            }
+        }
+
+        private static void SetStructProperties(object unrealStruct, List<UnrealProperty> properties)
+        {
+            foreach (var prop in GetStructFields(unrealStruct))
+            {
+                object value = GetPropertyObjectValue(properties, prop.Name);
+                AssignValue(prop, unrealStruct, value);
+            }
+        }
+
+        public static bool AssignArrayValues(PropertyInfo prop, object target, object[] objArray, Type targetType)
+        {
+            if (targetType.IsArray)
+            {
+                var elementType = targetType.GetElementType();
+                if (elementType == null) return false;
+
+                Array typedArray = Array.CreateInstance(elementType, objArray.Length);
+                for (int i = 0; i < objArray.Length; i++)
+                    typedArray.SetValue(TryChangeType(objArray[i], elementType), i);
+
+                prop.SetValue(target, typedArray);
+                return true;
+            }
+
+            if (targetType.IsGenericType)
+            {
+                var genericDef = targetType.GetGenericTypeDefinition();
+
+                if (genericDef == typeof(UArray<>))
                 {
-                    if (Enum.TryParse(prop.PropertyType, str, ignoreCase: true, out var enumValue))
-                        prop.SetValue(this, enumValue);
-                }
-                else if (value is object[] objArray && targetType.IsArray)
-                {
-                    var elementType = targetType.GetElementType();
-                    if (elementType != null)
-                    {
-                        Array typedArray = Array.CreateInstance(elementType, objArray.Length);
-                        for (int i = 0; i < objArray.Length; i++)
-                        {
-                            var element = objArray[i];
-                            if (elementType.IsInstanceOfType(element))
-                                typedArray.SetValue(element, i);
-                            else
-                            {
-                                var converted = TryChangeType(element, elementType);
-                                if (converted != null)
-                                    typedArray.SetValue(converted, i);
-                            }
-                        }
-                        prop.SetValue(this, typedArray);
-                    }
-                }
-                else if (value is CoreProperty coreProp && typeof(IAtomicStruct).IsAssignableFrom(targetType))
-                {
-                    if (targetType.IsInstanceOfType(coreProp.Atomic))
-                        prop.SetValue(this, coreProp.Atomic);
-                }
-                else if (targetType.IsInstanceOfType(value))
-                {
-                    prop.SetValue(this, value);
-                }
-                /*else if (value is EngineProperty engineProp)
-                {
-                    var structType = EngineProperty.GetStructType(prop, engineProp.StructType);
-                    if (structType != null)
-                    {
-                        var instance = Activator.CreateInstance(structType);
-                        ApplyEngineFields(instance, engineProp.Fields);
-                        prop.SetValue(this, instance);
-                    }
-                }*/
-                else
-                {
-                    var converted = TryChangeType(value, targetType);
-                    if (converted != null)
-                        prop.SetValue(this, converted);
+                    var elementType = targetType.GetGenericArguments()[0];
+                    var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType));
+
+                    foreach (var item in objArray)
+                        list.Add(TryChangeType(item, elementType));
+
+                    var uArrayInstance = Activator.CreateInstance(targetType, list);
+                    prop.SetValue(target, uArrayInstance);
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private static object TryChangeType(object value, Type targetType)
@@ -229,23 +269,36 @@ namespace UpkManager.Models.UpkFile.Classes
             return Properties.FirstOrDefault(p => p.NameIndex.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public UProperty GetPropertyValue(string name)
-        {
-            return GetProperty(name)?.Value;
-        }
-
         public object GetPropertyObjectValue(string name)
         {
-            var value = GetPropertyValue(name);
+            var value = GetProperty(name)?.Value;
             return value != null ? ExtractValue(value) : null;
         }
 
-        private object[] GetValueArray(UProperty[] array)
+        public static object GetPropertyObjectValue(List<UnrealProperty> properties, string name)
+        {
+            var value = properties.FirstOrDefault(p => p.NameIndex.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))?.Value;
+            return value != null ? ExtractValue(value) : null;
+        }
+
+        private static object[] GetValueArray(UProperty[] array)
         {
             return [.. array.Select(ExtractValue)];
         }
 
-        private object ExtractValue(UProperty value)
+        public static object ReconstructStructure(Type structType, List<UnrealProperty> fields)
+        {
+            if (structType == null) return null;
+            //   throw new InvalidOperationException("StructType is not set.");
+
+            object instance = Activator.CreateInstance(structType);
+            if (instance == null) return null;
+            SetStructProperties(instance, fields);
+
+            return instance;
+        }
+
+        private static object ExtractValue(UProperty value)
         {
             return value switch
             {
@@ -256,21 +309,12 @@ namespace UpkManager.Models.UpkFile.Classes
                 UNameProperty n => n.PropertyValue,
                 UStrProperty s => s.PropertyString,
                 UStructProperty sv => sv.StructValue,
+                UObjectProperty o => o.Object,
+                CoreProperty core => core.Atomic,
+                EngineProperty eng => ReconstructStructure(eng.StructType, eng.Fields),
                 UArrayProperty av => GetValueArray(av.Array),
                 _ => null
             };
-        }
-
-        public TEnum? GetPropertyEnum<TEnum>(string name) where TEnum : struct, Enum
-        {
-            if (GetPropertyValue(name) is UByteProperty byteValue)
-            {
-                string enumValueStr = byteValue.EnumValue;
-                if (!string.IsNullOrEmpty(enumValueStr) && Enum.TryParse(enumValueStr, true, out TEnum parsed))
-                    return parsed;
-            }
-
-            return null;
         }
     }
 }

@@ -104,7 +104,7 @@ namespace UpkManager.Models.UpkFile.Core
                 PropertyTypes.StrProperty => () => new UStrProperty(),
                 PropertyTypes.NameProperty => () => new UNameProperty(),
                 PropertyTypes.ObjectProperty => () => new UObjectProperty(),
-                PropertyTypes.StructProperty => () => new EngineProperty(def.Struct!),
+                PropertyTypes.StructProperty => () => new EngineProperty(def.StuctType),
                 _ => null
             };
         }
