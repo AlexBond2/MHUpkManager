@@ -149,14 +149,14 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public FMaterialResource[] StaticPermutationResources { get; set; }
 
         [StructField("StaticParameterSet")]
-        public StaticParameterSet[] StaticParameters { get; set; }
+        public FStaticParameterSet[] StaticParameters { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
 
             StaticPermutationResources = new FMaterialResource[2];
-            StaticParameters = new StaticParameterSet[2];
+            StaticParameters = new FStaticParameterSet[2];
 
             uint qualityMask = 0x1;
             if (bHasStaticPermutationResource)
@@ -169,7 +169,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
                 if ((qualityMask & (1 << qIndex)) == 0) continue;
 
                 StaticPermutationResources[qIndex] = FMaterialResource.ReadData(buffer);
-                StaticParameters[qIndex] = StaticParameterSet.ReadData(buffer);
+                StaticParameters[qIndex] = FStaticParameterSet.ReadData(buffer);
             }
         }
     }
@@ -213,7 +213,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public uint UsingTransforms { get; set; }
 
         [StructField("TextureLookup")]
-        public UArray<TextureLookup> TextureLookups { get; set; }
+        public UArray<FTextureLookup> TextureLookups { get; set; }
 
         public string Format => "";
         public override string ToString() => "FMaterial";
@@ -238,13 +238,13 @@ namespace UpkManager.Models.UpkFile.Engine.Material
 
             UsingTransforms = buffer.Reader.ReadUInt32();
 
-            TextureLookups = buffer.ReadArray(TextureLookup.ReadData);
+            TextureLookups = buffer.ReadArray(FTextureLookup.ReadData);
 
             _ = buffer.Reader.ReadUInt32(); // DummyDroppedFallbackComponents
         }
     }
 
-    public class TextureLookup
+    public class FTextureLookup
     {
         [StructField] public int TexCoordIndex { get; set; }
         [StructField] public int TextureIndex { get; set; }
@@ -252,9 +252,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         [StructField] public float VScale { get; set; }
         
         public override string ToString() => $"[{TexCoordIndex}] [{TextureIndex}] [{UScale:F4}; {VScale:F4}]";
-        public static TextureLookup ReadData(UBuffer buffer)
+        public static FTextureLookup ReadData(UBuffer buffer)
         {
-            return new TextureLookup
+            return new FTextureLookup
             {
                 TexCoordIndex = buffer.ReadInt32(),
                 TextureIndex = buffer.ReadInt32(),
@@ -293,41 +293,41 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         }
     }
 
-    public class StaticParameterSet : IAtomicStruct
+    public class FStaticParameterSet : IAtomicStruct
     {
         [StructField]
         public Guid BaseMaterialId { get; set; }
 
         [StructField("StaticSwitchParameter")]
-        public UArray<StaticSwitchParameter> StaticSwitchParameters { get; set; }
+        public UArray<FStaticSwitchParameter> StaticSwitchParameters { get; set; }
 
         [StructField("StaticComponentMaskParameter")]
-        public UArray<StaticComponentMaskParameter> StaticComponentMaskParameters { get; set; }
+        public UArray<FStaticComponentMaskParameter> StaticComponentMaskParameters { get; set; }
 
         [StructField("NormalParameter")]
-        public UArray<NormalParameter> NormalParameters { get; set; }
+        public UArray<FNormalParameter> NormalParameters { get; set; }
 
         [StructField("StaticTerrainLayerWeightParameter")]
-        public UArray<StaticTerrainLayerWeightParameter> TerrainLayerWeightParameters { get; set; }
+        public UArray<FStaticTerrainLayerWeightParameter> TerrainLayerWeightParameters { get; set; }
         public string Format => "";
         public override string ToString() => $"FStaticParameterSet";
 
-        public static StaticParameterSet ReadData(UBuffer buffer)
+        public static FStaticParameterSet ReadData(UBuffer buffer)
         {
-            var staticset = new StaticParameterSet
+            var staticset = new FStaticParameterSet
             {
                 BaseMaterialId = buffer.ReadGuid(),
-                StaticSwitchParameters = buffer.ReadArray(StaticSwitchParameter.ReadData),
-                StaticComponentMaskParameters = buffer.ReadArray(StaticComponentMaskParameter.ReadData),
-                NormalParameters = buffer.ReadArray(NormalParameter.ReadData),
-                TerrainLayerWeightParameters = buffer.ReadArray(StaticTerrainLayerWeightParameter.ReadData)
+                StaticSwitchParameters = buffer.ReadArray(FStaticSwitchParameter.ReadData),
+                StaticComponentMaskParameters = buffer.ReadArray(FStaticComponentMaskParameter.ReadData),
+                NormalParameters = buffer.ReadArray(FNormalParameter.ReadData),
+                TerrainLayerWeightParameters = buffer.ReadArray(FStaticTerrainLayerWeightParameter.ReadData)
             };
 
             return staticset;
         }
     }
 
-    public class StaticSwitchParameter : IAtomicStruct
+    public class FStaticSwitchParameter : IAtomicStruct
     {
         [StructField] public FName ParameterName { get; set; }
         [StructField] public bool Value { get; set; }
@@ -336,9 +336,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
 
         public string Format => "";
         public override string ToString() => $"FStaticSwitchParameter ({ParameterName}: {Value})";
-        public static StaticSwitchParameter ReadData(UBuffer buffer)
+        public static FStaticSwitchParameter ReadData(UBuffer buffer)
         {
-            var param = new StaticSwitchParameter
+            var param = new FStaticSwitchParameter
             {
                 ParameterName = buffer.ReadName(),
                 Value = buffer.ReadBool(),
@@ -350,7 +350,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         }
     }
 
-    public class StaticComponentMaskParameter : IAtomicStruct
+    public class FStaticComponentMaskParameter : IAtomicStruct
     {
         [StructField] public FName ParameterName { get; set; }
         [StructField] public bool R { get; set; }
@@ -362,9 +362,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public string Format => "";
         public override string ToString() => $"FStaticComponentMaskParameter ({ParameterName})";
 
-        public static StaticComponentMaskParameter ReadData(UBuffer buffer)
+        public static FStaticComponentMaskParameter ReadData(UBuffer buffer)
         {
-            var param = new StaticComponentMaskParameter
+            var param = new FStaticComponentMaskParameter
             {
                 ParameterName = buffer.ReadName(),
                 R = buffer.ReadBool(),
@@ -379,7 +379,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         }
     }
 
-    public class NormalParameter : IAtomicStruct
+    public class FNormalParameter : IAtomicStruct
     {
         [StructField] public FName ParameterName { get; set; }
         [StructField] public byte CompressionSettings { get; set; }
@@ -388,9 +388,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public string Format => "";
         public override string ToString() => $"FNormalParameter ({ParameterName})";
 
-        public static NormalParameter ReadData(UBuffer buffer)
+        public static FNormalParameter ReadData(UBuffer buffer)
         {
-            return new NormalParameter
+            return new FNormalParameter
             {
                 ParameterName = buffer.ReadName(),
                 CompressionSettings = buffer.Reader.ReadByte(),
@@ -400,7 +400,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         }
     }
 
-    public class StaticTerrainLayerWeightParameter : IAtomicStruct
+    public class FStaticTerrainLayerWeightParameter : IAtomicStruct
     {
         [StructField] public FName ParameterName { get; set; }
         [StructField] public int WeightmapIndex { get; set; }
@@ -409,9 +409,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public string Format => "";
         public override string ToString() => $"FStaticTerrainLayerWeightParameter ({ParameterName})";
 
-        public static StaticTerrainLayerWeightParameter ReadData(UBuffer buffer)
+        public static FStaticTerrainLayerWeightParameter ReadData(UBuffer buffer)
         {
-            return new StaticTerrainLayerWeightParameter
+            return new FStaticTerrainLayerWeightParameter
             {
                 ParameterName = buffer.ReadName(),
                 WeightmapIndex = buffer.ReadInt32(),
