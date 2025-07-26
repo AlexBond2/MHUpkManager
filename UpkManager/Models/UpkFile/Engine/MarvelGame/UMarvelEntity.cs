@@ -14,7 +14,7 @@ namespace UpkManager.Models.UpkFile.Engine.MarvelGame
         public UArray<FName> PhysicsFloppyBones { get; set; }
 
         [PropertyField]
-        public UArray<AnimationSetAlias> AnimationSetAliases { get; set; }
+        public UArray<FAnimationSetAlias> AnimationSetAliases { get; set; }
 
         [PropertyField]
         public UArray<FObject> ThrowPowerWeakComponents { get; set; } // MarvelFX
@@ -30,7 +30,7 @@ namespace UpkManager.Models.UpkFile.Engine.MarvelGame
     }
 
     [UnrealStruct("AnimationSetAlias")]
-    public class AnimationSetAlias
+    public class FAnimationSetAlias
     {
         [StructField]
         public FName alias { get; set; }

@@ -17,16 +17,16 @@ namespace UpkManager.Models.UpkFile.Engine.Material
     public class UMaterial : UMaterialInterface
     {
         [PropertyField]
-        public ColorMaterialInput EmissiveColor { get; set; }
+        public FColorMaterialInput EmissiveColor { get; set; }
 
         [PropertyField]
-        public ScalarMaterialInput Opacity { get; set; }
+        public FScalarMaterialInput Opacity { get; set; }
 
         [PropertyField]
-        public ScalarMaterialInput OpacityMask { get; set; }
+        public FScalarMaterialInput OpacityMask { get; set; }
 
         [PropertyField]
-        public ScalarMaterialInput OpacityShadow { get; set; }
+        public FScalarMaterialInput OpacityShadow { get; set; }
 
         [PropertyField]
         public bool TwoSided { get; set; }
@@ -62,7 +62,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public UArray<FObject> Expressions { get; set; } // MaterialExpression
 
         [PropertyField]
-        public UArray<MaterialFunctionInfo> MaterialFunctionInfos { get; set; }
+        public UArray<FMaterialFunctionInfo> MaterialFunctionInfos { get; set; }
 
         [StructField("MaterialResource")]
         public FMaterialResource[] MaterialResource { get; set; }
@@ -110,10 +110,10 @@ namespace UpkManager.Models.UpkFile.Engine.Material
     };
 
     [UnrealStruct("MaterialFunctionInfo")]
-    public class MaterialFunctionInfo
+    public class FMaterialFunctionInfo
     {
         [StructField]
-        public Guid StateId { get; set; }
+        public FGuid StateId { get; set; }
 
         [StructField]
         public FObject Function { get; set; } // MaterialFunction
@@ -124,7 +124,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
     public class UMaterialFunction : UObject
     {
         [PropertyField]
-        public Guid StateId { get; set; }
+        public FGuid StateId { get; set; }
 
         [PropertyField]
         public string Description { get; set; }
@@ -186,7 +186,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public int MaxTextureDependencyLength { get; set; }
 
         [StructField]
-        public Guid Id { get; set; }
+        public FGuid Id { get; set; }
 
         [StructField]
         public int NumUserTexCoords { get; set; }
@@ -296,7 +296,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
     public class FStaticParameterSet : IAtomicStruct
     {
         [StructField]
-        public Guid BaseMaterialId { get; set; }
+        public FGuid BaseMaterialId { get; set; }
 
         [StructField("StaticSwitchParameter")]
         public UArray<FStaticSwitchParameter> StaticSwitchParameters { get; set; }
@@ -332,7 +332,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         [StructField] public FName ParameterName { get; set; }
         [StructField] public bool Value { get; set; }
         [StructField] public bool bOverride { get; set; }
-        [StructField] public Guid ExpressionGUID { get; set; }
+        [StructField] public FGuid ExpressionGUID { get; set; }
 
         public string Format => "";
         public override string ToString() => $"FStaticSwitchParameter ({ParameterName}: {Value})";
@@ -358,7 +358,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         [StructField] public bool B { get; set; }
         [StructField] public bool A { get; set; }
         [StructField] public bool bOverride { get; set; }
-        [StructField] public Guid ExpressionGUID { get; set; }
+        [StructField] public FGuid ExpressionGUID { get; set; }
         public string Format => "";
         public override string ToString() => $"FStaticComponentMaskParameter ({ParameterName})";
 
@@ -384,7 +384,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         [StructField] public FName ParameterName { get; set; }
         [StructField] public byte CompressionSettings { get; set; }
         [StructField] public bool bOverride { get; set; }
-        [StructField] public Guid ExpressionGUID { get; set; }
+        [StructField] public FGuid ExpressionGUID { get; set; }
         public string Format => "";
         public override string ToString() => $"FNormalParameter ({ParameterName})";
 
@@ -405,7 +405,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         [StructField] public FName ParameterName { get; set; }
         [StructField] public int WeightmapIndex { get; set; }
         [StructField] public bool bOverride { get; set; }
-        [StructField] public Guid ExpressionGUID { get; set; }
+        [StructField] public FGuid ExpressionGUID { get; set; }
         public string Format => "";
         public override string ToString() => $"FStaticTerrainLayerWeightParameter ({ParameterName})";
 
@@ -422,23 +422,23 @@ namespace UpkManager.Models.UpkFile.Engine.Material
     }
 
     [UnrealClass("MaterialInstanceConstant")]
-    public class MaterialInstanceConstant : UMaterialInstance
+    public class UMaterialInstanceConstant : UMaterialInstance
     {
         [PropertyField]
-        public UArray<FontParameterValue> FontParameterValues { get; set; }
+        public UArray<FFontParameterValue> FontParameterValues { get; set; }
 
         [PropertyField]
-        public UArray<ScalarParameterValue> ScalarParameterValues { get; set; }
+        public UArray<FScalarParameterValue> ScalarParameterValues { get; set; }
 
         [PropertyField]
-        public UArray<TextureParameterValue> TextureParameterValues { get; set; }
+        public UArray<FTextureParameterValue> TextureParameterValues { get; set; }
 
         [PropertyField]
-        public UArray<VectorParameterValue> VectorParameterValues { get; set; }
+        public UArray<FVectorParameterValue> VectorParameterValues { get; set; }
     }
 
     [UnrealStruct("FontParameterValue")]
-    public class FontParameterValue
+    public class FFontParameterValue
     {
         [StructField]
         public FName ParameterName { get; set; }
@@ -450,11 +450,11 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public int FontPage { get; set; }
 
         [StructField]
-        public Guid ExpressionGUID { get; set; }
+        public FGuid ExpressionGUID { get; set; }
     }
 
     [UnrealStruct("ScalarParameterValue")]
-    public class ScalarParameterValue
+    public class FScalarParameterValue
     {
         [StructField]
         public FName ParameterName { get; set; }
@@ -463,11 +463,11 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public float ParameterValue { get; set; }
 
         [StructField]
-        public Guid ExpressionGUID { get; set; }
+        public FGuid ExpressionGUID { get; set; }
     }
 
     [UnrealStruct("TextureParameterValue")]
-    public class TextureParameterValue
+    public class FTextureParameterValue
     {
         [StructField]
         public FName ParameterName { get; set; }
@@ -476,23 +476,23 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public FObject ParameterValue { get; set; } // UTexture
 
         [StructField]
-        public Guid ExpressionGUID { get; set; }
+        public FGuid ExpressionGUID { get; set; }
     }
 
     [UnrealStruct("VectorParameterValue")]
-    public class VectorParameterValue
+    public class FVectorParameterValue
     {
         [StructField]
         public FName ParameterName { get; set; }
 
         [StructField]
-        public LinearColor ParameterValue { get; set; }
+        public FLinearColor ParameterValue { get; set; }
 
         [StructField]
-        public Guid ExpressionGUID { get; set; }
+        public FGuid ExpressionGUID { get; set; }
     }
 
-    public class MaterialInput// : IAtomicStruct
+    public class FMaterialInput// : IAtomicStruct
     {
         [StructField] public FObject Expression { get; set; } // MaterialExpression
         [StructField] public int OutputIndex { get; set; }
@@ -507,25 +507,25 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public string Format => "";
     }
 
-    public class ColorMaterialInput : MaterialInput
+    public class FColorMaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
-        [StructField] public Color Constant { get; set; }
+        [StructField] public FColor Constant { get; set; }
     }
 
-    public class ScalarMaterialInput : MaterialInput
+    public class FScalarMaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
         [StructField] public float Constant { get; set; }
     }
 
-    public class VectorMaterialInput : MaterialInput
+    public class FVectorMaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
-        [StructField] public Vector Constant { get; set; }
+        [StructField] public FVector Constant { get; set; }
     }
 
-    public class Vector2MaterialInput : MaterialInput
+    public class FVector2MaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
         [StructField] public float ConstantX { get; set; }

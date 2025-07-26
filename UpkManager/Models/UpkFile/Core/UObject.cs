@@ -124,13 +124,23 @@ namespace UpkManager.Models.UpkFile.Classes
 
         private string GetTypeName(Type type)
         {
+            var atomicAttr = type.GetCustomAttribute<AtomicStructAttribute>();
+            if (atomicAttr != null)
+                return atomicAttr.Name;
+
             if (type.IsGenericType)
             {
                 string mainType = type.Name.Split('`')[0];
                 var args = type.GetGenericArguments();
                 return $"{mainType}<{string.Join(", ", args.Select(GetTypeName))}>";
             }
-            return type.Name;
+
+            return type.Name switch
+            {
+                "Single" => "Float",
+                "Int32" => "Int",
+                _ => type.Name
+            };
         }
 
         public virtual void ReadBuffer(UBuffer buffer)

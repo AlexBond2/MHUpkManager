@@ -2,7 +2,6 @@
 using DDSLib;
 using System.Windows.Media.Imaging;
 using UpkManager.Models.UpkFile.Engine.Texture;
-using UpkManager.Models.UpkFile.Objects.Textures;
 
 namespace MHUpkManager
 {
@@ -24,7 +23,7 @@ namespace MHUpkManager
             public int Size;
             public int Index;
 
-            public static MipMapInfo AddMipMap(Texture2DMipMap mipMap, int index)
+            public static MipMapInfo AddMipMap(FTexture2DMipMap mipMap, int index)
             {
                 var info = new MipMapInfo
                 {

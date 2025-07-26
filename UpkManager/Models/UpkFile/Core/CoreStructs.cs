@@ -18,7 +18,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Vector")]
-    public class Vector : IAtomicStruct
+    public class FVector : IAtomicStruct
     {
         [StructField]
         public float X { get; set; }
@@ -31,9 +31,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}]";
 
-        public Vector() { }
+        public FVector() { }
 
-        public Vector(float x, float y, float z)
+        public FVector(float x, float y, float z)
         {
             X = x;
             Y = y;
@@ -42,9 +42,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public Vector3 ToVector3() => new Vector3(X, Y, Z);
 
-        public static Vector ReadData(UBuffer buffer)
+        public static FVector ReadData(UBuffer buffer)
         {
-            var vector = new Vector
+            var vector = new FVector
             {
                 X = buffer.Reader.ReadSingle(),
                 Y = buffer.Reader.ReadSingle(),
@@ -54,7 +54,8 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
-    public class PackedNormal : IAtomicStruct
+    [AtomicStruct("PackedNormal")]
+    public class FPackedNormal : IAtomicStruct
     {
         [StructField]
         public uint Packed { get; set; }
@@ -67,9 +68,9 @@ namespace UpkManager.Models.UpkFile.Core
         private const float Scale = 1.0f / 127.5f; 
         private const float Offset = -1.0f;
 
-        public Vector ToVector()
+        public FVector ToVector()
         {            
-            return new Vector(
+            return new FVector(
                 X * Scale + Offset,
                 Y * Scale + Offset,
                 Z * Scale + Offset
@@ -78,9 +79,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => ToVector().Format;
 
-        public static PackedNormal ReadData(UBuffer buffer)
+        public static FPackedNormal ReadData(UBuffer buffer)
         {
-            PackedNormal normal = new()
+            FPackedNormal normal = new()
             {
                 Packed = buffer.Reader.ReadUInt32(),
             };
@@ -89,7 +90,8 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
-    public class PackedPosition : IAtomicStruct
+    [AtomicStruct("PackedPosition")]
+    public class FPackedPosition : IAtomicStruct
     {
         [StructField]
         public uint Packed { get; set; }
@@ -98,9 +100,9 @@ namespace UpkManager.Models.UpkFile.Core
         public int Y => (int)(Packed << 11) >> (32 - 11);
         public int Z => (int)(Packed << 22) >> (32 - 10);
 
-        public Vector ToVector()
+        public FVector ToVector()
         {
-            return new Vector(
+            return new FVector(
                 X / 1023.0f,
                 Y / 1023.0f,
                 Z / 511.0f
@@ -109,9 +111,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => ToVector().Format;
 
-        public static PackedPosition ReadData(UBuffer buffer)
+        public static FPackedPosition ReadData(UBuffer buffer)
         {
-            PackedPosition normal = new()
+            FPackedPosition normal = new()
             {
                 Packed = buffer.Reader.ReadUInt32(),
             };
@@ -120,7 +122,8 @@ namespace UpkManager.Models.UpkFile.Core
         }
     }
 
-    public class Vector2D : IAtomicStruct
+    [AtomicStruct("Vector2D")]
+    public class FVector2D : IAtomicStruct
     {
         [StructField]
         public float X { get; set; }
@@ -130,17 +133,17 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{X:F4};{Y:F4}]";
 
-        public Vector2D() { }
+        public FVector2D() { }
 
-        public Vector2D(float x, float y)
+        public FVector2D(float x, float y)
         {
             X = x;
             Y = y;
         }
 
-        public static Vector2D ReadData(UBuffer buffer)
+        public static FVector2D ReadData(UBuffer buffer)
         {
-            var vector2D = new Vector2D
+            var vector2D = new FVector2D
             {
                 X = buffer.Reader.ReadSingle(),
                 Y = buffer.Reader.ReadSingle()
@@ -151,7 +154,7 @@ namespace UpkManager.Models.UpkFile.Core
         public Vector2 ToVector2() => new Vector2(X, Y);
     }
 
-    public class Float16 : IAtomicStruct
+    public class FFloat16 : IAtomicStruct
     {
         [StructField]
         public ushort Encoded { get; set; }
@@ -185,38 +188,38 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"{ToFloat():F4}";
 
-        public static Float16 ReadData(UBuffer buffer)
+        public static FFloat16 ReadData(UBuffer buffer)
         {
-            return new Float16
+            return new FFloat16
             {
                 Encoded = buffer.Reader.ReadUInt16()
             };
         }
     }
 
-    public class Vector2DHalf : IAtomicStruct
+    public class FVector2DHalf : IAtomicStruct
     {
         [StructField]
-        public Float16 X { get; set; }
+        public FFloat16 X { get; set; }
 
         [StructField]
-        public Float16 Y { get; set; }
+        public FFloat16 Y { get; set; }
 
         public string Format => $"[{X.ToFloat():F4};{Y.ToFloat():F4}]";
 
-        public static Vector2DHalf ReadData(UBuffer buffer)
+        public static FVector2DHalf ReadData(UBuffer buffer)
         {
-            var vector2D = new Vector2DHalf
+            var vector2D = new FVector2DHalf
             {
-                X = Float16.ReadData(buffer),
-                Y = Float16.ReadData(buffer)
+                X = FFloat16.ReadData(buffer),
+                Y = FFloat16.ReadData(buffer)
             };
             return vector2D;
         }
     }
 
     [AtomicStruct("Quat")]
-    public class Quat : IAtomicStruct
+    public class FQuat : IAtomicStruct
     {
         [StructField]
         public float X { get; set; }
@@ -232,8 +235,8 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}; {W:F4}]";
 
-        public Quat() { }
-        public Quat(float x, float y, float z, int w)
+        public FQuat() { }
+        public FQuat(float x, float y, float z, int w)
         {
             X = x;
             Y = y;
@@ -241,9 +244,9 @@ namespace UpkManager.Models.UpkFile.Core
             W = w;
         }
 
-        public static Quat ReadData(UBuffer buffer)
+        public static FQuat ReadData(UBuffer buffer)
         {
-            var quad = new Quat
+            var quad = new FQuat
             {
                 X = buffer.Reader.ReadSingle(),
                 Y = buffer.Reader.ReadSingle(),
@@ -255,7 +258,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Guid")]
-    public class Guid : IAtomicStruct
+    public class FGuid : IAtomicStruct
     {
         [StructField]
         public int A { get; set; }
@@ -279,9 +282,9 @@ namespace UpkManager.Models.UpkFile.Core
         public string Format => ToSystemGuid().ToString();
         public override string ToString() => ToSystemGuid().ToString();
 
-        public static Guid ReadData(UBuffer buffer)
+        public static FGuid ReadData(UBuffer buffer)
         {
-            var guid = new Guid
+            var guid = new FGuid
             {
                 A = buffer.Reader.ReadInt32(),
                 B = buffer.Reader.ReadInt32(),
@@ -293,7 +296,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Rotator")]
-    public class Rotator : IAtomicStruct
+    public class FRotator : IAtomicStruct
     {
         [StructField]
         public int Pitch { get; set; }
@@ -311,9 +314,9 @@ namespace UpkManager.Models.UpkFile.Core
             return value / 32768.0f * 180.0f;
         }
 
-        public static Rotator ReadData(UBuffer buffer)
+        public static FRotator ReadData(UBuffer buffer)
         {
-            var rotator = new Rotator
+            var rotator = new FRotator
             {
                 Pitch = buffer.Reader.ReadInt32(),
                 Yaw = buffer.Reader.ReadInt32(),
@@ -324,25 +327,25 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Box")]
-    public class Box : IAtomicStruct
+    public class FBox : IAtomicStruct
     {
         [StructField]
-        public Vector Min { get; set; }
+        public FVector Min { get; set; }
 
         [StructField]
-        public Vector Max { get; set; }
+        public FVector Max { get; set; }
 
         [StructField]
         public bool IsValid { get; set; }
 
         public string Format => "";
 
-        public static Box ReadData(UBuffer buffer)
+        public static FBox ReadData(UBuffer buffer)
         {
-            var box = new Box
+            var box = new FBox
             {
-                Min = Vector.ReadData(buffer),
-                Max = Vector.ReadData(buffer),
+                Min = FVector.ReadData(buffer),
+                Max = FVector.ReadData(buffer),
                 IsValid = buffer.ReadAtomicBool()
             };
             return box;
@@ -350,7 +353,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Plane")]
-    public class Plane : IAtomicStruct
+    public class FPlane : IAtomicStruct
     {
         [StructField]
         public float W { get; set; }
@@ -366,9 +369,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{X:F4}; {Y:F4}; {Z:F4}; {W:F4}]";
 
-        public static Plane ReadData(UBuffer buffer)
+        public static FPlane ReadData(UBuffer buffer)
         {
-            var quad = new Plane
+            var quad = new FPlane
             {
                 W = buffer.Reader.ReadSingle(),
                 X = buffer.Reader.ReadSingle(),
@@ -380,54 +383,55 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Matrix")]
-    public class Matrix : IAtomicStruct
+    public class FMatrix : IAtomicStruct
     {
         [StructField]
-        public Plane XPlane { get; set; }
+        public FPlane XPlane { get; set; }
 
         [StructField]
-        public Plane YPlane { get; set; }
+        public FPlane YPlane { get; set; }
 
         [StructField]
-        public Plane ZPlane { get; set; }
+        public FPlane ZPlane { get; set; }
 
         [StructField]
-        public Plane WPlane { get; set; }
+        public FPlane WPlane { get; set; }
 
         public string Format => "";
 
-        public static Matrix ReadData(UBuffer buffer)
+        public static FMatrix ReadData(UBuffer buffer)
         {
-            var matrix = new Matrix
+            var matrix = new FMatrix
             {
-                XPlane = Plane.ReadData(buffer),
-                YPlane = Plane.ReadData(buffer),
-                ZPlane = Plane.ReadData(buffer),
-                WPlane = Plane.ReadData(buffer),
+                XPlane = FPlane.ReadData(buffer),
+                YPlane = FPlane.ReadData(buffer),
+                ZPlane = FPlane.ReadData(buffer),
+                WPlane = FPlane.ReadData(buffer),
             };
             return matrix;
         }
     }
 
-    public class BoxSphereBounds : IAtomicStruct
+    [AtomicStruct("BoxSphereBounds")]
+    public class FBoxSphereBounds : IAtomicStruct
     {
         [StructField]
-        public Vector Origin { get; set; }
+        public FVector Origin { get; set; }
 
         [StructField]
-        public Vector BoxExtent { get; set; }
+        public FVector BoxExtent { get; set; }
 
         [StructField]
         public float SphereRadius { get; set; }
 
         public string Format => "";
 
-        public static BoxSphereBounds ReadData(UBuffer buffer)
+        public static FBoxSphereBounds ReadData(UBuffer buffer)
         {
-            var bounds = new BoxSphereBounds
+            var bounds = new FBoxSphereBounds
             {
-                Origin = Vector.ReadData(buffer),
-                BoxExtent = Vector.ReadData(buffer),
+                Origin = FVector.ReadData(buffer),
+                BoxExtent = FVector.ReadData(buffer),
                 SphereRadius = buffer.Reader.ReadSingle()
             };
             return bounds;
@@ -435,7 +439,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("Color")]
-    public class Color : IAtomicStruct
+    public class FColor : IAtomicStruct
     {
         [StructField]
         public byte B { get; set; }
@@ -451,9 +455,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{R};{G};{B};{A}]";
 
-        public static Color ReadData(UBuffer buffer)
+        public static FColor ReadData(UBuffer buffer)
         {
-            var color = new Color
+            var color = new FColor
             {
                 B = buffer.Reader.ReadByte(),
                 G = buffer.Reader.ReadByte(),
@@ -465,7 +469,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [AtomicStruct("LinearColor")]
-    public class LinearColor : IAtomicStruct
+    public class FLinearColor : IAtomicStruct
     {
 
         [StructField]
@@ -482,9 +486,9 @@ namespace UpkManager.Models.UpkFile.Core
 
         public string Format => $"[{R:F4}; {G:F4}; {B:F4}; {A:F4}]";
 
-        public static LinearColor ReadData(UBuffer buffer)
+        public static FLinearColor ReadData(UBuffer buffer)
         {
-            var color = new LinearColor
+            var color = new FLinearColor
             {
                 R = buffer.Reader.ReadSingle(),
                 G = buffer.Reader.ReadSingle(),
@@ -496,7 +500,7 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [UnrealStruct("RawDistribution")]
-    public class RawDistribution
+    public class FRawDistribution
     {
         [StructField] 
         public byte Type { get; set; }
@@ -521,14 +525,14 @@ namespace UpkManager.Models.UpkFile.Core
     }
 
     [UnrealStruct("RawDistributionFloat")]
-    public class RawDistributionFloat : RawDistribution
+    public class FRawDistributionFloat : FRawDistribution
     {
         [StructField]
         public FObject Distribution { get; set; } // DistributionFloat
     }
 
     [UnrealStruct("RawDistributionVector")]
-    public class RawDistributionVector : RawDistribution
+    public class FRawDistributionVector : FRawDistribution
     {
         [StructField]
         public FObject Distribution { get; set; } // DistributionVector

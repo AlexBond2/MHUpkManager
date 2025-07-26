@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Compression;
@@ -168,9 +169,9 @@ namespace UpkManager.Models.UpkFile.Types
             return MemoryMarshal.Cast<byte, T>(bytes.AsSpan());
         }
 
-        public Core.Guid ReadGuid()
+        public FGuid ReadGuid()
         {            
-            return Core.Guid.ReadData(this);
+            return FGuid.ReadData(this);
         }
 
         public byte[] ReadBytes()

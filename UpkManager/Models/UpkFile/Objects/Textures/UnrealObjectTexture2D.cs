@@ -8,6 +8,7 @@ using DDSLib.Constants;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
+using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Tables;
 
 
@@ -30,7 +31,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
         public int MipMapsCount { get; private set; }
 
-        public List<Texture2DMipMap> MipMaps { get; }
+        public List<FTexture2DMipMap> MipMaps { get; }
 
         public byte[] Guid { get; private set; }
 
@@ -64,7 +65,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             {
                 await ProcessCompressedBulkData(reader, async bulkChunk =>
                 {
-                    Texture2DMipMap mip = new Texture2DMipMap
+                    FTexture2DMipMap mip = new FTexture2DMipMap
                     {
                         SizeX = reader.ReadInt32(),
                         SizeY = reader.ReadInt32()
@@ -86,7 +87,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             MipMapsCount = count;
         }
 
-        public async Task ReadMipMapCache(ByteArrayReader upkReader, uint index, Texture2DMipMap overrideMipMap)
+        public async Task ReadMipMapCache(ByteArrayReader upkReader, uint index, FTexture2DMipMap overrideMipMap)
         {
             var header = new UnrealCompressedChunkHeader();
 
@@ -94,7 +95,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
 
             if (TryGetImageProperties(header, (int)index, overrideMipMap, out int width, out int height, out FileFormat format))
             {
-                Texture2DMipMap mip = new()
+                FTexture2DMipMap mip = new()
                 {
                     SizeX = width,
                     SizeY = height,
@@ -108,7 +109,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             }
         }
 
-        public bool TryGetImageProperties(UnrealCompressedChunkHeader header, int index, Texture2DMipMap overrideMipMap, out int width, out int height, out FileFormat ddsFormat)
+        public bool TryGetImageProperties(UnrealCompressedChunkHeader header, int index, FTexture2DMipMap overrideMipMap, out int width, out int height, out FileFormat ddsFormat)
         {
             if (overrideMipMap.SizeX > 0)
             {
@@ -411,7 +412,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             BuilderSize = base.GetBuilderSize()
                         + sizeof(int);
 
-            foreach (Texture2DMipMap mipMap in MipMaps)
+            foreach (FTexture2DMipMap mipMap in MipMaps)
             {
                 BulkDataCompressionTypes flags = mipMap.Data == null || 
                     mipMap.Data.Length == 0 
@@ -478,7 +479,7 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
             var format = MipMaps[0].OverrideFormat;
             for (int index = maxIndex; index < MipMapsCount; index++)
             {
-                Texture2DMipMap mip = new Texture2DMipMap
+                FTexture2DMipMap mip = new FTexture2DMipMap
                 {
                     SizeX = mipMaps[index].Width,
                     SizeY = mipMaps[index].Height,

@@ -1,23 +1,18 @@
-﻿
-using DDSLib.Constants;
+﻿using DDSLib.Constants;
 using UpkManager.Models.UpkFile.Types;
 
-namespace UpkManager.Models.UpkFile.Objects.Textures
+namespace UpkManager.Models.UpkFile.Engine.Texture
 {
-
-    public class Texture2DMipMap
+    public class FTexture2DMipMap
     {
-
-        #region Properties
-
         public int SizeX { get; set; }
         public int SizeY { get; set; }
         public FileFormat OverrideFormat { get; set; }
         public byte[] Data { get; set; } // UntypedBulkData
 
-        public static Texture2DMipMap ReadMipMap(UBuffer buffer)
+        public static FTexture2DMipMap ReadMipMap(UBuffer buffer)
         {
-            var mipMap = new Texture2DMipMap
+            var mipMap = new FTexture2DMipMap
             {
                 Data = buffer.ReadBulkData(),
                 SizeX = buffer.Reader.ReadInt32(),
@@ -29,9 +24,5 @@ namespace UpkManager.Models.UpkFile.Objects.Textures
         {
             return $"[{SizeX} x {SizeY}] [{Data?.Length}]";
         }
-
-        #endregion Properties
-
     }
-
 }

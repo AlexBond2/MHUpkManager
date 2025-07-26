@@ -111,7 +111,7 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
                 if (numComponents > 1) y = reader.ReadSingle();
                 if (numComponents > 2) z = reader.ReadSingle();
 
-                track.RotKeys.Add(new Quat(x, y, z, 0));
+                track.RotKeys.Add(new FQuat(x, y, z, 0));
             }
 
             TimeDecode(track.Times, sequence, reader, numKeys);
@@ -171,7 +171,7 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
                 if (numComponents > 1) y = reader.ReadSingle();
                 if (numComponents > 2) z = reader.ReadSingle();
 
-                track.PosKeys.Add(new Vector(x, y, z));
+                track.PosKeys.Add(new FVector(x, y, z));
             }
 
             TimeDecode(track.Times, sequence, reader, numKeys);

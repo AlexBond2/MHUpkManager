@@ -9,27 +9,27 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     public class UKMeshProps : UObject
     {
         [PropertyField]
-        public Vector COMNudge { get; set; }
+        public FVector COMNudge { get; set; }
 
         [PropertyField]
-        public KAggregateGeom AggGeom { get; set; }
+        public FKAggregateGeom AggGeom { get; set; }
     }
 
 
     [UnrealStruct("KAggregateGeom")]
-    public class KAggregateGeom
+    public class FKAggregateGeom
     {
         [StructField]
-        public UArray<KSphereElem> SphereElems { get; set; }
+        public UArray<FKSphereElem> SphereElems { get; set; }
 
         [StructField]
-        public UArray<KBoxElem> BoxElems { get; set; }
+        public UArray<FKBoxElem> BoxElems { get; set; }
 
         [StructField]
-        public UArray<KSphylElem> SphylElems { get; set; }
+        public UArray<FKSphylElem> SphylElems { get; set; }
 
         [StructField]
-        public UArray<KConvexElem> ConvexElems { get; set; }
+        public UArray<FKConvexElem> ConvexElems { get; set; }
 
         [StructField]
         public IntPtr RenderInfo { get; set; } // Pointer
@@ -39,35 +39,35 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     }
 
     [UnrealStruct("KConvexElem")]
-    public class KConvexElem
+    public class FKConvexElem
     {
         [StructField]
-        public UArray<Vector> VertexData { get; set; }
+        public UArray<FVector> VertexData { get; set; }
 
         [StructField]
-        public UArray<Plane> PermutedVertexData { get; set; }
+        public UArray<FPlane> PermutedVertexData { get; set; }
 
         [StructField]
         public UArray<int> FaceTriData { get; set; }
 
         [StructField]
-        public UArray<Vector> EdgeDirections { get; set; }
+        public UArray<FVector> EdgeDirections { get; set; }
 
         [StructField]
-        public UArray<Vector> FaceNormalDirections { get; set; }
+        public UArray<FVector> FaceNormalDirections { get; set; }
 
         [StructField]
-        public UArray<Plane> FacePlaneData { get; set; }
+        public UArray<FPlane> FacePlaneData { get; set; }
 
         [StructField]
-        public Box ElemBox { get; set; }
+        public FBox ElemBox { get; set; }
     }
 
     [UnrealStruct("KSphylElem")]
-    public class KSphylElem
+    public class FKSphylElem
     {
         [StructField]
-        public Matrix TM { get; set; }
+        public FMatrix TM { get; set; }
 
         [StructField]
         public float Radius { get; set; }
@@ -83,10 +83,10 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     }
 
     [UnrealStruct("KBoxElem")]
-    public class KBoxElem
+    public class FKBoxElem
     {
         [StructField]
-        public Matrix TM { get; set; }
+        public FMatrix TM { get; set; }
 
         [StructField]
         public float X { get; set; }
@@ -105,10 +105,10 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     }
 
     [UnrealStruct("KSphereElem")]
-    public class KSphereElem
+    public class FKSphereElem
     {
         [StructField]
-        public Matrix TM { get; set; }
+        public FMatrix TM { get; set; }
 
         [StructField]
         public float Radius { get; set; }
@@ -124,37 +124,37 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     public class URB_BodySetup : UKMeshProps
     {
         [StructField("KCachedConvexData")]
-        public UArray<KCachedConvexData> PreCachedPhysData { get; set; }
+        public UArray<FKCachedConvexData> PreCachedPhysData { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
 
-            PreCachedPhysData = buffer.ReadArray(KCachedConvexData.ReadData);
+            PreCachedPhysData = buffer.ReadArray(FKCachedConvexData.ReadData);
         }
     }
 
-    public class KCachedConvexData
+    public class FKCachedConvexData
     {
-        public UArray<KCachedConvexDataElement> CachedConvexElements { get; set; }
+        public UArray<FKCachedConvexDataElement> CachedConvexElements { get; set; }
 
-        public static KCachedConvexData ReadData(UBuffer buffer)
+        public static FKCachedConvexData ReadData(UBuffer buffer)
         {
-            var data = new KCachedConvexData
+            var data = new FKCachedConvexData
             {
-                CachedConvexElements = buffer.ReadArray(KCachedConvexDataElement.ReadData)
+                CachedConvexElements = buffer.ReadArray(FKCachedConvexDataElement.ReadData)
             };
             return data;
         }
     }
 
-    public class KCachedConvexDataElement
+    public class FKCachedConvexDataElement
     {
         public byte[] ConvexElementData { get; set; }
 
-        public static KCachedConvexDataElement ReadData(UBuffer buffer)
+        public static FKCachedConvexDataElement ReadData(UBuffer buffer)
         {
-            var data = new KCachedConvexDataElement
+            var data = new FKCachedConvexDataElement
             {
                 ConvexElementData = buffer.ReadBytes()
             };

@@ -12,7 +12,7 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
         public FName SequenceName { get; set; }
 
         [PropertyField]
-        public UArray<AnimNotifyEvent> Notifies { get; set; }
+        public UArray<FAnimNotifyEvent> Notifies { get; set; }
 
         [PropertyField]
         public float SequenceLength { get; set; }
@@ -67,15 +67,15 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
 
     public class RawAnimSequenceTrack
     {
-        public UArray<Vector> PosKeys { get; set; }
-        public UArray<Quat> RotKeys { get; set; }
+        public UArray<FVector> PosKeys { get; set; }
+        public UArray<FQuat> RotKeys { get; set; }
 
         public static RawAnimSequenceTrack ReadData(UBuffer buffer)
         {
             var track = new RawAnimSequenceTrack
             {
-                PosKeys = buffer.ReadArray(Vector.ReadData),
-                RotKeys = buffer.ReadArray(Quat.ReadData)
+                PosKeys = buffer.ReadArray(FVector.ReadData),
+                RotKeys = buffer.ReadArray(FQuat.ReadData)
             };
             return track;
         }
@@ -88,7 +88,7 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
 
     public class TranslationTrack
     {
-        public UArray<Vector> PosKeys { get; set; } = [];
+        public UArray<FVector> PosKeys { get; set; } = [];
         public UArray<float> Times { get; set; } = [];
 
         public override string ToString()
@@ -101,7 +101,7 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
 
     public class RotationTrack
     {
-        public UArray<Quat> RotKeys { get; set; } = [];
+        public UArray<FQuat> RotKeys { get; set; } = [];
         public UArray<float> Times { get; set; } = [];
 
         public override string ToString()

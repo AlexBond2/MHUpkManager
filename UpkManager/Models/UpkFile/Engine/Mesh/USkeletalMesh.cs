@@ -9,7 +9,6 @@ using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine.Mesh
 {
-    using Vector = Core.Vector;
     [UnrealClass("SkeletalMesh")]
     public class USkeletalMesh: UObject
     {
@@ -20,34 +19,34 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public UArray<FObject> Sockets { get; set; } // SkeletalMeshSocket
 
         [PropertyField]
-        public UArray<SkeletalMeshLODInfo> LODInfo { get; set; }
+        public UArray<FSkeletalMeshLODInfo> LODInfo { get; set; }
 
         [StructField]
-        public BoxSphereBounds Bounds { get; set; }
+        public FBoxSphereBounds Bounds { get; set; }
 
         [StructField("UMaterialInterface")]
         public UArray<FObject> Materials { get; set; } // UMaterialInterface
 
         [StructField]
-        public Vector Origin { get; set; }
+        public FVector Origin { get; set; }
 
         [StructField]
-        public Rotator RotOrigin { get; set; }
+        public FRotator RotOrigin { get; set; }
 
         [StructField("MeshBone")]
-        public UArray<MeshBone> RefSkeleton { get; set; }
+        public UArray<FMeshBone> RefSkeleton { get; set; }
 
         [StructField]
         public int SkeletalDepth { get; set; }
 
         [StructField("StaticLODModel")]
-        public UArray<StaticLODModel> LODModels { get; set; }
+        public UArray<FStaticLODModel> LODModels { get; set; }
 
         [StructField]
         public UMap<FName, int> NameIndexMap { get; set; }
 
         [StructField("PerPolyBoneCollisionData")]
-        public UArray<PerPolyBoneCollisionData> PerPolyBoneKDOPs { get; set; }
+        public UArray<FPerPolyBoneCollisionData> PerPolyBoneKDOPs { get; set; }
 
         [StructField("BoneBreakName")]
         public UArray<string> BoneBreakNames { get; set; }
@@ -63,37 +62,37 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public UArray<float> CachedStreamingTextureFactors { get; set; }
 
         [StructField]
-        public SkeletalMeshSourceData SourceData { get; set; }
+        public FSkeletalMeshSourceData SourceData { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
 
-            Bounds = BoxSphereBounds.ReadData(buffer);
+            Bounds = FBoxSphereBounds.ReadData(buffer);
             Materials = buffer.ReadArray(UBuffer.ReadObject);
-            Origin = Vector.ReadData(buffer);
-            RotOrigin = Rotator.ReadData(buffer);
-            RefSkeleton = buffer.ReadArray(MeshBone.ReadData);
+            Origin = FVector.ReadData(buffer);
+            RotOrigin = FRotator.ReadData(buffer);
+            RefSkeleton = buffer.ReadArray(FMeshBone.ReadData);
             SkeletalDepth = buffer.ReadInt32();
 
             LODModels = ReadLODModels(buffer);
 
             NameIndexMap = buffer.ReadMap<FName, int>(UName.ReadName, UBuffer.ReadInt32);
-            PerPolyBoneKDOPs = buffer.ReadArray(PerPolyBoneCollisionData.ReadData);
+            PerPolyBoneKDOPs = buffer.ReadArray(FPerPolyBoneCollisionData.ReadData);
             BoneBreakNames = buffer.ReadArray(UBuffer.ReadString);
             BoneBreakOptions = buffer.ReadBytes();
 
             ClothingAssets = buffer.ReadArray(UBuffer.ReadObject);
             CachedStreamingTextureFactors = buffer.ReadArray(UBuffer.ReadFloat);
-            SourceData = SkeletalMeshSourceData.ReadData(buffer, this);
+            SourceData = FSkeletalMeshSourceData.ReadData(buffer, this);
         }
 
-        public UArray<StaticLODModel> ReadLODModels(UBuffer buffer)
+        public UArray<FStaticLODModel> ReadLODModels(UBuffer buffer)
         {
             int count = buffer.Reader.ReadInt32();
-            var array = new UArray<StaticLODModel>(count);
+            var array = new UArray<FStaticLODModel>(count);
             for (int i = 0; i < count; i++)
-                array.Add(StaticLODModel.ReadData(buffer, this));
+                array.Add(FStaticLODModel.ReadData(buffer, this));
 
             return array;
         }
@@ -109,13 +108,13 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public FName BoneName { get; set; }
 
         [PropertyField]
-        public Vector RelativeLocation { get; set; }
+        public FVector RelativeLocation { get; set; }
 
         [PropertyField]
-        public Rotator RelativeRotation { get; set; }
+        public FRotator RelativeRotation { get; set; }
 
         [PropertyField]
-        public Vector RelativeScale { get; set; }
+        public FVector RelativeScale { get; set; }
     }
 
     [UnrealClass("SkeletalMeshComponent")]
@@ -138,7 +137,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     }
 
     [UnrealStruct("SkeletalMeshLODInfo")]
-    public class SkeletalMeshLODInfo : IAtomicStruct
+    public class FSkeletalMeshLODInfo : IAtomicStruct
     {
         [StructField]
         public float DisplayFactor { get; set; }
@@ -153,7 +152,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public UArray<bool> bEnableShadowCasting { get; set; }
 
         [StructField]
-        public UArray<TriangleSortSettings> TriangleSortSettings { get; set; }
+        public UArray<FTriangleSortSettings> TriangleSortSettings { get; set; }
 
         [StructField]
         public bool bDisableCompression { get; set; }
@@ -165,7 +164,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     }
 
     [UnrealStruct("TriangleSortSettings")]
-    public class TriangleSortSettings : IAtomicStruct
+    public class FTriangleSortSettings : IAtomicStruct
     {
         [StructField]
         public TriangleSortOption TriangleSorting { get; set; }
@@ -197,21 +196,21 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         TSA_MAX                         // 3
     };
 
-    public class SkeletalMeshSourceData : IAtomicStruct
+    public class FSkeletalMeshSourceData : IAtomicStruct
     {
         [StructField]
         public bool bHaveSourceData { get; set; }
 
         [StructField]
-        public StaticLODModel LODModel { get; set; }
+        public FStaticLODModel LODModel { get; set; }
 
-        public static SkeletalMeshSourceData ReadData(UBuffer buffer, USkeletalMesh mesh)
+        public static FSkeletalMeshSourceData ReadData(UBuffer buffer, USkeletalMesh mesh)
         {
-            var data = new SkeletalMeshSourceData();
+            var data = new FSkeletalMeshSourceData();
 
             data.bHaveSourceData = buffer.ReadBool();
             if (data.bHaveSourceData)
-                data.LODModel = StaticLODModel.ReadData(buffer, mesh);
+                data.LODModel = FStaticLODModel.ReadData(buffer, mesh);
 
             return data;
         }
@@ -219,27 +218,27 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
     }
 
-    public class PerPolyBoneCollisionData : IAtomicStruct
+    public class FPerPolyBoneCollisionData : IAtomicStruct
     {
         [StructField]
-        public SkeletalKDOPTreeLegacy LegacykDOPTree { get; set; }
+        public FSkeletalKDOPTreeLegacy LegacykDOPTree { get; set; }
 
         [StructField]
-        public UArray<Vector> CollisionVerts { get; set; }
+        public UArray<FVector> CollisionVerts { get; set; }
 
-        public static PerPolyBoneCollisionData ReadData(UBuffer buffer)
+        public static FPerPolyBoneCollisionData ReadData(UBuffer buffer)
         {
-            return new PerPolyBoneCollisionData
+            return new FPerPolyBoneCollisionData
             {
-                LegacykDOPTree = SkeletalKDOPTreeLegacy.ReadData(buffer),
-                CollisionVerts = buffer.ReadArray(Vector.ReadData)
+                LegacykDOPTree = FSkeletalKDOPTreeLegacy.ReadData(buffer),
+                CollisionVerts = buffer.ReadArray(FVector.ReadData)
             };
         }
 
         public string Format => "";
     }
 
-    public class SkeletalKDOPTreeLegacy : IAtomicStruct
+    public class FSkeletalKDOPTreeLegacy : IAtomicStruct
     {
         [StructField]
         public UArray<byte[]> Nodes { get; set; } // FkDOPCollisionTriangle
@@ -247,9 +246,9 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         [StructField]
         public UArray<byte[]> Triangles { get; set; } // FSkelMeshCollisionDataProvider
 
-        public static SkeletalKDOPTreeLegacy ReadData(UBuffer buffer)
+        public static FSkeletalKDOPTreeLegacy ReadData(UBuffer buffer)
         {
-            return new SkeletalKDOPTreeLegacy
+            return new FSkeletalKDOPTreeLegacy
             {
                 Nodes = buffer.ReadArrayUnkElement(),
                 Triangles = buffer.ReadArrayUnkElement()
@@ -259,19 +258,19 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
     }
 
-    public class StaticLODModel : IAtomicStruct
+    public class FStaticLODModel : IAtomicStruct
     {
         [StructField("SkelMeshSection")]
-        public UArray<SkelMeshSection> Sections { get; set; }
+        public UArray<FSkelMeshSection> Sections { get; set; }
 
         [StructField]
-        public MultiSizeIndexContainer MultiSizeIndexContainer { get; set; }
+        public FMultiSizeIndexContainer MultiSizeIndexContainer { get; set; }
 
         [StructField("ActiveBoneIndex", true)]
         public UArray<ushort> ActiveBoneIndices { get; set; }
 
         [StructField("SkelMeshChunk")]
-        public UArray<SkelMeshChunk> Chunks { get; set; }
+        public UArray<FSkelMeshChunk> Chunks { get; set; }
 
         [StructField]
         public uint Size { get; set; }
@@ -289,27 +288,27 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public uint NumTexCoords { get; set; }
 
         [StructField]
-        public SkeletalMeshVertexBuffer VertexBufferGPUSkin { get; set; }
+        public FSkeletalMeshVertexBuffer VertexBufferGPUSkin { get; set; }
 
         [StructField]
-        public SkeletalMeshVertexColorBuffer ColorVertexBuffer { get; set; }
+        public FSkeletalMeshVertexColorBuffer ColorVertexBuffer { get; set; }
 
         [StructField("SkeletalMeshVertexInfluences")]
-        public UArray<SkeletalMeshVertexInfluences> VertexInfluences { get; set; }
+        public UArray<FSkeletalMeshVertexInfluences> VertexInfluences { get; set; }
 
         [StructField]
-        public MultiSizeIndexContainer AdjacencyMultiSizeIndexContainer { get; set; }
+        public FMultiSizeIndexContainer AdjacencyMultiSizeIndexContainer { get; set; }
 
         public string Format => "";
         public override string ToString() => "FStaticLODModel";
 
-        public static StaticLODModel ReadData(UBuffer buffer, USkeletalMesh mesh)
+        public static FStaticLODModel ReadData(UBuffer buffer, USkeletalMesh mesh)
         {
-            StaticLODModel lod = new StaticLODModel();
-            lod.Sections = buffer.ReadArray(SkelMeshSection.ReadData);
-            lod.MultiSizeIndexContainer = MultiSizeIndexContainer.ReadData(buffer);
+            FStaticLODModel lod = new FStaticLODModel();
+            lod.Sections = buffer.ReadArray(FSkelMeshSection.ReadData);
+            lod.MultiSizeIndexContainer = FMultiSizeIndexContainer.ReadData(buffer);
             lod.ActiveBoneIndices = buffer.ReadArray(UBuffer.ReadUInt16);
-            lod.Chunks = buffer.ReadArray(SkelMeshChunk.ReadData);
+            lod.Chunks = buffer.ReadArray(FSkelMeshChunk.ReadData);
             lod.Size = buffer.Reader.ReadUInt32();
             lod.NumVertices = buffer.Reader.ReadUInt32();
 
@@ -318,36 +317,36 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
 
             lod.NumTexCoords = buffer.Reader.ReadUInt32();
             
-            lod.VertexBufferGPUSkin = SkeletalMeshVertexBuffer.ReadData(buffer);
+            lod.VertexBufferGPUSkin = FSkeletalMeshVertexBuffer.ReadData(buffer);
 
             if (mesh.bHasVertexColors)
-                lod.ColorVertexBuffer = SkeletalMeshVertexColorBuffer.ReadData(buffer);
+                lod.ColorVertexBuffer = FSkeletalMeshVertexColorBuffer.ReadData(buffer);
 
-            lod.VertexInfluences = buffer.ReadArray(SkeletalMeshVertexInfluences.ReadData);
-            lod.AdjacencyMultiSizeIndexContainer = MultiSizeIndexContainer.ReadData(buffer);
+            lod.VertexInfluences = buffer.ReadArray(FSkeletalMeshVertexInfluences.ReadData);
+            lod.AdjacencyMultiSizeIndexContainer = FMultiSizeIndexContainer.ReadData(buffer);
             
             return lod;
         }
     }
 
-    public class VertexBuffer : IAtomicStruct
+    public class FVertexBuffer : IAtomicStruct
     {
         public string Format => "";
     }
 
-    public class SkeletalMeshVertexInfluences : VertexBuffer
+    public class FSkeletalMeshVertexInfluences : FVertexBuffer
     {
         [StructField]
-        public UArray<VertexInfluence> Influences { get; set; }
+        public UArray<FVertexInfluence> Influences { get; set; }
 
         [StructField]
         public UMap<BoneIndexPair, UArray<uint>> VertexInfluenceMapping { get; set; }
 
         [StructField]
-        public UArray<SkelMeshSection> Sections { get; set; }
+        public UArray<FSkelMeshSection> Sections { get; set; }
 
         [StructField]
-        public UArray<SkelMeshChunk> Chunks { get; set; }
+        public UArray<FSkelMeshChunk> Chunks { get; set; }
 
         [StructField]
         public byte[] RequiredBones { get; set; }
@@ -355,14 +354,14 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         [StructField]
         public byte Usage { get; set; }
 
-        public static SkeletalMeshVertexInfluences ReadData(UBuffer buffer)
+        public static FSkeletalMeshVertexInfluences ReadData(UBuffer buffer)
         {
             return new()
             {
-                Influences = buffer.ReadArray(VertexInfluence.ReadData),
+                Influences = buffer.ReadArray(FVertexInfluence.ReadData),
                 VertexInfluenceMapping = buffer.ReadMap(BoneIndexPair.ReadKeys, UBuffer.ReadArrayUInt32),
-                Sections = buffer.ReadArray(SkelMeshSection.ReadData),
-                Chunks = buffer.ReadArray(SkelMeshChunk.ReadData),
+                Sections = buffer.ReadArray(FSkelMeshSection.ReadData),
+                Chunks = buffer.ReadArray(FSkelMeshChunk.ReadData),
                 RequiredBones = buffer.ReadBytes(),
                 Usage = buffer.Reader.ReadByte()
             };
@@ -380,33 +379,33 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
     }
 
-    public class VertexInfluence : IAtomicStruct
+    public class FVertexInfluence : IAtomicStruct
     {
         [StructField]
-        public InfluenceBones Bones { get; set; }
+        public FInfluenceBones Bones { get; set; }
 
         [StructField]
-        public InfluenceWeights Weights { get; set; }
+        public FInfluenceWeights Weights { get; set; }
 
         public string Format => "";
 
-        public static VertexInfluence ReadData(UBuffer buffer)
+        public static FVertexInfluence ReadData(UBuffer buffer)
         {
-            return new VertexInfluence
+            return new FVertexInfluence
             {
-                Bones = InfluenceBones.ReadData(buffer),
-                Weights = InfluenceWeights.ReadData(buffer)
+                Bones = FInfluenceBones.ReadData(buffer),
+                Weights = FInfluenceWeights.ReadData(buffer)
             };
         }
     }
 
-    public class InfluenceBones : IAtomicStruct
+    public class FInfluenceBones : IAtomicStruct
     {
         [StructField]
         public byte[] Bones { get; set; }
-        public static InfluenceBones ReadData(UBuffer buffer)
+        public static FInfluenceBones ReadData(UBuffer buffer)
         {
-            return new InfluenceBones
+            return new FInfluenceBones
             {
                 Bones = buffer.Read4Bytes()
             };
@@ -414,13 +413,13 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
     }
 
-    public class InfluenceWeights : IAtomicStruct
+    public class FInfluenceWeights : IAtomicStruct
     {
         [StructField]
         public byte[] Weights { get; set; }
-        public static InfluenceWeights ReadData(UBuffer buffer)
+        public static FInfluenceWeights ReadData(UBuffer buffer)
         {
-            return new InfluenceWeights
+            return new FInfluenceWeights
             {
                 Weights = buffer.Read4Bytes()
             };
@@ -428,15 +427,15 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
     }
 
-    public class SkeletalMeshVertexColorBuffer : VertexBuffer
+    public class FSkeletalMeshVertexColorBuffer : FVertexBuffer
     {
         [StructField("GPUSkinVertexColor", true)]
-        public UArray<GPUSkinVertexColor> Colors { get; set; }
+        public UArray<FGPUSkinVertexColor> Colors { get; set; }
 
-        public static SkeletalMeshVertexColorBuffer ReadData(UBuffer buffer)
+        public static FSkeletalMeshVertexColorBuffer ReadData(UBuffer buffer)
         {
-            SkeletalMeshVertexColorBuffer vertexBuffer = new();
-            vertexBuffer.Colors = buffer.ReadArrayElement(GPUSkinVertexColor.ReadData, 4);
+            FSkeletalMeshVertexColorBuffer vertexBuffer = new();
+            vertexBuffer.Colors = buffer.ReadArrayElement(FGPUSkinVertexColor.ReadData, 4);
             return vertexBuffer;
         }
     }
@@ -451,7 +450,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public byte[] Weights;
     }
 
-    public class SkeletalMeshVertexBuffer : VertexBuffer
+    public class FSkeletalMeshVertexBuffer : FVertexBuffer
     {
         [StructField]
         public uint NumTexCoords { get; set; }
@@ -463,18 +462,18 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public bool bUsePackedPosition { get; set; }
 
         [StructField]
-        public Vector MeshExtension { get; set; }
+        public FVector MeshExtension { get; set; }
 
         [StructField]
-        public Vector MeshOrigin { get; set; }
+        public FVector MeshOrigin { get; set; }
 
-        public UArray<GPUSkinVertexFloat16Uvs32Xyz> VertsF16UV32 { get; set; }
-        public UArray<GPUSkinVertexFloat16Uvs> VertsF16 { get; set; }
-        public UArray<GPUSkinVertexFloat32Uvs32Xyz> VertsF32UV32 { get; set; }
-        public UArray<GPUSkinVertexFloat32Uvs> VertsF32 { get; set; }
+        public UArray<FGPUSkinVertexFloat16Uvs32Xyz> VertsF16UV32 { get; set; }
+        public UArray<FGPUSkinVertexFloat16Uvs> VertsF16 { get; set; }
+        public UArray<FGPUSkinVertexFloat32Uvs32Xyz> VertsF32UV32 { get; set; }
+        public UArray<FGPUSkinVertexFloat32Uvs> VertsF32 { get; set; }
 
         [StructField("GPUSkinVertexBase", true)]
-        public IEnumerable<GPUSkinVertexBase> VertexData {
+        public IEnumerable<FGPUSkinVertexBase> VertexData {
             get
             {
                 if (VertsF16UV32 != null)  return VertsF16UV32;
@@ -503,15 +502,15 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
             }
         }
 
-        public static SkeletalMeshVertexBuffer ReadData(UBuffer buffer)
+        public static FSkeletalMeshVertexBuffer ReadData(UBuffer buffer)
         {
-            SkeletalMeshVertexBuffer vertexBuffer = new()
+            FSkeletalMeshVertexBuffer vertexBuffer = new()
             {
                 NumTexCoords = buffer.Reader.ReadUInt32(),
                 bUseFullPrecisionUVs = buffer.Reader.ReadBool(),
                 bUsePackedPosition = buffer.Reader.ReadBool(),
-                MeshExtension = Vector.ReadData(buffer),
-                MeshOrigin = Vector.ReadData(buffer)
+                MeshExtension = FVector.ReadData(buffer),
+                MeshOrigin = FVector.ReadData(buffer)
             };
 
             // Forced value for PC
@@ -520,22 +519,22 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
             if (!vertexBuffer.bUseFullPrecisionUVs)
             {
                 if (vertexBuffer.bUsePackedPosition)
-                    vertexBuffer.VertsF16UV32 = ReadArrayElement<GPUSkinVertexFloat16Uvs32Xyz>(buffer, vertexBuffer.NumTexCoords);
+                    vertexBuffer.VertsF16UV32 = ReadArrayElement<FGPUSkinVertexFloat16Uvs32Xyz>(buffer, vertexBuffer.NumTexCoords);
                 else
-                    vertexBuffer.VertsF16 = ReadArrayElement<GPUSkinVertexFloat16Uvs>(buffer, vertexBuffer.NumTexCoords);
+                    vertexBuffer.VertsF16 = ReadArrayElement<FGPUSkinVertexFloat16Uvs>(buffer, vertexBuffer.NumTexCoords);
             }
             else
             {
                 if (vertexBuffer.bUsePackedPosition)
-                    vertexBuffer.VertsF32UV32 = ReadArrayElement<GPUSkinVertexFloat32Uvs32Xyz>(buffer, vertexBuffer.NumTexCoords);
+                    vertexBuffer.VertsF32UV32 = ReadArrayElement<FGPUSkinVertexFloat32Uvs32Xyz>(buffer, vertexBuffer.NumTexCoords);
                 else
-                    vertexBuffer.VertsF32 = ReadArrayElement<GPUSkinVertexFloat32Uvs>(buffer, vertexBuffer.NumTexCoords);
+                    vertexBuffer.VertsF32 = ReadArrayElement<FGPUSkinVertexFloat32Uvs>(buffer, vertexBuffer.NumTexCoords);
             }
             return vertexBuffer;
         }
 
         private static UArray<T> ReadArrayElement<T>(UBuffer buffer, uint numTexCoords) 
-            where T : GPUSkinVertexBase, new()
+            where T : FGPUSkinVertexBase, new()
         {
             T readMethod()
             {
@@ -557,26 +556,26 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
 
         private static int GetExpectedSize<T>(uint numTexCoords)
         {
-            if (typeof(T) == typeof(GPUSkinVertexFloat16Uvs))
+            if (typeof(T) == typeof(FGPUSkinVertexFloat16Uvs))
                 return 16 + 12 + 2 * 2 * (int)numTexCoords; // 32
-            if (typeof(T) == typeof(GPUSkinVertexFloat16Uvs32Xyz))
+            if (typeof(T) == typeof(FGPUSkinVertexFloat16Uvs32Xyz))
                 return 16 + 4 + 2 * 2 * (int)numTexCoords; // 24
-            if (typeof(T) == typeof(GPUSkinVertexFloat32Uvs))
+            if (typeof(T) == typeof(FGPUSkinVertexFloat32Uvs))
                 return 16 + 12 + 4 * 2 * (int)numTexCoords; // 40
-            if (typeof(T) == typeof(GPUSkinVertexFloat32Uvs32Xyz))
+            if (typeof(T) == typeof(FGPUSkinVertexFloat32Uvs32Xyz))
                 return 16 + 4 + 4 * 2 * (int)numTexCoords; // 28
 
             return -1;
         }
     }
 
-    public class GPUSkinVertexBase
+    public class FGPUSkinVertexBase
     {
         [StructField]
-        public PackedNormal TangentX { get; set; }
+        public FPackedNormal TangentX { get; set; }
 
         [StructField]
-        public PackedNormal TangentZ { get; set; }
+        public FPackedNormal TangentZ { get; set; }
 
         [StructField]
         public byte[] InfluenceBones { get; set; }
@@ -596,56 +595,56 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
 
         public virtual void ReadData(UBuffer buffer, int num)
         {
-            TangentX = PackedNormal.ReadData(buffer);
-            TangentZ = PackedNormal.ReadData(buffer);
+            TangentX = FPackedNormal.ReadData(buffer);
+            TangentZ = FPackedNormal.ReadData(buffer);
             InfluenceBones = buffer.Read4Bytes();
             InfluenceWeights = buffer.Read4Bytes();
         }
 
-        public static Vector2D[] ReadUVs(UBuffer buffer, int num)
+        public static FVector2D[] ReadUVs(UBuffer buffer, int num)
         {
-            var verts = new Vector2D[num];
+            var verts = new FVector2D[num];
             for (int i = 0; i < num; i++)
-                verts[i] = Vector2D.ReadData(buffer);
+                verts[i] = FVector2D.ReadData(buffer);
 
             return verts;
         }
 
-        public static Vector2DHalf[] ReadHalfUVs(UBuffer buffer, int num)
+        public static FVector2DHalf[] ReadHalfUVs(UBuffer buffer, int num)
         {
-            var verts = new Vector2DHalf[num];
+            var verts = new FVector2DHalf[num];
             for (int i = 0; i < num; i++)
-                verts[i] = Vector2DHalf.ReadData(buffer);
+                verts[i] = FVector2DHalf.ReadData(buffer);
 
             return verts;
         }
     }
 
-    public class GPUSkinVertexColor : IAtomicStruct
+    public class FGPUSkinVertexColor : IAtomicStruct
     {
         [StructField]
-        public Color VertexColor { get; set; }
+        public FColor VertexColor { get; set; }
 
         public string Format => VertexColor.Format;
 
-        public static GPUSkinVertexColor ReadData(UBuffer buffer)
+        public static FGPUSkinVertexColor ReadData(UBuffer buffer)
         {
             return new()
             {
-                VertexColor = Color.ReadData(buffer)
+                VertexColor = FColor.ReadData(buffer)
             };
         }
 
         public override string ToString() => Format;
     }
 
-    public class GPUSkinVertexFloat16Uvs32Xyz : GPUSkinVertexBase
+    public class FGPUSkinVertexFloat16Uvs32Xyz : FGPUSkinVertexBase
     {
         [StructField]
-        public PackedPosition Positon { get; set; }
+        public FPackedPosition Positon { get; set; }
 
         [StructField]
-        public Vector2DHalf[] UVs { get; set; }
+        public FVector2DHalf[] UVs { get; set; }
 
         public override Vector3 GetVector3()
         {
@@ -662,20 +661,20 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public override void ReadData(UBuffer buffer, int num)
         {
             base.ReadData(buffer, num);
-            Positon = PackedPosition.ReadData(buffer);
+            Positon = FPackedPosition.ReadData(buffer);
             UVs = ReadHalfUVs(buffer, num);
         }
 
         public override string ToString() => $"Pos: {Positon.Format} UV[0]: {UVs[0].Format}";
     }
 
-    public class GPUSkinVertexFloat16Uvs : GPUSkinVertexBase
+    public class FGPUSkinVertexFloat16Uvs : FGPUSkinVertexBase
     {
         [StructField]
-        public Vector Positon { get; set; }
+        public FVector Positon { get; set; }
 
         [StructField]
-        public Vector2DHalf[] UVs { get; set; }
+        public FVector2DHalf[] UVs { get; set; }
 
         public override Vector3 GetVector3()
         {
@@ -692,20 +691,20 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public override void ReadData(UBuffer buffer, int num)
         {
             base.ReadData(buffer, num);
-            Positon = Vector.ReadData(buffer);
+            Positon = FVector.ReadData(buffer);
             UVs = ReadHalfUVs(buffer, num);
         }
 
         public override string ToString() => $"Pos: {Positon.Format} UV[0]: {UVs[0].Format}";
     }
 
-    public class GPUSkinVertexFloat32Uvs32Xyz : GPUSkinVertexBase
+    public class FGPUSkinVertexFloat32Uvs32Xyz : FGPUSkinVertexBase
     {
         [StructField]
-        public PackedPosition Positon { get; set; }
+        public FPackedPosition Positon { get; set; }
 
         [StructField]
-        public Vector2D[] UVs { get; set; }
+        public FVector2D[] UVs { get; set; }
 
         public override Vector3 GetVector3()
         {
@@ -722,20 +721,20 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public override void ReadData(UBuffer buffer, int num)
         {
             base.ReadData(buffer, num);
-            Positon = PackedPosition.ReadData(buffer);
+            Positon = FPackedPosition.ReadData(buffer);
             UVs = ReadUVs(buffer, num);
         }
 
         public override string ToString() => $"Pos: {Positon.Format} UV[0]: {UVs[0].Format}";
     }
 
-    public class GPUSkinVertexFloat32Uvs : GPUSkinVertexBase
+    public class FGPUSkinVertexFloat32Uvs : FGPUSkinVertexBase
     {
         [StructField]
-        public Vector Positon { get; set; }
+        public FVector Positon { get; set; }
 
         [StructField]
-        public Vector2D[] UVs { get; set; }
+        public FVector2D[] UVs { get; set; }
 
         public override Vector3 GetVector3()
         {
@@ -752,23 +751,23 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public override void ReadData(UBuffer buffer, int num)
         {
             base.ReadData(buffer, num);
-            Positon = Vector.ReadData(buffer);
+            Positon = FVector.ReadData(buffer);
             UVs = ReadUVs(buffer, num);
         }
 
         public override string ToString() => $"Pos: {Positon.Format} UV[0]: {UVs[0].Format}";
     }
 
-    public class SkelMeshChunk : IAtomicStruct
+    public class FSkelMeshChunk : IAtomicStruct
     {
         [StructField]
         public uint BaseVertexIndex { get; set; }
 
         [StructField("RigidSkinVertex")]
-        public UArray<RigidSkinVertex> RigidVertices { get; set; }
+        public UArray<FRigidSkinVertex> RigidVertices { get; set; }
 
         [StructField("SoftSkinVertex")]
-        public UArray<SoftSkinVertex> SoftVertices { get; set; }
+        public UArray<FSoftSkinVertex> SoftVertices { get; set; }
 
         [StructField("Bone", true)]
         public UArray<ushort> BoneMap { get; set; }
@@ -785,15 +784,15 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
         public override string ToString() => "FSkelMeshChunk";
 
-        public static SkelMeshChunk ReadData(UBuffer buffer)
+        public static FSkelMeshChunk ReadData(UBuffer buffer)
         {
-            SkelMeshChunk chunk = new()
+            FSkelMeshChunk chunk = new()
             {
                 BaseVertexIndex = buffer.Reader.ReadUInt32()
             };
 
-            chunk.RigidVertices = buffer.ReadArray(RigidSkinVertex.ReadData);
-            chunk.SoftVertices = buffer.ReadArray(SoftSkinVertex.ReadData);
+            chunk.RigidVertices = buffer.ReadArray(FRigidSkinVertex.ReadData);
+            chunk.SoftVertices = buffer.ReadArray(FSoftSkinVertex.ReadData);
             chunk.BoneMap = buffer.ReadArray(UBuffer.ReadUInt16);
             chunk.NumRigidVertices = buffer.Reader.ReadInt32();
             chunk.NumSoftVertices = buffer.Reader.ReadInt32();
@@ -803,25 +802,25 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
     }
 
-    public class RigidSkinVertex : IAtomicStruct
+    public class FRigidSkinVertex : IAtomicStruct
     {
         [StructField]
-        public Vector Position { get; set; }
+        public FVector Position { get; set; }
 
         [StructField]
-        public PackedNormal TangentX { get; set; }
+        public FPackedNormal TangentX { get; set; }
 
         [StructField]
-        public PackedNormal TangentY { get; set; }
+        public FPackedNormal TangentY { get; set; }
 
         [StructField]
-        public PackedNormal TangentZ { get; set; }
+        public FPackedNormal TangentZ { get; set; }
 
         [StructField]
-        public Vector2D[] UVs { get; set; }
+        public FVector2D[] UVs { get; set; }
 
         [StructField]
-        public Color Color { get; set; }
+        public FColor Color { get; set; }
 
         [StructField]
         public byte Bone { get; set; }
@@ -829,16 +828,16 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
         public override string ToString() => "FRigidSkinVertex";
 
-        public static RigidSkinVertex ReadData(UBuffer buffer)
+        public static FRigidSkinVertex ReadData(UBuffer buffer)
         {
-            RigidSkinVertex vertex = new()
+            FRigidSkinVertex vertex = new()
             {
-                Position = Vector.ReadData(buffer),
-                TangentX = PackedNormal.ReadData(buffer),
-                TangentY = PackedNormal.ReadData(buffer),
-                TangentZ = PackedNormal.ReadData(buffer),
-                UVs = SoftSkinVertex.ReadUVs(buffer),
-                Color = Color.ReadData(buffer),
+                Position = FVector.ReadData(buffer),
+                TangentX = FPackedNormal.ReadData(buffer),
+                TangentY = FPackedNormal.ReadData(buffer),
+                TangentZ = FPackedNormal.ReadData(buffer),
+                UVs = FSoftSkinVertex.ReadUVs(buffer),
+                Color = FColor.ReadData(buffer),
                 Bone = buffer.Reader.ReadByte()
             };
 
@@ -846,25 +845,25 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
     }
 
-    public class SoftSkinVertex : IAtomicStruct
+    public class FSoftSkinVertex : IAtomicStruct
     {
         [StructField]
-        public Vector Position { get; set; }
+        public FVector Position { get; set; }
 
         [StructField]
-        public PackedNormal TangentX { get; set; }
+        public FPackedNormal TangentX { get; set; }
 
         [StructField]
-        public PackedNormal TangentY { get; set; }
+        public FPackedNormal TangentY { get; set; }
 
         [StructField]
-        public PackedNormal TangentZ { get; set; }
+        public FPackedNormal TangentZ { get; set; }
 
         [StructField]
-        public Vector2D[] UVs { get; set; }
+        public FVector2D[] UVs { get; set; }
 
         [StructField]
-        public Color Color { get; set; }
+        public FColor Color { get; set; }
 
         [StructField]
         public byte[] InfluenceBones { get; set; }
@@ -875,16 +874,16 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
         public override string ToString() => "FSoftSkinVertex";
 
-        public static SoftSkinVertex ReadData(UBuffer buffer)
+        public static FSoftSkinVertex ReadData(UBuffer buffer)
         {
-            SoftSkinVertex vertex = new()
+            FSoftSkinVertex vertex = new()
             {
-                Position = Vector.ReadData(buffer),
-                TangentX = PackedNormal.ReadData(buffer),
-                TangentY = PackedNormal.ReadData(buffer),
-                TangentZ = PackedNormal.ReadData(buffer),
+                Position = FVector.ReadData(buffer),
+                TangentX = FPackedNormal.ReadData(buffer),
+                TangentY = FPackedNormal.ReadData(buffer),
+                TangentZ = FPackedNormal.ReadData(buffer),
                 UVs = ReadUVs(buffer),
-                Color = Color.ReadData(buffer),
+                Color = FColor.ReadData(buffer),
                 InfluenceBones = buffer.Read4Bytes(),
                 InfluenceWeights = buffer.Read4Bytes()
             };
@@ -892,17 +891,17 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
             return vertex;
         }
 
-        public static Vector2D[] ReadUVs(UBuffer buffer)
+        public static FVector2D[] ReadUVs(UBuffer buffer)
         {
-            var verts = new Vector2D[4];
+            var verts = new FVector2D[4];
             for (int i = 0; i < 4; i++)
-                verts[i] = Vector2D.ReadData(buffer);
+                verts[i] = FVector2D.ReadData(buffer);
 
             return verts;
         }
     }
 
-    public class SkelMeshSection : IAtomicStruct
+    public class FSkelMeshSection : IAtomicStruct
     {
         [StructField]
         public ushort MaterialIndex { get; set; }
@@ -922,9 +921,9 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public string Format => "";
         public override string ToString() => "FSkelMeshSection";
 
-        public static SkelMeshSection ReadData(UBuffer buffer)
+        public static FSkelMeshSection ReadData(UBuffer buffer)
         {
-            SkelMeshSection section = new()
+            FSkelMeshSection section = new()
             {
                 MaterialIndex = buffer.Reader.ReadUInt16(),
                 ChunkIndex = buffer.Reader.ReadUInt16(),
@@ -937,7 +936,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
     }
 
-    public class MultiSizeIndexContainer : IAtomicStruct
+    public class FMultiSizeIndexContainer : IAtomicStruct
     {
         [StructField]
         public bool NeedsCPUAccess { get; set; }
@@ -950,9 +949,9 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
 
         public string Format => "";
 
-        public static MultiSizeIndexContainer ReadData(UBuffer buffer)
+        public static FMultiSizeIndexContainer ReadData(UBuffer buffer)
         {
-            MultiSizeIndexContainer container = new()
+            FMultiSizeIndexContainer container = new()
             {
                 NeedsCPUAccess = buffer.Reader.ReadBool(),
                 DataTypeSize = buffer.Reader.ReadByte()
@@ -974,7 +973,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
     }
 
-    public class MeshBone : IAtomicStruct
+    public class FMeshBone : IAtomicStruct
     {
         [StructField]
         public FName Name { get; set; }
@@ -992,18 +991,18 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public int ParentIndex { get; set; }
 
         [StructField]
-        public Color BoneColor { get; set; }
+        public FColor BoneColor { get; set; }
 
-        public static MeshBone ReadData(UBuffer buffer)
+        public static FMeshBone ReadData(UBuffer buffer)
         {
-            MeshBone bone = new()
+            FMeshBone bone = new()
             {
                 Name = buffer.ReadName(),
                 Flags = buffer.Reader.ReadUInt32(),
                 BonePos = VJointPos.ReadData(buffer),
                 NumChildren = buffer.ReadInt32(),
                 ParentIndex = buffer.ReadInt32(),
-                BoneColor = Color.ReadData(buffer)
+                BoneColor = FColor.ReadData(buffer)
             };
             return bone;
         }
@@ -1015,17 +1014,17 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
     public class VJointPos : IAtomicStruct
     {
         [StructField]
-        public Quat Orientation { get; set; }
+        public FQuat Orientation { get; set; }
 
         [StructField]
-        public Vector Position { get; private set; }
+        public FVector Position { get; private set; }
 
         public static VJointPos ReadData(UBuffer buffer)
         {
             VJointPos joint = new()
             {
-                Orientation = Quat.ReadData(buffer),
-                Position = Vector.ReadData(buffer)
+                Orientation = FQuat.ReadData(buffer),
+                Position = FVector.ReadData(buffer)
             };
             return joint;
         }

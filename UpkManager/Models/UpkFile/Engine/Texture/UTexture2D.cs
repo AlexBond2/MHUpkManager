@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Objects.Textures;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
@@ -38,42 +39,42 @@ namespace UpkManager.Models.UpkFile.Engine.Texture
         public int FirstResourceMemMip { get; set; }
 
         [StructField("Texture2DMipMap")]
-        public UArray<Texture2DMipMap> Mips { get; set; }
+        public UArray<FTexture2DMipMap> Mips { get; set; }
 
         [StructField]
-        public Core.Guid TextureFileCacheGuid { get; set; }
+        public FGuid TextureFileCacheGuid { get; set; }
 
         [StructField("Texture2DMipMap")]
-        public UArray<Texture2DMipMap> CachedPVRTCMips { get; set; }
+        public UArray<FTexture2DMipMap> CachedPVRTCMips { get; set; }
 
         [StructField]
         public int CachedFlashMipMaxResolution { get; set; }
 
         [StructField("Texture2DMipMap")]
-        public UArray<Texture2DMipMap> CachedATITCMips { get; set; }
+        public UArray<FTexture2DMipMap> CachedATITCMips { get; set; }
 
         [StructField("UntypedBulkData")]
         public byte[] CachedFlashMipData { get; set; } // UntypedBulkData
 
         [StructField("Texture2DMipMap")]
-        public UArray<Texture2DMipMap> CachedETCMips { get; set; }
+        public UArray<FTexture2DMipMap> CachedETCMips { get; set; }
 
         public override void ReadBuffer(UBuffer buffer)
         {
             base.ReadBuffer(buffer);
 
-            Mips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
+            Mips = buffer.ReadArray(FTexture2DMipMap.ReadMipMap);
 
             SetMipsFormat();
 
             TextureFileCacheGuid = buffer.ReadGuid();
-            CachedPVRTCMips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
+            CachedPVRTCMips = buffer.ReadArray(FTexture2DMipMap.ReadMipMap);
 
             CachedFlashMipMaxResolution = buffer.Reader.ReadInt32();
-            CachedATITCMips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
+            CachedATITCMips = buffer.ReadArray(FTexture2DMipMap.ReadMipMap);
             CachedFlashMipData = buffer.ReadBulkData();
 
-            CachedETCMips = buffer.ReadArray(Texture2DMipMap.ReadMipMap);
+            CachedETCMips = buffer.ReadArray(FTexture2DMipMap.ReadMipMap);
         }
 
         private void SetMipsFormat()
@@ -102,7 +103,7 @@ namespace UpkManager.Models.UpkFile.Engine.Texture
 
             FileFormat format;
 
-            Texture2DMipMap mipMap = Mips
+            FTexture2DMipMap mipMap = Mips
                 .Where(mm => mm.Data != null && mm.Data.Length > 0)
                 .OrderByDescending(mm => mm.SizeX > mm.SizeY ? mm.SizeX : mm.SizeY)
                 .FirstOrDefault();
@@ -135,7 +136,7 @@ namespace UpkManager.Models.UpkFile.Engine.Texture
 
             var orderedMipMaps = Mips.Where(mm => mm.Data != null && mm.Data.Length > 0).OrderByDescending(mip => mip.SizeX);
 
-            Texture2DMipMap mipMap = orderedMipMaps.FirstOrDefault();
+            FTexture2DMipMap mipMap = orderedMipMaps.FirstOrDefault();
 
             var ddsHeader = new DdsHeader(new DdsSaveConfig(mipMap.OverrideFormat, 0, 0, false, false), mipMap.SizeX, mipMap.SizeY, orderedMipMaps.Count());
             var stream = new MemoryStream();

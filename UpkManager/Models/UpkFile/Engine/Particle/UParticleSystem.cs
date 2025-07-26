@@ -24,14 +24,14 @@ namespace UpkManager.Models.UpkFile.Engine.Particle
         public UArray<float> LODDistances { get; set; }
 
         [PropertyField]
-        public UArray<ParticleSystemLOD> LODSettings { get; set; }
+        public UArray<FParticleSystemLOD> LODSettings { get; set; }
 
         [PropertyField]
-        public Box FixedRelativeBoundingBox { get; set; }
+        public FBox FixedRelativeBoundingBox { get; set; }
     }
 
     [UnrealStruct("ParticleSystemLOD")]
-    public class ParticleSystemLOD
+    public class FParticleSystemLOD
     {
         [StructField]
         public bool bLit { get; set; }
@@ -75,16 +75,16 @@ namespace UpkManager.Models.UpkFile.Engine.Particle
     public class UParticleModuleSpawn : UParticleModuleSpawnBase
     {
         [PropertyField]
-        public RawDistributionFloat Rate { get; set; }
+        public FRawDistributionFloat Rate { get; set; }
 
         [PropertyField]
-        public RawDistributionFloat RateScale { get; set; }
+        public FRawDistributionFloat RateScale { get; set; }
 
         [PropertyField]
         public EParticleBurstMethod ParticleBurstMethod { get; set; }
 
         [PropertyField]
-        public UArray<ParticleBurst> BurstList { get; set; }
+        public UArray<FParticleBurst> BurstList { get; set; }
     }
 
     [UnrealClass("ParticleModuleColorBase")]
@@ -96,15 +96,15 @@ namespace UpkManager.Models.UpkFile.Engine.Particle
     public class UParticleModuleColorOverLife : UParticleModuleColorBase
     {
         [PropertyField]
-        public RawDistributionVector ColorOverLife { get; set; }
+        public FRawDistributionVector ColorOverLife { get; set; }
 
         [PropertyField]
-        public RawDistributionFloat AlphaOverLife { get; set; }
+        public FRawDistributionFloat AlphaOverLife { get; set; }
     }
 
 
     [UnrealStruct("ParticleBurst")]
-    public class ParticleBurst
+    public class FParticleBurst
     {
         [StructField]
         public int Count { get; set; }

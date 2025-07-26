@@ -71,29 +71,29 @@ namespace UpkManager.Models.UpkFile.Engine.Anim
         public float EndTime { get; set; }
 
         [PropertyField]
-        public UArray<TrailSample> TrailSampledData { get; set; }
+        public UArray<FTrailSample> TrailSampledData { get; set; }
     }
 
     [UnrealStruct("TrailSample")]
-    public class TrailSample : IAtomicStruct
+    public class FTrailSample : IAtomicStruct
     {
         [StructField]
         public float RelativeTime { get; set; }
 
         [StructField]
-        public Vector FirstEdgeSample { get; set; }
+        public FVector FirstEdgeSample { get; set; }
 
         [StructField]
-        public Vector ControlPointSample { get; set; }
+        public FVector ControlPointSample { get; set; }
 
         [StructField]
-        public Vector SecondEdgeSample { get; set; }
+        public FVector SecondEdgeSample { get; set; }
 
         public string Format => "";
     }
 
     [UnrealStruct("AnimNotifyEvent")]
-    public class AnimNotifyEvent : IAtomicStruct
+    public class FAnimNotifyEvent : IAtomicStruct
     {
         [StructField]
         public float Time { get; set; }

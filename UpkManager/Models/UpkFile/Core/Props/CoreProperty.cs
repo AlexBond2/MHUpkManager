@@ -35,7 +35,8 @@ namespace UpkManager.Models.UpkFile.Core
         {            
             Parent = parent;
             StructType = structType;
-            StructName = structType.Name;
+            var attr = structType.GetCustomAttribute<AtomicStructAttribute>();
+            StructName = attr?.Name ?? structType.Name;
 
             Atomic = (IAtomicStruct)Activator.CreateInstance(structType)!;
 
@@ -47,7 +48,7 @@ namespace UpkManager.Models.UpkFile.Core
             }
         }
 
-        public static IEnumerable<PropertyInfo> GetStructFields(object obj)
+        public static new IEnumerable<PropertyInfo> GetStructFields(object obj)
         {
             Type type = obj.GetType();
             foreach (var field in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
@@ -92,7 +93,8 @@ namespace UpkManager.Models.UpkFile.Core
                     bool skip = attr.Skip;
 
                     string fieldName = field.Name;
-                    string typeName = attr.TypeName ?? field.PropertyType.Name;
+                    
+                    string typeName = attr.TypeName ?? GetPrettyTypeName(field.PropertyType);
 
                     var structNode = new VirtualNode($"{fieldName} ::{typeName}");
                     
@@ -115,6 +117,14 @@ namespace UpkManager.Models.UpkFile.Core
                     fieldNode.Children.Add(structNode);
                 }
             }
+        }
+
+        private static string GetPrettyTypeName(Type type)
+        {
+            var atomicAttr = type.GetCustomAttribute<AtomicStructAttribute>();
+            if (atomicAttr != null) return atomicAttr.Name;
+
+            return type.Name;
         }
 
         public static VirtualNode BuildArrayVirtualTree(string typeName, IEnumerable enumerable, bool skip)
