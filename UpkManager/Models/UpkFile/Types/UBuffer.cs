@@ -53,6 +53,11 @@ namespace UpkManager.Models.UpkFile.Types
             return count == 1;
         }
 
+        public byte ReadByte()
+        {
+            return Reader.ReadByte();
+        }
+
         public UMap<UName, FObject> ReadUMap()
         {
             int size = Reader.ReadInt32();
@@ -202,6 +207,16 @@ namespace UpkManager.Models.UpkFile.Types
             return buffer.Reader.ReadUInt16();
         }
 
+        public static short ReadInt16(UBuffer buffer)
+        {
+            return buffer.Reader.ReadInt16();
+        }
+
+        public uint ReadUInt32()
+        {
+            return Reader.ReadUInt32();
+        }
+
         public static uint ReadUInt32(UBuffer buffer)
         {
             return buffer.Reader.ReadUInt32();
@@ -216,11 +231,15 @@ namespace UpkManager.Models.UpkFile.Types
             return data;
         }
 
+        public float ReadFloat()
+        {
+            return Reader.ReadSingle();
+        }
+
         public static float ReadFloat(UBuffer buffer)
         {
             return buffer.Reader.ReadSingle();
         }
-
 
         public static UArray<uint> ReadArrayUInt32(UBuffer buffer)
         {

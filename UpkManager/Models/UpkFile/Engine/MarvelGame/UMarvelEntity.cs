@@ -79,4 +79,15 @@ namespace UpkManager.Models.UpkFile.Engine.MarvelGame
         [PropertyField]
         public UArray<FObject> AnimationSet { get; set; } // AnimSet
     }
+
+    public enum NaviContentTags
+    {
+        None = 0,
+        OpaqueWall = 1,
+        TransparentWall = 2,
+        Blocking = 3,
+        NoFly = 4,
+        Walkable = 5,
+        Obstacle = 6
+    }
 }

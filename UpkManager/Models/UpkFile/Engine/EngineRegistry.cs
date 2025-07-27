@@ -67,6 +67,12 @@ namespace UpkManager.Models.UpkFile.Engine
             }
         }
 
+        public static string GetStructName(Type type)
+        {
+            var attr = type.GetCustomAttribute<UnrealStructAttribute>();
+            return attr?.StructName ?? type.Name;
+        }
+
         private void RegisterPropertyIfArray(PropertyInfo prop, string parent)
         {
             var type = prop.PropertyType;
@@ -75,7 +81,7 @@ namespace UpkManager.Models.UpkFile.Engine
             if (TryGetElementTypeIfArray(type, out var elementType))
             {
                 var propertyKind = GetPropertyType(elementType);
-                var structName = propertyKind == PropertyTypes.StructProperty ? elementType.Name : null;
+                var structName = propertyKind == PropertyTypes.StructProperty ? GetStructName(elementType) : null;
 
                 var info = new StructInfo
                 {
@@ -98,7 +104,7 @@ namespace UpkManager.Models.UpkFile.Engine
                         Parent = parent,
                         Name = name,
                         Type = propertyKind,
-                        Struct = type.Name,
+                        Struct = GetStructName(type),
                         StuctType = type
                     };
 
