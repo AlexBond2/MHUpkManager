@@ -2,6 +2,7 @@
 using System.Drawing.Imaging;
 using System.Numerics;
 using System.Text;
+using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Types;
 
@@ -10,8 +11,8 @@ namespace MHUpkManager
     public partial class ModelViewForm : Form
     {
         private string title;
-        private USkeletalMesh mesh;
-        private SkeletalMeshData model;
+        private UObject mesh;
+        private ModelMeshData model;
 
         private const uint OBJ_AXES = 1;
         private const uint OBJ_TARGET = 2;
@@ -97,7 +98,7 @@ namespace MHUpkManager
             Win32.wglUseFontBitmaps(hdc, 0, 255, FONT_GL);
         }
 
-        public void SetMeshObject(USkeletalMesh obj)
+        public void SetMeshObject(UObject obj)
         {
             mesh = obj;
 
@@ -107,7 +108,7 @@ namespace MHUpkManager
                 return;
             }
 
-            model = new SkeletalMeshData(mesh);
+            model = new ModelMeshData(mesh);
             ResetTransView();
         }
 
@@ -454,42 +455,55 @@ namespace MHUpkManager
             };
         }
 
-        public struct SkeletalMeshData
+        public struct ModelMeshData
         {
-            public USkeletalMesh Mesh;
+            public UObject Mesh;
             public int[] Indices;
             public Vector3 Center;
             public float Radius;
             public GLVertex[] Vertices;
 
-            public SkeletalMeshData(USkeletalMesh mesh)
+            public ModelMeshData(UObject obj)
             {
-                Mesh = mesh;
+                Mesh = obj;
+                if (obj is USkeletalMesh mesh)
+                {
+                    var lod = mesh.LODModels[0];
 
-                var lod = mesh.LODModels[0];
+                    Vertices = [.. lod.VertexBufferGPUSkin.GetGLVertexData()];
+                    Indices = ConvertIndices(lod.MultiSizeIndexContainer.IndexBuffer);
 
-                Vertices = [.. lod.VertexBufferGPUSkin.GetGLVertexData()];
-                Indices = ConvertIndices(lod.MultiSizeIndexContainer.IndexBuffer);
+                    Center = CalculateCenter(Vertices);
+                    Radius = mesh.Bounds.SphereRadius;
+                }
+                else if (obj is UStaticMesh staticMesh)
+                {
+                    var lod = staticMesh.LODModels[0];
 
-                Center = CalculateCenter(Vertices);
-                Radius = mesh.Bounds.SphereRadius;
+                    Vertices = [.. lod.GetGLVertexData()];
+                    
+                    Indices = ConvertIndices(lod.IndexBuffer.Indices);
+
+                    Center = CalculateCenter(Vertices);
+                    Radius = staticMesh.Bounds.SphereRadius;
+                }
             }
 
-            public int[] ConvertIndices(UArray<uint> indices)
+            public int[] ConvertIndices<T>(IEnumerable<T> indices) where T : struct, IConvertible
             {
-                if (indices.Count % 3 != 0) return [];
+                var indicesArray = indices.ToArray();
+                if (indicesArray.Length % 3 != 0) return [];
 
-                int[] flipped = new int[indices.Count];
+                int[] flipped = new int[indicesArray.Length];
 
-                for (int i = 0; i < indices.Count; i += 3)
+                for (int i = 0; i < indicesArray.Length; i += 3)
                 {
-                    flipped[i] = (int)indices[i + 2];
-                    flipped[i + 1] = (int)indices[i + 1];
-                    flipped[i + 2] = (int)indices[i];
+                    flipped[i] = Convert.ToInt32(indicesArray[i + 2]);
+                    flipped[i + 1] = Convert.ToInt32(indicesArray[i + 1]);
+                    flipped[i + 2] = Convert.ToInt32(indicesArray[i]);
                 }
 
                 return flipped;
-
             }
 
             private static Vector3 CalculateCenter(GLVertex[] vertices)

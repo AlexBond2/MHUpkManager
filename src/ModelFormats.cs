@@ -9,7 +9,7 @@ namespace MHUpkManager
 {
     public class ModelFormats
     {
-        public static void ExportToDAE(string fileName, SkeletalMeshData model)
+        public static void ExportToDAE(string fileName, ModelMeshData model)
         {
             using var writer = new StreamWriter(fileName);
             writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
@@ -75,7 +75,7 @@ namespace MHUpkManager
             writer.WriteLine("</COLLADA>");
         }
 
-        public static void ExportToOBJ(string fileName, SkeletalMeshData model)
+        public static void ExportToOBJ(string fileName, ModelMeshData model)
         {
             using var writer = new StreamWriter(fileName);
 
@@ -97,7 +97,7 @@ namespace MHUpkManager
             }
         }
 
-        public static void ExportToGLTF(string filename, SkeletalMeshData model, bool gltf)
+        public static void ExportToGLTF(string filename, ModelMeshData model, bool gltf)
         {
             if (model.Vertices == null || model.Indices == null || model.Indices.Length % 3 != 0)
                 return;

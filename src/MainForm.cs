@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using UpkManager.Contracts;
 using UpkManager.Extensions;
 using UpkManager.Models;
+using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Engine.Mesh;
@@ -321,10 +322,15 @@ namespace MHUpkManager
             }
 
             if (uObject.UObject is UTexture2D) viewTextureMenuItem.Enabled = true;
-            if (uObject.UObject is USkeletalMesh) viewModelMenuItem.Enabled = true;
+            if (CheckMeshObject(uObject)) viewModelMenuItem.Enabled = true;
 
             ExpandFiltered(propertiesView.Nodes);
             propertiesView.EndUpdate();
+        }
+
+        private static bool CheckMeshObject(IUnrealObject uObject)
+        {
+            return uObject.UObject is USkeletalMesh || uObject.UObject is UStaticMesh;
         }
 
         private static void ExpandFiltered(TreeNodeCollection nodes)
@@ -476,10 +482,10 @@ namespace MHUpkManager
 
         private void openModelView(string name, UnrealObjectBase unrealObject)
         {
-            if (unrealObject is IUnrealObject uObject && uObject.UObject is USkeletalMesh mesh)
+            if (unrealObject is IUnrealObject uObject && CheckMeshObject(uObject))
             {
                 modelViewForm.SetTitle(name);
-                modelViewForm.SetMeshObject(mesh);
+                modelViewForm.SetMeshObject(uObject.UObject as UObject);
                 modelViewForm.ShowDialog();
             }
         }
