@@ -15,7 +15,7 @@ namespace UpkManager.Models.UpkFile.Tables
         {
             PackageNameIndex = new FName();
             ClassNameIndex = new FName();
-            ObjectNameIndex = new FObject();
+            ObjectNameIndex = new FObject(this);
         }
 
         #endregion Constructor

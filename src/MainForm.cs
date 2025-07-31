@@ -273,7 +273,7 @@ namespace MHUpkManager
                 try
                 {
                     if (export.UnrealObject == null)
-                        await export.ParseUnrealObject(UpkFile.Header, false, false);
+                        await export.ParseUnrealObject(false, false);
 
                     viewObjectInHEXMenuItem.Enabled = true;
 

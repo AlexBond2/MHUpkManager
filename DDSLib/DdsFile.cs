@@ -50,6 +50,7 @@ namespace DDSLib
 
         public BitmapSource BitmapSource => new RgbaBitmapSource(largestMipMap, Width);
 
+        public byte[] BitmapData => largestMipMap;
 
         #endregion Public Properties
 

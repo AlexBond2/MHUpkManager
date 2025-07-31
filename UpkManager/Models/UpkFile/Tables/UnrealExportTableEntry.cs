@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UpkManager.Constants;
+
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
-using UpkManager.Models.UpkFile.Engine;
 using UpkManager.Models.UpkFile.Objects;
 
 namespace UpkManager.Models.UpkFile.Tables
@@ -50,7 +49,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal UnrealExportTableEntry()
         {
-            ObjectNameIndex = new FObject();
+            ObjectNameIndex = new FObject(this);
             NetObjects = [];
         }
 
@@ -79,6 +78,7 @@ namespace UpkManager.Models.UpkFile.Tables
         #region Unreal Properties
 
         public ByteArrayReader UnrealObjectReader { get; private set; }
+        public UnrealHeader UnrealHeader { get; private set; }
         public UnrealObjectBase UnrealObject { get; private set; }
         public FName ClassReferenceNameIndex { get; private set; }
         public FName SuperReferenceNameIndex { get; private set; }
@@ -124,16 +124,17 @@ namespace UpkManager.Models.UpkFile.Tables
             ArchetypeReferenceNameIndex = header.GetObjectTableEntry(ArchetypeReference)?.ObjectNameIndex;
         }
 
-        internal void ReadUnrealObject(ByteArrayReader reader)
+        internal void ReadUnrealObject(ByteArrayReader reader, UnrealHeader unrealHeader)
         {
             UnrealObjectReader = reader.Splice(SerialDataOffset, SerialDataSize);
+            UnrealHeader = unrealHeader;
         }
 
-        public async Task ParseUnrealObject(UnrealHeader header, bool skipProperties, bool skipParse)
+        public async Task ParseUnrealObject(bool skipProperties, bool skipParse)
         {
             UnrealObject = ObjectTypeFactory();
 
-            await UnrealObject.ReadUnrealObject(UnrealObjectReader, header, this, skipProperties, skipParse);
+            await UnrealObject.ReadUnrealObject(UnrealObjectReader, UnrealHeader, this, skipProperties, skipParse);
         }
 
         #endregion Unreal Methods

@@ -30,7 +30,7 @@ namespace UpkManager.Repository {
       if (Header == null) return;
 
       foreach(UnrealExportTableEntry export in Header.ExportTable.Where(export => export.UnrealObject == null)) 
-                await export.ParseUnrealObject(Header, false, false);
+                await export.ParseUnrealObject(false, false);
 
       FileStream stream = new (Filename, FileMode.Create);
 

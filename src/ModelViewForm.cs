@@ -1,10 +1,10 @@
 ﻿using SharpGL;
-using System.Drawing.Imaging;
 using System.Numerics;
-using System.Text;
+
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Engine.Material;
 using UpkManager.Models.UpkFile.Engine.Mesh;
-using UpkManager.Models.UpkFile.Types;
+using UpkManager.Models.UpkFile.Engine.Texture;
 
 namespace MHUpkManager
 {
@@ -13,11 +13,6 @@ namespace MHUpkManager
         private string title;
         private UObject mesh;
         private ModelMeshData model;
-
-        private const uint OBJ_AXES = 1;
-        private const uint OBJ_TARGET = 2;
-        private const uint OBJ_GRID = 3;
-        private const uint FONT_GL = 2000;
 
         private const float MaxDepth = 100000.0f;
 
@@ -53,7 +48,7 @@ namespace MHUpkManager
         {
             var gl = sceneControl.OpenGL;
             
-            InitializeFont(gl);
+            GLLib.InitializeFont(gl);
             GenerateDisplayLists(gl);
             SetupLighting(gl);
         }
@@ -88,16 +83,6 @@ namespace MHUpkManager
             gl.LightModel(OpenGL.GL_LIGHT_MODEL_TWO_SIDE, 1);
         }
 
-        private void InitializeFont(OpenGL gl)
-        {
-            IntPtr hdc = gl.RenderContextProvider.DeviceContextHandle;
-
-            using var font = new Font("MS Sans Serif", 8, FontStyle.Regular);
-            IntPtr hFont = font.ToHfont();
-            Win32.SelectObject(hdc, hFont);
-            Win32.wglUseFontBitmaps(hdc, 0, 255, FONT_GL);
-        }
-
         public void SetMeshObject(UObject obj)
         {
             mesh = obj;
@@ -108,7 +93,7 @@ namespace MHUpkManager
                 return;
             }
 
-            model = new ModelMeshData(mesh);
+            model = new ModelMeshData(mesh, sceneControl.OpenGL);
             ResetTransView();
         }
 
@@ -205,32 +190,6 @@ namespace MHUpkManager
                 isRotating = false;
         }
 
-        public uint LoadTextureFromPng(string filePath, OpenGL gl)
-        {
-            Bitmap bitmap = new Bitmap(filePath);
-
-            uint[] textureIds = new uint[1];
-            gl.GenTextures(1, textureIds);
-            uint textureId = textureIds[0];
-
-            gl.BindTexture(OpenGL.GL_TEXTURE_2D, textureId);
-
-            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);
-            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);
-
-            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-
-            gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA, bitmap.Width, bitmap.Height, 0,
-                OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, data.Scan0);
-
-            bitmap.UnlockBits(data);
-
-            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
-
-            return textureId;
-        }
-
         private void sceneControl_OpenGLDraw(object sender, RenderEventArgs args)
         {
             var gl = sceneControl.OpenGL;
@@ -267,7 +226,7 @@ namespace MHUpkManager
             // grid
             gl.Disable(OpenGL.GL_LIGHTING);
             gl.Color(0.5f, 0.5f, 0.5f);
-            gl.CallList(OBJ_GRID);
+            gl.CallList(GLLib.OBJ_GRID);
             gl.Enable(OpenGL.GL_LIGHTING);
 
             gl.PushMatrix();
@@ -290,29 +249,43 @@ namespace MHUpkManager
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
 
-            gl.CallList(OBJ_AXES);
+            gl.CallList(GLLib.OBJ_AXES);
 
             gl.Flush();
         }
 
         private void DrawModel(OpenGL gl)
         {
-            if (mesh == null) return;
-            
-            // gl.BindTexture(OpenGL.GL_TEXTURE_2D, textureId);  
-            gl.Begin(OpenGL.GL_TRIANGLES);
+            if (model.Mesh == null || model.Vertices == null) return;
 
-            foreach (var index in model.Indices)
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+
+            foreach (var section in model.Sections)
             {
-                var vertex = model.Vertices[index];
+                if (section.GLTextureId != 0)
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, section.GLTextureId);
+                else
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0); // или текстура по умолчанию
 
-                gl.Normal(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
-                gl.TexCoord(vertex.TexCoord.X, vertex.TexCoord.Y);
-                gl.Vertex(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+                gl.Begin(OpenGL.GL_TRIANGLES);
+                uint start = section.BaseIndex;
+                uint end = start + section.NumTriangles * 3;
+
+                for (uint i = start; i < end; i++)
+                {
+                    var vertex = model.Vertices[model.Indices[i]];
+                    gl.Normal(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
+                    gl.TexCoord(vertex.TexCoord.X, vertex.TexCoord.Y);
+                    gl.Vertex(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
+                }
+
+                gl.End();
             }
 
-            gl.End();
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+            gl.Disable(OpenGL.GL_TEXTURE_2D);
         }
+
 
         private void sceneControl_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -331,77 +304,13 @@ namespace MHUpkManager
 
         private void GenerateDisplayLists(OpenGL gl)
         {
-            gl.NewList(OBJ_AXES, OpenGL.GL_COMPILE);
-            DrawAxes(gl);
+            gl.NewList(GLLib.OBJ_AXES, OpenGL.GL_COMPILE);
+            GLLib.DrawAxes(gl);
             gl.EndList();
 
-            gl.NewList(OBJ_GRID, OpenGL.GL_COMPILE);
-            DrawGrid(gl, 16);
+            gl.NewList(GLLib.OBJ_GRID, OpenGL.GL_COMPILE);
+            GLLib.DrawGrid(gl, 16);
             gl.EndList();
-        }
-
-        private void DrawGrid(OpenGL gl, int gridMax)
-        {
-            int size = 5;
-            gl.Begin(OpenGL.GL_LINES);
-            for (int i = -gridMax; i <= gridMax; i++)
-            {
-                gl.Vertex(-gridMax * size, i * size, 0);
-                gl.Vertex(gridMax * size, i * size, 0);
-                gl.Vertex(i * size, -gridMax * size, 0);
-                gl.Vertex(i * size, gridMax * size, 0);
-            }
-            gl.End();
-        }
-
-        private void DrawText(OpenGL gl, string text)
-        {
-            gl.ListBase(FONT_GL);
-            byte[] array = Encoding.ASCII.GetBytes(text);
-            gl.CallLists(array.Length, array);
-        }
-
-        private void DrawAxes(OpenGL gl)
-        {
-            gl.Disable(OpenGL.GL_LIGHTING);
-
-            gl.Color(1f, 0f, 0f); // Red X
-            gl.Begin(OpenGL.GL_LINES);
-            gl.Vertex(0, 0, 0);
-            gl.Vertex(1, 0, 0);
-            gl.End();
-            gl.RasterPos(1.2f, 0, 0);
-            DrawText(gl, "x");
-
-            gl.Color(0f, 1f, 0f); // Green Y
-            gl.Begin(OpenGL.GL_LINES);
-            gl.Vertex(0, 0, 0);
-            gl.Vertex(0, 1, 0);
-            gl.End();
-            gl.RasterPos(0, 1.2f, 0);
-            DrawText(gl, "y");
-
-            gl.Color(0f, 0f, 1f); // Blue Z
-            gl.Begin(OpenGL.GL_LINES);
-            gl.Vertex(0, 0, 0);
-            gl.Vertex(0, 0, 1);
-            gl.End();
-            gl.RasterPos(0, 0, 1.2f);
-            DrawText(gl, "z");
-
-            gl.Enable(OpenGL.GL_LIGHTING);
-        }
-
-        private void DrawTarget(OpenGL gl, float size)
-        {
-            gl.Begin(OpenGL.GL_LINES);
-            gl.Vertex(-size, 0, 0);
-            gl.Vertex(size, 0, 0);
-            gl.Vertex(0, -size, 0);
-            gl.Vertex(0, size, 0);
-            gl.Vertex(0, 0, -size);
-            gl.Vertex(0, 0, size);
-            gl.End();
         }
 
         private void sceneControl_KeyDown(object sender, KeyEventArgs e)
@@ -455,17 +364,33 @@ namespace MHUpkManager
             };
         }
 
+        public struct MeshSectionData
+        {
+            public uint BaseIndex;
+            public uint NumTriangles;
+
+            public int MaterialIndex;
+            public UMaterialInstanceConstant Material;
+            public UTexture2D DiffuseTexture;
+            public uint GLTextureId;
+        }
+
         public struct ModelMeshData
         {
             public UObject Mesh;
-            public int[] Indices;
             public Vector3 Center;
             public float Radius;
+
+            public int[] Indices;
             public GLVertex[] Vertices;
 
-            public ModelMeshData(UObject obj)
+            public List<MeshSectionData> Sections;
+
+            public ModelMeshData(UObject obj, OpenGL gl)
             {
                 Mesh = obj;
+                Sections = [];
+
                 if (obj is USkeletalMesh mesh)
                 {
                     var lod = mesh.LODModels[0];
@@ -475,6 +400,26 @@ namespace MHUpkManager
 
                     Center = CalculateCenter(Vertices);
                     Radius = mesh.Bounds.SphereRadius;
+
+                    foreach (var section in lod.Sections)
+                    {
+                        var sectionData = new MeshSectionData
+                        {
+                            BaseIndex = section.BaseIndex,
+                            NumTriangles = section.NumTriangles,
+                            MaterialIndex = section.MaterialIndex
+                        };
+
+                        if (section.MaterialIndex < mesh.Materials.Count)
+                        {
+                            sectionData.Material = mesh.Materials[section.MaterialIndex].LoadObject<UMaterialInstanceConstant>();
+                            sectionData.DiffuseTexture = sectionData.Material?.GetTextureParameterValue("DiffuseTexture");
+                            sectionData.GLTextureId = GLLib.BindGLTexture(gl, sectionData.DiffuseTexture);
+                        }
+
+                        Sections.Add(sectionData);
+                    }
+
                 }
                 else if (obj is UStaticMesh staticMesh)
                 {
@@ -486,6 +431,22 @@ namespace MHUpkManager
 
                     Center = CalculateCenter(Vertices);
                     Radius = staticMesh.Bounds.SphereRadius;
+
+                    foreach (var element in lod.Elements)
+                    {
+                        var sectionData = new MeshSectionData
+                        {
+                            BaseIndex = element.FirstIndex,
+                            NumTriangles = element.NumTriangles,
+                            MaterialIndex = element.MaterialIndex
+                        };
+
+                        sectionData.Material = element.Material.LoadObject<UMaterialInstanceConstant>();
+                        sectionData.DiffuseTexture = sectionData.Material?.GetTextureParameterValue("DiffuseTexture");
+                        sectionData.GLTextureId = GLLib.BindGLTexture(gl, sectionData.DiffuseTexture);
+
+                        Sections.Add(sectionData);
+                    }
                 }
             }
 

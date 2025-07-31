@@ -156,7 +156,7 @@ namespace UpkManager.Models.UpkFile
             
             await ExportTable.ForEachAsync(export =>            
                 Task.Run(() => {
-                    export.ReadUnrealObject(reader);
+                    export.ReadUnrealObject(reader, this);
                     message.IncrementCurrent();
                 })
             );
