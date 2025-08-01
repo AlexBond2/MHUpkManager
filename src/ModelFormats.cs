@@ -88,28 +88,6 @@ namespace MHUpkManager
             writer.WriteLine("</COLLADA>");
         }
 
-        public static void ExportToOBJ(string fileName, ModelMeshData model)
-        {
-            using var writer = new StreamWriter(fileName);
-
-            writer.WriteLine("# Exported OBJ");
-
-            foreach (var v in model.Vertices)
-            {
-                writer.WriteLine($"v {v.Position.X} {v.Position.Z} {v.Position.Y}"); // MH invert
-                writer.WriteLine($"vt {v.TexCoord.X} {1.0f - v.TexCoord.Y}"); // flip Y
-                writer.WriteLine($"vn {v.Normal.X} {v.Normal.Z} {v.Normal.Y}"); // MH invert
-            }
-
-            for (int i = 0; i < model.Indices.Length; i += 3)
-            {
-                int i1 = model.Indices[i] + 1;
-                int i2 = model.Indices[i + 1] + 1;
-                int i3 = model.Indices[i + 2] + 1;
-                writer.WriteLine($"f {i1}/{i1}/{i1} {i2}/{i2}/{i2} {i3}/{i3}/{i3}");
-            }
-        }
-
         public static void ExportModel(string filename, ModelMeshData model, ExportFormat format)
         {
             if (model.Vertices == null || model.Indices == null || model.Indices.Length % 3 != 0)
@@ -118,11 +96,6 @@ namespace MHUpkManager
             if (format == ExportFormat.DAE)
             {
                 ExportToDAE(filename, model);
-                return;
-            }
-            else if (format == ExportFormat.OBJ)
-            {
-                ExportToOBJ(filename, model);
                 return;
             }
 
@@ -173,9 +146,10 @@ namespace MHUpkManager
 
             switch (format)
             {
-               /* case ExportFormat.OBJ:
-                    modelRoot.SaveAsWavefront(filename); // Don't work!!!
-                    return;*/
+                case ExportFormat.OBJ:
+                    if (File.Exists(filename)) File.Delete(filename);
+                    modelRoot.SaveAsWavefront(filename);
+                    return;
                 case ExportFormat.GLB:
                     modelRoot.SaveGLB(filename);
                     break;
