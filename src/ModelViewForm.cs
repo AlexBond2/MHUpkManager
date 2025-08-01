@@ -5,6 +5,7 @@ using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine.Material;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace MHUpkManager
 {
@@ -20,6 +21,16 @@ namespace MHUpkManager
         private bool isPanning = false;
         private bool isRotating = false;
         private TransView transView;
+
+        public double[] matMH =
+        [
+            -1,  0,  0, 0,
+            0,  1,  0, 0,
+            0,  0,  1, 0,
+            0,  0,  0, 1
+        ];
+
+        private bool showNormal = false;
 
         public ModelViewForm()
         {
@@ -56,8 +67,8 @@ namespace MHUpkManager
         private void SetupLighting(OpenGL gl)
         {
             float[] ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
-            float[] lightPos = { 400.0f, 400.0f, 400f, 1.0f }; 
-            float[] light1Pos = { -200.0f, -200.0f, 200f, 1.0f };
+            float[] lightPos = { -400.0f, -400.0f, 400f, 1.0f }; 
+            float[] light1Pos = { 200.0f, 200.0f, 200f, 1.0f };
 
             float[] matDiffuse1 = { 0.9f, 0.9f, 0.9f, 1.0f };
             float[] matDiffuse2 = { 0.6f, 0.6f, 0.6f, 1.0f };
@@ -83,8 +94,10 @@ namespace MHUpkManager
             gl.LightModel(OpenGL.GL_LIGHT_MODEL_TWO_SIDE, 1);
         }
 
-        public void SetMeshObject(UObject obj)
+        public void SetMeshObject(string name, UObject obj)
         {
+            SetTitle(name);
+
             mesh = obj;
 
             if (mesh == null)
@@ -93,7 +106,7 @@ namespace MHUpkManager
                 return;
             }
 
-            model = new ModelMeshData(mesh, sceneControl.OpenGL);
+            model = new ModelMeshData(mesh, name, sceneControl.OpenGL);
             ResetTransView();
         }
 
@@ -118,15 +131,7 @@ namespace MHUpkManager
                 try
                 {
                     Cursor.Current = Cursors.WaitCursor;
-
-                    if (ext == ".gltf")
-                        ModelFormats.ExportToGLTF(sfd.FileName, model, true);
-                    else if (ext == ".glb")
-                        ModelFormats.ExportToGLTF(sfd.FileName, model, false);
-                    else if (ext == ".obj")
-                        ModelFormats.ExportToOBJ(sfd.FileName, model);
-                    else if (ext == ".dae")
-                        ModelFormats.ExportToDAE(sfd.FileName, model);
+                    ModelFormats.ExportModel(sfd.FileName, model, ModelFormats.GetExportFormat(ext));
                 }
                 finally
                 {
@@ -148,8 +153,8 @@ namespace MHUpkManager
         private void sceneControl_MouseMove(object sender, MouseEventArgs e)
         {
             Point cur = e.Location;
-            int dx = cur.X - lastMousePos.X;
-            int dy = cur.Y - lastMousePos.Y;
+            int dx = lastMousePos.X - cur.X;
+            int dy = lastMousePos.Y - cur.Y;
 
             if (isPanning)
             {
@@ -169,12 +174,12 @@ namespace MHUpkManager
 
                 transView.xpos -= stepY * cosY * sinX;
                 transView.ypos += stepY * sinY * sinX;
-                transView.zpos += stepY * cosX;
+                transView.zpos -= stepY * cosX;
             }
             else if (isRotating)
             {
-                transView.xrot += dy / 5.0f;
-                transView.zrot += dx / 5.0f;
+                transView.xrot -= dy / 5.0f;
+                transView.zrot -= dx / 5.0f;
             }
 
             lastMousePos = cur;
@@ -218,7 +223,7 @@ namespace MHUpkManager
             gl.LookAt(0, -transView.zoom, 0, 0, 0, 0, 0, 0, 1);
             gl.Rotate(transView.xrot, 1, 0, 0);
             gl.Rotate(transView.zrot, 0, 0, 1);
-            gl.Translate(transView.xpos, transView.ypos, -transView.zpos);
+            gl.Translate(-transView.xpos, -transView.ypos, -transView.zpos);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
@@ -230,6 +235,7 @@ namespace MHUpkManager
             gl.Enable(OpenGL.GL_LIGHTING);
 
             gl.PushMatrix();
+            gl.MultMatrix(matMH);
             DrawModel(gl);
             gl.PopMatrix();
 
@@ -284,8 +290,40 @@ namespace MHUpkManager
 
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.Disable(OpenGL.GL_TEXTURE_2D);
-        }
 
+            if (showNormal)
+            {
+                gl.Disable(OpenGL.GL_LIGHTING);
+                gl.Color(1.0f, 0.0f, 1.0f);
+
+                gl.Begin(OpenGL.GL_LINES);
+                foreach (var section in model.Sections)
+                {
+                    uint start = section.BaseIndex;
+                    uint end = start + section.NumTriangles * 3;
+                    for (uint i = start; i < end; i++)
+                    {
+                        var vertex = model.Vertices[model.Indices[i]];
+
+                        var pos = vertex.Position;
+                        var norm = vertex.Normal;
+
+                        float scale = 3.0f;
+                        var endPos = new Vector3(
+                            pos.X + norm.X * scale,
+                            pos.Y + norm.Y * scale,
+                            pos.Z + norm.Z * scale
+                        );
+
+                        gl.Vertex(pos.X, pos.Y, pos.Z);
+                        gl.Vertex(endPos.X, endPos.Y, endPos.Z);
+                    }
+                }
+
+                gl.End();
+                gl.Enable(OpenGL.GL_LIGHTING);
+            }
+        }
 
         private void sceneControl_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -358,8 +396,8 @@ namespace MHUpkManager
                 zpos = model.Center.Z,
                 xrot = 20.0f,
                 yrot = 0,
-                zrot = 225.0f,
-                zoom = model.Radius * 2f,
+                zrot = 45.0f,
+                zoom = model.Radius * 3f,
                 Per = 35.0f
             };
         }
@@ -373,11 +411,23 @@ namespace MHUpkManager
             public UMaterialInstanceConstant Material;
             public UTexture2D DiffuseTexture;
             public uint GLTextureId;
+            public string TextureName;
+            public byte[] TextureData;
+
+            public void LoadMaterial(OpenGL gl, FObject material)
+            {
+                Material = material?.LoadObject<UMaterialInstanceConstant>();
+                var textureObj = Material?.GetTextureParameterValue("DiffuseTexture");
+                TextureName = textureObj?.Name;
+                DiffuseTexture = textureObj?.LoadObject<UTexture2D>();
+                GLTextureId = GLLib.BindGLTexture(gl, DiffuseTexture, out TextureData);
+            }
         }
 
         public struct ModelMeshData
         {
             public UObject Mesh;
+            public string ModelName;
             public Vector3 Center;
             public float Radius;
 
@@ -386,9 +436,10 @@ namespace MHUpkManager
 
             public List<MeshSectionData> Sections;
 
-            public ModelMeshData(UObject obj, OpenGL gl)
+            public ModelMeshData(UObject obj, string name, OpenGL gl)
             {
                 Mesh = obj;
+                ModelName = name;
                 Sections = [];
 
                 if (obj is USkeletalMesh mesh)
@@ -398,8 +449,7 @@ namespace MHUpkManager
                     Vertices = [.. lod.VertexBufferGPUSkin.GetGLVertexData()];
                     Indices = ConvertIndices(lod.MultiSizeIndexContainer.IndexBuffer);
 
-                    Center = CalculateCenter(Vertices);
-                    Radius = mesh.Bounds.SphereRadius;
+                    CalculateCenterAndRadius(Vertices);
 
                     foreach (var section in lod.Sections)
                     {
@@ -412,9 +462,7 @@ namespace MHUpkManager
 
                         if (section.MaterialIndex < mesh.Materials.Count)
                         {
-                            sectionData.Material = mesh.Materials[section.MaterialIndex].LoadObject<UMaterialInstanceConstant>();
-                            sectionData.DiffuseTexture = sectionData.Material?.GetTextureParameterValue("DiffuseTexture");
-                            sectionData.GLTextureId = GLLib.BindGLTexture(gl, sectionData.DiffuseTexture);
+                            sectionData.LoadMaterial(gl, mesh.Materials[section.MaterialIndex]);
                         }
 
                         Sections.Add(sectionData);
@@ -429,8 +477,7 @@ namespace MHUpkManager
                     
                     Indices = ConvertIndices(lod.IndexBuffer.Indices);
 
-                    Center = CalculateCenter(Vertices);
-                    Radius = staticMesh.Bounds.SphereRadius;
+                    CalculateCenterAndRadius(Vertices);
 
                     foreach (var element in lod.Elements)
                     {
@@ -441,36 +488,37 @@ namespace MHUpkManager
                             MaterialIndex = element.MaterialIndex
                         };
 
-                        sectionData.Material = element.Material.LoadObject<UMaterialInstanceConstant>();
-                        sectionData.DiffuseTexture = sectionData.Material?.GetTextureParameterValue("DiffuseTexture");
-                        sectionData.GLTextureId = GLLib.BindGLTexture(gl, sectionData.DiffuseTexture);
+                        sectionData.LoadMaterial(gl, element.Material);
 
                         Sections.Add(sectionData);
                     }
                 }
             }
 
-            public int[] ConvertIndices<T>(IEnumerable<T> indices) where T : struct, IConvertible
+            public static int[] ConvertIndices<T>(IEnumerable<T> indices) where T : struct, IConvertible
             {
                 var indicesArray = indices.ToArray();
                 if (indicesArray.Length % 3 != 0) return [];
 
-                int[] flipped = new int[indicesArray.Length];
+                int[] converted = new int[indicesArray.Length];
 
                 for (int i = 0; i < indicesArray.Length; i += 3)
                 {
-                    flipped[i] = Convert.ToInt32(indicesArray[i + 2]);
-                    flipped[i + 1] = Convert.ToInt32(indicesArray[i + 1]);
-                    flipped[i + 2] = Convert.ToInt32(indicesArray[i]);
+                    converted[i] = Convert.ToInt32(indicesArray[i]);
+                    converted[i + 1] = Convert.ToInt32(indicesArray[i + 1]);
+                    converted[i + 2] = Convert.ToInt32(indicesArray[i + 2]);
                 }
 
-                return flipped;
+                return converted;
             }
 
-            private static Vector3 CalculateCenter(GLVertex[] vertices)
+            private void CalculateCenterAndRadius(GLVertex[] vertices)
             {
                 if (vertices == null || vertices.Length == 0)
-                    return new Vector3(0, 0, 0);
+                {
+                    Center = new Vector3(0f, 0f, 0f);
+                    Radius = 0.0f;
+                }
 
                 float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
                 float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
@@ -487,11 +535,14 @@ namespace MHUpkManager
                     if (p.Z > maxZ) maxZ = p.Z;
                 }
 
-                return new Vector3(
+                Center = new Vector3(
                     (minX + maxX) * 0.5f,
                     (minY + maxY) * 0.5f,
                     (minZ + maxZ) * 0.5f
                 );
+
+                var corner = new Vector3(maxX, maxY, maxZ);
+                Radius = Vector3.Distance(Center, corner);
             }
         }
 

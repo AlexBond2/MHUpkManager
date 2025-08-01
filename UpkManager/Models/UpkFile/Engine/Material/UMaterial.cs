@@ -438,13 +438,13 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         [PropertyField]
         public UArray<FVectorParameterValue> VectorParameterValues { get; set; }
 
-        public UTexture2D GetTextureParameterValue(string parameterName)
+        public FObject GetTextureParameterValue(string parameterName)
         {
             if (TextureParameterValues == null) return null;
 
             foreach (var parameter in TextureParameterValues)
                 if (parameterName.StartsWith(parameter.ParameterName.Name, StringComparison.OrdinalIgnoreCase))
-                    return parameter.ParameterValue.LoadObject<UTexture2D>();
+                    return parameter.ParameterValue;
 
             return null;
         }

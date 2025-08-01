@@ -1,6 +1,6 @@
 ﻿using DDSLib;
 using SharpGL;
-using System.Diagnostics;
+
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -116,8 +116,9 @@ namespace MHUpkManager
             return textureId;
         }
 
-        public static uint BindGLTexture(OpenGL gl, UTexture2D texture)
+        public static uint BindGLTexture(OpenGL gl, UTexture2D texture, out byte[] outData)
         {
+            outData = [];
             if (texture == null)
                 return 0;
 
@@ -139,13 +140,14 @@ namespace MHUpkManager
                 var stream = texture.GetObjectStream(texture.FirstResourceMemMip);
                 ddsFile.Load(stream);
                 data = ddsFile.BitmapData;
-                UploadUncompressedTexture(gl, OpenGL.GL_RGBA, width, height, data);
+                UploadUncompressedTexture(gl, OpenGL.GL_RGBA, width, height, data);                
             }
             else if (texture.Format == EPixelFormat.PF_A8R8G8B8)
             {
                 UploadUncompressedTexture(gl, OpenGL.GL_BGRA, width, height, data);
             }
 
+            outData = data;
             return textureId;
         }
 
@@ -163,7 +165,7 @@ namespace MHUpkManager
             try
             {
                 IntPtr ptr = handle.AddrOfPinnedObject();
-                gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, format, width, height, 0, format, OpenGL.GL_UNSIGNED_BYTE, ptr);
+                gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA, width, height, 0, format, OpenGL.GL_UNSIGNED_BYTE, ptr);
             }
             finally
             {

@@ -24,7 +24,6 @@ namespace MHUpkManager
 
         private HexViewForm hexViewForm;
         private TextureViewForm textureViewForm;
-        private ModelViewForm modelViewForm;
 
         private List<TreeNode> rootNodes;
         private object currentObject;
@@ -43,7 +42,6 @@ namespace MHUpkManager
 
             hexViewForm = new HexViewForm();
             textureViewForm = new TextureViewForm();
-            modelViewForm = new ModelViewForm();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -52,7 +50,6 @@ namespace MHUpkManager
 
             hexViewForm?.Dispose();
             textureViewForm?.Dispose();
-            modelViewForm?.Dispose();
         }
 
         private void RegistryInstances()
@@ -484,8 +481,8 @@ namespace MHUpkManager
         {
             if (unrealObject is IUnrealObject uObject && CheckMeshObject(uObject))
             {
-                modelViewForm.SetTitle(name);
-                modelViewForm.SetMeshObject(uObject.UObject as UObject);
+                using var modelViewForm = new ModelViewForm();                
+                modelViewForm.SetMeshObject(name, uObject.UObject as UObject);
                 modelViewForm.ShowDialog();
             }
         }

@@ -9,7 +9,7 @@ namespace DDSLib
     //
     // http://stackoverflow.com/questions/21428272/show-rgba-image-from-memory
     //
-    internal sealed class RgbaBitmapSource : BitmapSource
+    public sealed class RgbaBitmapSource : BitmapSource
     {
 
         #region Private Fields
@@ -23,7 +23,7 @@ namespace DDSLib
 
         #region Constructor
 
-        internal RgbaBitmapSource(byte[] Rgba, int PixelWidth)
+        public RgbaBitmapSource(byte[] Rgba, int PixelWidth)
         {
             rgbaBuffer = Rgba;
 

@@ -1,29 +1,42 @@
-﻿using SharpGLTF.Geometry;
+﻿using DDSLib;
+
+using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SharpGLTF.Schema2;
 using System.Numerics;
+using System.Windows.Media.Imaging;
 using UpkManager.Models.UpkFile.Engine.Mesh;
+using UpkManager.Models.UpkFile.Engine.Texture;
 using static MHUpkManager.ModelViewForm;
 
 namespace MHUpkManager
 {
     public class ModelFormats
     {
+        public enum ExportFormat
+        {
+            GLTF,
+            GLB,
+            DAE,
+            OBJ
+        }
+
         public static void ExportToDAE(string fileName, ModelMeshData model)
         {
             using var writer = new StreamWriter(fileName);
             writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             writer.WriteLine("<COLLADA xmlns=\"http://www.collada.org/2005/11/COLLADASchema\" version=\"1.4.1\">");
-            writer.WriteLine("<asset><unit name=\"meter\" meter=\"1\"/><up_axis>Z_UP</up_axis></asset>");
+            writer.WriteLine("<asset><unit name=\"meter\" meter=\"1\"/><up_axis>Y_UP</up_axis></asset>");
 
-            writer.WriteLine("<library_geometries><geometry id=\"mesh\" name=\"mesh\">");
+            writer.WriteLine($"<library_geometries><geometry id=\"mesh\" name=\"{model.ModelName}\">");
             writer.WriteLine("<mesh>");
 
             // Positions
             writer.WriteLine("<source id=\"positions\">");
             writer.WriteLine("<float_array id=\"positions-array\" count=\"" + model.Vertices.Length * 3 + "\">");
             foreach (var v in model.Vertices)
-                writer.Write($"{v.Position.X} {v.Position.Y} {v.Position.Z} ");
+                writer.Write($"{v.Position.X} {v.Position.Z} {v.Position.Y} "); // MH invert
             writer.WriteLine("</float_array>");
             writer.WriteLine("<technique_common><accessor source=\"#positions-array\" count=\"" + model.Vertices.Length + "\" stride=\"3\">");
             writer.WriteLine("<param name=\"X\" type=\"float\"/><param name=\"Y\" type=\"float\"/><param name=\"Z\" type=\"float\"/>");
@@ -33,7 +46,7 @@ namespace MHUpkManager
             writer.WriteLine("<source id=\"normals\">");
             writer.WriteLine("<float_array id=\"normals-array\" count=\"" + model.Vertices.Length * 3 + "\">");
             foreach (var v in model.Vertices)
-                writer.Write($"{v.Normal.X} {v.Normal.Y} {v.Normal.Z} ");
+                writer.Write($"{v.Normal.X} {v.Normal.Z} {v.Normal.Y} "); // MH invert
             writer.WriteLine("</float_array>");
             writer.WriteLine("<technique_common><accessor source=\"#normals-array\" count=\"" + model.Vertices.Length + "\" stride=\"3\">");
             writer.WriteLine("<param name=\"X\" type=\"float\"/><param name=\"Y\" type=\"float\"/><param name=\"Z\" type=\"float\"/>");
@@ -83,9 +96,9 @@ namespace MHUpkManager
 
             foreach (var v in model.Vertices)
             {
-                writer.WriteLine($"v {v.Position.X} {v.Position.Y} {v.Position.Z}");
+                writer.WriteLine($"v {v.Position.X} {v.Position.Z} {v.Position.Y}"); // MH invert
                 writer.WriteLine($"vt {v.TexCoord.X} {1.0f - v.TexCoord.Y}"); // flip Y
-                writer.WriteLine($"vn {v.Normal.X} {v.Normal.Y} {v.Normal.Z}");
+                writer.WriteLine($"vn {v.Normal.X} {v.Normal.Z} {v.Normal.Y}"); // MH invert
             }
 
             for (int i = 0; i < model.Indices.Length; i += 3)
@@ -97,14 +110,23 @@ namespace MHUpkManager
             }
         }
 
-        public static void ExportToGLTF(string filename, ModelMeshData model, bool gltf)
+        public static void ExportModel(string filename, ModelMeshData model, ExportFormat format)
         {
             if (model.Vertices == null || model.Indices == null || model.Indices.Length % 3 != 0)
                 return;
 
-            var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>("Mesh");
+            if (format == ExportFormat.DAE)
+            {
+                ExportToDAE(filename, model);
+                return;
+            }
+            else if (format == ExportFormat.OBJ)
+            {
+                ExportToOBJ(filename, model);
+                return;
+            }
 
-            var primitive = meshBuilder.UsePrimitive(new MaterialBuilder("Default"));
+            var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(model.ModelName);
 
             var vertexBuilders = model.Vertices.Select(v =>
                 new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
@@ -113,23 +135,71 @@ namespace MHUpkManager
                     new VertexEmpty())
             ).ToArray();
 
-            for (int i = 0; i < model.Indices.Length; i += 3)
-            {
-                var idx0 = model.Indices[i];
-                var idx1 = model.Indices[i + 1];
-                var idx2 = model.Indices[i + 2];
+            var materialCache = new Dictionary<int, MaterialBuilder>();
 
-                primitive.AddTriangle(vertexBuilders[idx0], vertexBuilders[idx1], vertexBuilders[idx2]);
+            foreach (var section in model.Sections)
+            {
+                if (!materialCache.TryGetValue(section.MaterialIndex, out var matBuilder))
+                {
+                    matBuilder = new MaterialBuilder($"{section.TextureName}");
+
+                    if (section.DiffuseTexture != null)
+                    {
+                        ImageBuilder imageBuilder = CreateImageFromRgba(section.DiffuseTexture, section.TextureData);
+                        matBuilder.WithChannelImage(KnownChannel.BaseColor, imageBuilder);
+                    }
+
+                    materialCache[section.MaterialIndex] = matBuilder;
+                }
+
+                var primitive = meshBuilder.UsePrimitive(matBuilder);
+
+                uint start = section.BaseIndex;
+                uint end = start + section.NumTriangles * 3;
+
+                for (uint i = start; i < end; i += 3)
+                {
+                    var i0 = model.Indices[i];
+                    var i1 = model.Indices[i + 1];
+                    var i2 = model.Indices[i + 2];
+
+                    primitive.AddTriangle(vertexBuilders[i0], vertexBuilders[i1], vertexBuilders[i2]);
+                }
             }
 
             var scene = new SharpGLTF.Scenes.SceneBuilder();
-            scene.AddRigidMesh(meshBuilder, Matrix4x4.CreateRotationX(-MathF.PI / 2));
+            scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
             var modelRoot = scene.ToGltf2();
 
-            if (gltf)
-                modelRoot.SaveGLTF(filename);
-            else
-                modelRoot.SaveGLB(filename);
+            switch (format)
+            {
+               /* case ExportFormat.OBJ:
+                    modelRoot.SaveAsWavefront(filename); // Don't work!!!
+                    return;*/
+                case ExportFormat.GLB:
+                    modelRoot.SaveGLB(filename);
+                    break;
+                case ExportFormat.GLTF:
+                    modelRoot.SaveGLTF(filename);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static ImageBuilder CreateImageFromRgba(UTexture2D texture, byte[] textureData)
+        {
+            int width = texture.Mips[texture.FirstResourceMemMip].SizeX;
+            int height = texture.Mips[texture.FirstResourceMemMip].SizeY;
+
+            var bitmapSource = new RgbaBitmapSource(textureData, width);
+            MemoryStream outStream = new();
+
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            encoder.Save(outStream);
+
+            return ImageBuilder.From(new(outStream.ToArray()));
         }
 
         private static VertexTexture1 ToVertexTexture1(GLVertex v)
@@ -139,8 +209,11 @@ namespace MHUpkManager
 
         private static VertexPositionNormal ToVertexPositionNormal(GLVertex v)
         {
-            var pos = v.Position;
-            var norm = SafeNormal(v.Normal);
+            var p = v.Position;
+            var n = SafeNormal(v.Normal);
+
+            var pos = new Vector3(p.X, p.Z, p.Y); // MH invert
+            var norm = new Vector3(n.X, n.Z, n.Y); // MH invert
 
             return new VertexPositionNormal(pos, norm);
         }
@@ -155,6 +228,18 @@ namespace MHUpkManager
                 return Vector3.UnitY;
 
             return Vector3.Normalize(n);
+        }
+
+        public static ExportFormat GetExportFormat(string extension)
+        {
+            return extension switch
+            {
+                ".gltf" => ExportFormat.GLTF,
+                ".glb" => ExportFormat.GLB,
+                ".obj" => ExportFormat.OBJ,
+                ".dae" => ExportFormat.DAE,
+                _ => throw new NotSupportedException($"Unsupported file extension: {extension}")
+            };
         }
     }
 }

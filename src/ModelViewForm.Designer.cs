@@ -44,8 +44,8 @@
             sceneControl.Margin = new Padding(4, 3, 4, 3);
             sceneControl.Name = "sceneControl";
             sceneControl.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL2_1;
-            sceneControl.RenderContextType = SharpGL.RenderContextType.DIBSection;
-            sceneControl.RenderTrigger = SharpGL.RenderTrigger.TimerBased;
+            sceneControl.RenderContextType = SharpGL.RenderContextType.NativeWindow;
+            sceneControl.RenderTrigger = SharpGL.RenderTrigger.Manual;
             sceneControl.Size = new Size(800, 426);
             sceneControl.TabIndex = 0;
             sceneControl.OpenGLInitialized += sceneControl_OpenGLInitialized;
