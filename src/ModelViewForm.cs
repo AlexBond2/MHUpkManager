@@ -17,7 +17,7 @@ namespace MHUpkManager
 
         private const float MaxDepth = 100000.0f;
 
-        private Point lastMousePos; 
+        private Point lastMousePos;
         private bool isPanning = false;
         private bool isRotating = false;
         private TransView transView;
@@ -31,6 +31,8 @@ namespace MHUpkManager
         ];
 
         private bool showNormal = false;
+        private bool showBones = false; 
+        private bool showBoneNames = false;
 
         public ModelViewForm()
         {
@@ -44,13 +46,9 @@ namespace MHUpkManager
 
             transView = new TransView
             {
-                xpos = 0,
-                ypos = 0,
-                zpos = 0,
-                xrot = 20.0f,
-                yrot = 0,
-                zrot = 225.0f,
-                zoom = 60f,
+                Pos = new(0f, 0f, 0f),
+                Rot = new(20.0f, 0f, 45.0f),
+                Zoom = 60f,
                 Per = 35.0f
             };
         }
@@ -58,7 +56,7 @@ namespace MHUpkManager
         private void sceneControl_OpenGLInitialized(object sender, EventArgs e)
         {
             var gl = sceneControl.OpenGL;
-            
+
             GLLib.InitializeFont(gl);
             GenerateDisplayLists(gl);
             SetupLighting(gl);
@@ -67,7 +65,7 @@ namespace MHUpkManager
         private void SetupLighting(OpenGL gl)
         {
             float[] ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
-            float[] lightPos = { -400.0f, -400.0f, 400f, 1.0f }; 
+            float[] lightPos = { -400.0f, -400.0f, 400f, 1.0f };
             float[] light1Pos = { 200.0f, 200.0f, 200f, 1.0f };
 
             float[] matDiffuse1 = { 0.9f, 0.9f, 0.9f, 1.0f };
@@ -158,28 +156,28 @@ namespace MHUpkManager
 
             if (isPanning)
             {
-                float sinY = (float)Math.Sin((transView.zrot - 90) * Math.PI / 180.0);
-                float cosY = (float)Math.Cos((transView.zrot - 90) * Math.PI / 180.0);
-                float sinX = (float)Math.Sin(transView.xrot * Math.PI / 180.0);
-                float cosX = (float)Math.Cos(transView.xrot * Math.PI / 180.0);
+                float sinY = (float)Math.Sin((transView.Rot.Z - 90) * Math.PI / 180.0);
+                float cosY = (float)Math.Cos((transView.Rot.Z - 90) * Math.PI / 180.0);
+                float sinX = (float)Math.Sin(transView.Rot.X * Math.PI / 180.0);
+                float cosX = (float)Math.Cos(transView.Rot.X * Math.PI / 180.0);
 
-                float zoom = transView.zoom;
+                float zoom = transView.Zoom;
                 float perRad = transView.Per * (float)(Math.PI / 180.0);
 
                 float stepX = dx / (float)sceneControl.Width * zoom * perRad;
                 float stepY = dy / (float)sceneControl.Height * zoom * perRad;
 
-                transView.xpos -= stepX * sinY;
-                transView.ypos -= stepX * cosY;
+                transView.Pos.X -= stepX * sinY;
+                transView.Pos.Y -= stepX * cosY;
 
-                transView.xpos -= stepY * cosY * sinX;
-                transView.ypos += stepY * sinY * sinX;
-                transView.zpos -= stepY * cosX;
+                transView.Pos.X -= stepY * cosY * sinX;
+                transView.Pos.Y += stepY * sinY * sinX;
+                transView.Pos.Z -= stepY * cosX;
             }
             else if (isRotating)
             {
-                transView.xrot -= dy / 5.0f;
-                transView.zrot -= dx / 5.0f;
+                transView.Rot.X -= dy / 5.0f;
+                transView.Rot.Z -= dx / 5.0f;
             }
 
             lastMousePos = cur;
@@ -214,16 +212,16 @@ namespace MHUpkManager
             gl.LoadIdentity();
             gl.Viewport(0, 0, width, height);
 
-            gl.Perspective(transView.Per, aspect, transView.zoom / 50.0f, MaxDepth);
+            gl.Perspective(transView.Per, aspect, transView.Zoom / 50.0f, MaxDepth);
 
-            if (transView.zrot > 360.0f) transView.zrot -= 360.0f;
-            if (transView.zrot < -360.0f) transView.zrot += 360.0f;
+            if (transView.Rot.Z > 360.0f) transView.Rot.Z -= 360.0f;
+            if (transView.Rot.Z < -360.0f) transView.Rot.Z += 360.0f;
 
             // camera
-            gl.LookAt(0, -transView.zoom, 0, 0, 0, 0, 0, 0, 1);
-            gl.Rotate(transView.xrot, 1, 0, 0);
-            gl.Rotate(transView.zrot, 0, 0, 1);
-            gl.Translate(-transView.xpos, -transView.ypos, -transView.zpos);
+            gl.LookAt(0, -transView.Zoom, 0, 0, 0, 0, 0, 0, 1);
+            gl.Rotate(transView.Rot.X, 1, 0, 0);
+            gl.Rotate(transView.Rot.Z, 0, 0, 1);
+            gl.Translate(-transView.Pos.X, -transView.Pos.Y, -transView.Pos.Z);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
@@ -239,7 +237,7 @@ namespace MHUpkManager
             DrawModel(gl);
             gl.PopMatrix();
 
-            float fzoom = transView.zoom / 15.0f;
+            float fzoom = transView.Zoom / 15.0f;
             gl.Scale(fzoom, fzoom, fzoom);
 
             // --- axis ---
@@ -249,8 +247,8 @@ namespace MHUpkManager
 
             gl.Perspective(20.0f, aspect, 5.0f, 20.0f);
             gl.LookAt(0, -10, 0, 0, 0, 0, 0, 0, 1);
-            gl.Rotate(transView.xrot, 1, 0, 0);
-            gl.Rotate(transView.zrot, 0, 0, 1);
+            gl.Rotate(transView.Rot.X, 1, 0, 0);
+            gl.Rotate(transView.Rot.Z, 0, 0, 1);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
@@ -292,50 +290,107 @@ namespace MHUpkManager
             gl.Disable(OpenGL.GL_TEXTURE_2D);
 
             if (showNormal)
+                DrawNormal(gl);
+
+            if (showBones || showBoneNames)
+                DrawBones(gl);
+        }
+
+        private static Vector3 GetTranslation(Matrix4x4 m)
+        {
+            return new Vector3(m.M41, m.M42, m.M43);
+        }
+
+        private void DrawBones(OpenGL gl)
+        {
+            if (model.Bones != null)
             {
                 gl.Disable(OpenGL.GL_LIGHTING);
-                gl.Color(1.0f, 0.0f, 1.0f);
+                gl.Disable(OpenGL.GL_DEPTH_TEST);      
 
-                gl.Begin(OpenGL.GL_LINES);
-                foreach (var section in model.Sections)
+                for (int i = 0; i < model.Bones.Count; i++)
                 {
-                    uint start = section.BaseIndex;
-                    uint end = start + section.NumTriangles * 3;
-                    for (uint i = start; i < end; i++)
+                    var bone = model.Bones[i];
+                    if (bone.ParentIndex >= 0)
                     {
-                        var vertex = model.Vertices[model.Indices[i]];
+                        var to = GetTranslation(bone.GlobalTransform);
 
-                        var pos = vertex.Position;
-                        var norm = vertex.Normal;
+                        if (showBones)
+                        {
+                            gl.PointSize(4.0f);
+                            gl.Color(0.8f, 0.8f, 0.8f);
+                            gl.Begin(OpenGL.GL_POINTS);
+                            gl.Vertex(to.X, to.Y, to.Z);
+                            gl.End();
+                            gl.PointSize(1.0f);
 
-                        float scale = 3.0f;
-                        var endPos = new Vector3(
-                            pos.X + norm.X * scale,
-                            pos.Y + norm.Y * scale,
-                            pos.Z + norm.Z * scale
-                        );
+                            gl.LineWidth(1f);
+                            gl.Color(0.5f, 0.5f, 0.5f);
+                            var parent = model.Bones[bone.ParentIndex];
+                            var from = GetTranslation(parent.GlobalTransform);
+                            gl.Begin(OpenGL.GL_LINES);
+                            gl.Vertex(from.X, from.Y, from.Z);
+                            gl.Vertex(to.X, to.Y, to.Z);
+                            gl.End();
+                        }
 
-                        gl.Vertex(pos.X, pos.Y, pos.Z);
-                        gl.Vertex(endPos.X, endPos.Y, endPos.Z);
+                        if (showBoneNames)
+                        {
+                            gl.Color(1.0f, 1.0f, 0.0f);
+                            gl.RasterPos(to.X, to.Y, to.Z);
+                            GLLib.DrawText(gl, " " + bone.Name);
+                        }
                     }
                 }
-
-                gl.End();
                 gl.Enable(OpenGL.GL_LIGHTING);
+                gl.Enable(OpenGL.GL_DEPTH_TEST);
             }
+        }
+
+        private void DrawNormal(OpenGL gl)
+        {
+            gl.Disable(OpenGL.GL_LIGHTING);
+            gl.Color(1.0f, 0.0f, 1.0f);
+
+            gl.Begin(OpenGL.GL_LINES);
+            foreach (var section in model.Sections)
+            {
+                uint start = section.BaseIndex;
+                uint end = start + section.NumTriangles * 3;
+                for (uint i = start; i < end; i++)
+                {
+                    var vertex = model.Vertices[model.Indices[i]];
+
+                    var pos = vertex.Position;
+                    var norm = vertex.Normal;
+
+                    float scale = 1.0f;
+                    var endPos = new Vector3(
+                        pos.X + norm.X * scale,
+                        pos.Y + norm.Y * scale,
+                        pos.Z + norm.Z * scale
+                    );
+
+                    gl.Vertex(pos.X, pos.Y, pos.Z);
+                    gl.Vertex(endPos.X, endPos.Y, endPos.Z);
+                }
+            }
+
+            gl.End();
+            gl.Enable(OpenGL.GL_LIGHTING);
         }
 
         private void sceneControl_MouseWheel(object sender, MouseEventArgs e)
         {
             if (e.Delta > 0)
-                transView.zoom -= transView.zoom * 0.1f;
+                transView.Zoom -= transView.Zoom * 0.1f;
             else
-                transView.zoom += transView.zoom * 0.1f;
+                transView.Zoom += transView.Zoom * 0.1f;
 
-            if (transView.zoom < 1.0f)
-                transView.zoom = 1.0f;
-            if (transView.zoom > 1000.0f)
-                transView.zoom = 1000.0f;
+            if (transView.Zoom < 1.0f)
+                transView.Zoom = 1.0f;
+            if (transView.Zoom > 1000.0f)
+                transView.Zoom = 1000.0f;
 
             sceneControl.DoRender();
         }
@@ -356,22 +411,22 @@ namespace MHUpkManager
             switch (e.KeyCode)
             {
                 case Keys.NumPad7:
-                    transView.xrot += 10.0f;
+                    transView.Rot.X += 10.0f;
                     break;
                 case Keys.NumPad1:
-                    transView.xrot -= 10.0f;
+                    transView.Rot.X -= 10.0f;
                     break;
                 case Keys.NumPad8:
-                    transView.zpos += 10.0f;
+                    transView.Pos.Z += 10.0f;
                     break;
                 case Keys.NumPad2:
-                    transView.zpos -= 10.0f;
+                    transView.Pos.Z -= 10.0f;
                     break;
                 case Keys.NumPad4:
-                    transView.xpos += 10.0f;
+                    transView.Pos.X += 10.0f;
                     break;
                 case Keys.NumPad6:
-                    transView.xpos -= 10.0f;
+                    transView.Pos.X -= 10.0f;
                     break;
                 case Keys.NumPad9:
                     transView.Per += 10.0f;
@@ -391,15 +446,32 @@ namespace MHUpkManager
         {
             transView = new TransView
             {
-                xpos = model.Center.X,
-                ypos = model.Center.Y,
-                zpos = model.Center.Z,
-                xrot = 20.0f,
-                yrot = 0,
-                zrot = 45.0f,
-                zoom = model.Radius * 3f,
+                Pos = model.Center,
+                Rot = new(20.0f, 0f, 45.0f),
+                Zoom = model.Radius * 3f,
                 Per = 35.0f
             };
+        }
+
+        private void showNormalsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showNormalsToolStripMenuItem.Checked = !showNormalsToolStripMenuItem.Checked;
+            showNormal = showNormalsToolStripMenuItem.Checked;
+            sceneControl.Invalidate();
+        }
+
+        private void showBonesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showBonesToolStripMenuItem.Checked = !showBonesToolStripMenuItem.Checked;
+            showBones = showBonesToolStripMenuItem.Checked;
+            sceneControl.Invalidate();
+        }
+
+        private void showBoneNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showBoneNameToolStripMenuItem.Checked = !showBoneNameToolStripMenuItem.Checked;
+            showBoneNames = showBoneNameToolStripMenuItem.Checked;
+            sceneControl.Invalidate();
         }
 
         public struct MeshSectionData
@@ -424,6 +496,14 @@ namespace MHUpkManager
             }
         }
 
+        public struct Bone
+        {
+            public string Name;
+            public int ParentIndex;
+            public Matrix4x4 LocalTransform;
+            public Matrix4x4 GlobalTransform;
+        }
+
         public struct ModelMeshData
         {
             public UObject Mesh;
@@ -433,6 +513,7 @@ namespace MHUpkManager
 
             public int[] Indices;
             public GLVertex[] Vertices;
+            public List<Bone> Bones;
 
             public List<MeshSectionData> Sections;
 
@@ -441,6 +522,7 @@ namespace MHUpkManager
                 Mesh = obj;
                 ModelName = name;
                 Sections = [];
+                Bones = [];
 
                 if (obj is USkeletalMesh mesh)
                 {
@@ -468,13 +550,38 @@ namespace MHUpkManager
                         Sections.Add(sectionData);
                     }
 
+                    if (mesh.RefSkeleton != null)
+                    {
+                        for (int i = 0; i < mesh.RefSkeleton.Count; i++)
+                        {
+                            var bone = mesh.RefSkeleton[i];
+
+                            Bones.Add(new Bone
+                            {
+                                Name = bone.Name.ToString(),
+                                ParentIndex = bone.ParentIndex,
+                                LocalTransform = bone.BonePos.ToMatrix(),
+                                GlobalTransform = Matrix4x4.Identity
+                            });
+                        }
+
+                        for (int i = 0; i < Bones.Count; i++)
+                        {
+                            var bone = Bones[i];
+                            if (bone.ParentIndex >= 0)
+                                bone.GlobalTransform = bone.LocalTransform * Bones[bone.ParentIndex].GlobalTransform;
+                            else
+                                bone.GlobalTransform = bone.LocalTransform;
+                            Bones[i] = bone;
+                        }
+                    }
                 }
                 else if (obj is UStaticMesh staticMesh)
                 {
                     var lod = staticMesh.LODModels[0];
 
                     Vertices = [.. lod.GetGLVertexData()];
-                    
+
                     Indices = ConvertIndices(lod.IndexBuffer.Indices);
 
                     CalculateCenterAndRadius(Vertices);
@@ -548,9 +655,9 @@ namespace MHUpkManager
 
         public struct TransView
         {
-            public float xpos, ypos, zpos;
-            public float xrot, yrot, zrot;
-            public float zoom, Per;
+            public Vector3 Pos;
+            public Vector3 Rot;
+            public float Zoom, Per;
         }
     }
 }

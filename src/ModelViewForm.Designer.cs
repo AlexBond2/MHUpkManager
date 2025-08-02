@@ -32,6 +32,10 @@
             menuStrip1 = new MenuStrip();
             modelToolStripMenuItem = new ToolStripMenuItem();
             saveAsToolStripMenuItem = new ToolStripMenuItem();
+            viewToolStripMenuItem = new ToolStripMenuItem();
+            showNormalsToolStripMenuItem = new ToolStripMenuItem();
+            showBonesToolStripMenuItem = new ToolStripMenuItem();
+            showBoneNameToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -57,7 +61,7 @@
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { modelToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { modelToolStripMenuItem, viewToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(800, 24);
@@ -78,6 +82,34 @@
             saveAsToolStripMenuItem.Text = "Save as...";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
+            // viewToolStripMenuItem
+            // 
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem });
+            viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            viewToolStripMenuItem.Size = new Size(44, 20);
+            viewToolStripMenuItem.Text = "View";
+            // 
+            // showNormalsToolStripMenuItem
+            // 
+            showNormalsToolStripMenuItem.Name = "showNormalsToolStripMenuItem";
+            showNormalsToolStripMenuItem.Size = new Size(180, 22);
+            showNormalsToolStripMenuItem.Text = "Show Normals";
+            showNormalsToolStripMenuItem.Click += showNormalsToolStripMenuItem_Click;
+            // 
+            // showBonesToolStripMenuItem
+            // 
+            showBonesToolStripMenuItem.Name = "showBonesToolStripMenuItem";
+            showBonesToolStripMenuItem.Size = new Size(180, 22);
+            showBonesToolStripMenuItem.Text = "Show Bones";
+            showBonesToolStripMenuItem.Click += showBonesToolStripMenuItem_Click;
+            // 
+            // showBoneNameToolStripMenuItem
+            // 
+            showBoneNameToolStripMenuItem.Name = "showBoneNameToolStripMenuItem";
+            showBoneNameToolStripMenuItem.Size = new Size(180, 22);
+            showBoneNameToolStripMenuItem.Text = "Show Bone Names";
+            showBoneNameToolStripMenuItem.Click += showBoneNameToolStripMenuItem_Click;
+            // 
             // ModelViewForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -87,8 +119,8 @@
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Name = "ModelViewForm";
-            Text = "Model Viewer";
             StartPosition = FormStartPosition.CenterParent;
+            Text = "Model Viewer";
             ((System.ComponentModel.ISupportInitialize)sceneControl).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
@@ -102,5 +134,9 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem modelToolStripMenuItem;
         private ToolStripMenuItem saveAsToolStripMenuItem;
+        private ToolStripMenuItem viewToolStripMenuItem;
+        private ToolStripMenuItem showNormalsToolStripMenuItem;
+        private ToolStripMenuItem showBonesToolStripMenuItem;
+        private ToolStripMenuItem showBoneNameToolStripMenuItem;
     }
 }

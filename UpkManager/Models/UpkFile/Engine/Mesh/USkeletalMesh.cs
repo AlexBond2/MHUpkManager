@@ -1028,6 +1028,14 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
             };
             return joint;
         }
+
+        public Matrix4x4 ToMatrix()
+        {
+            var rotation = Orientation.ToQuaternion();
+            return Matrix4x4.CreateFromQuaternion(rotation) *
+                   Matrix4x4.CreateTranslation(Position.ToVector3());
+        }
+
         public string Format => $"{Orientation.Format} {Position.Format}";
     }
 

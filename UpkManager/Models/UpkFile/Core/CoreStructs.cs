@@ -40,7 +40,7 @@ namespace UpkManager.Models.UpkFile.Core
             Z = z;
         }
 
-        public Vector3 ToVector3() => new Vector3(X, Y, Z);
+        public Vector3 ToVector3() => new (X, Y, Z);
 
         public static FVector ReadData(UBuffer buffer)
         {
@@ -255,6 +255,8 @@ namespace UpkManager.Models.UpkFile.Core
             };
             return quad;
         }
+
+        public Quaternion ToQuaternion() => new (X, Y, Z, W);
     }
 
     [AtomicStruct("Guid")]
