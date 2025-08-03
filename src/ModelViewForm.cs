@@ -535,6 +535,33 @@ namespace MHUpkManager
 
                     foreach (var section in lod.Sections)
                     {
+                        var processed = new HashSet<int>();
+                        var chunk = lod.Chunks[section.ChunkIndex];
+                        var boneMap = chunk.BoneMap;
+
+                        uint start = section.BaseIndex;
+                        uint end = start + section.NumTriangles * 3;
+
+                        for (uint i = start; i < end; i++)
+                        {
+                            var vertexIndex = Indices[i];
+                            if (processed.Contains(vertexIndex)) continue;
+
+                            var vertex = Vertices[vertexIndex];
+
+                            for (int b = 0; b < vertex.Bones.Length; b++)
+                            {
+                                byte chunkBone = vertex.Bones[b];
+                                if (chunkBone < boneMap.Count)
+                                    vertex.Bones[b] = (byte)boneMap[chunkBone];
+                                else
+                                    vertex.Bones[b] = 0;
+                            }
+
+                            Vertices[vertexIndex] = vertex;
+                            processed.Add(vertexIndex);
+                        }
+
                         var sectionData = new MeshSectionData
                         {
                             BaseIndex = section.BaseIndex,

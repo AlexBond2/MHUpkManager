@@ -3,9 +3,12 @@
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
+
 using System.Numerics;
 using System.Windows.Media.Imaging;
+
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using static MHUpkManager.ModelViewForm;
@@ -99,49 +102,10 @@ namespace MHUpkManager
                 return;
             }
 
-            var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(model.ModelName);
+            var scene = model.Bones?.Count > 0
+                ? BuildSceneWithSkeleton(model)
+                : BuildSceneRigid(model);
 
-            var vertexBuilders = model.Vertices.Select(v =>
-                new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
-                    ToVertexPositionNormal(v),
-                    ToVertexTexture1(v),
-                    new VertexEmpty())
-            ).ToArray();
-
-            var materialCache = new Dictionary<int, MaterialBuilder>();
-
-            foreach (var section in model.Sections)
-            {
-                if (!materialCache.TryGetValue(section.MaterialIndex, out var matBuilder))
-                {
-                    matBuilder = new MaterialBuilder($"{section.TextureName}");
-
-                    if (section.DiffuseTexture != null)
-                    {
-                        ImageBuilder imageBuilder = CreateImageFromRgba(section.DiffuseTexture, section.TextureData);
-                        matBuilder.WithChannelImage(KnownChannel.BaseColor, imageBuilder);
-                    }
-
-                    materialCache[section.MaterialIndex] = matBuilder;
-                }
-
-                var primitive = meshBuilder.UsePrimitive(matBuilder);
-
-                uint start = section.BaseIndex;
-                uint end = start + section.NumTriangles * 3;
-
-                for (uint i = start; i < end; i += 3)
-                {
-                    var i0 = model.Indices[i];
-                    var i1 = model.Indices[i + 1];
-                    var i2 = model.Indices[i + 2];
-
-                    primitive.AddTriangle(vertexBuilders[i0], vertexBuilders[i1], vertexBuilders[i2]);
-                }
-            }
-
-            var scene = new SharpGLTF.Scenes.SceneBuilder();
-            scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
             var modelRoot = scene.ToGltf2();
 
             switch (format)
@@ -159,6 +123,132 @@ namespace MHUpkManager
                 default:
                     break;
             }
+        }
+
+        private static SceneBuilder BuildSceneRigid(ModelMeshData model)
+        {
+            var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(model.ModelName);
+
+            var vertexBuilders = model.Vertices.Select(v =>
+                new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(
+                    ToVertexPositionNormal(v),
+                    ToVertexTexture1(v),
+                    new VertexEmpty())
+            ).ToArray();
+
+            var materialCache = new Dictionary<int, MaterialBuilder>();
+
+            foreach (var section in model.Sections)
+            {
+                var matBuilder = BuildMaterals(section, materialCache);
+                var primitive = meshBuilder.UsePrimitive(matBuilder);
+
+                uint start = section.BaseIndex;
+                uint end = start + section.NumTriangles * 3;
+
+                for (uint i = start; i < end; i += 3)
+                {
+                    var i0 = model.Indices[i];
+                    var i1 = model.Indices[i + 1];
+                    var i2 = model.Indices[i + 2];
+
+                    primitive.AddTriangle(vertexBuilders[i0], vertexBuilders[i1], vertexBuilders[i2]);
+                }
+            }
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
+            return scene;
+        }
+
+        public static readonly Matrix4x4 MHInvert = new(
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, 1, 0, 0,
+            0, 0, 0, 1
+        );
+
+        private static SceneBuilder BuildSceneWithSkeleton(ModelMeshData model)
+        {
+            var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(model.ModelName);
+
+            var vertexBuilders = model.Vertices.Select(v =>
+            {
+                var pos = ToVertexPositionNormal(v);
+                var tex = ToVertexTexture1(v);
+
+                var bindings = v.Bones
+                    .Zip(v.Weights, (b, w) => (JointIndex: (int)b, Weight: w / 255.0f))
+                    .Where(pair => pair.Weight > 0)
+                    .Take(4)
+                    .ToArray();
+
+                var joints = new VertexJoints4(bindings);
+
+                return new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
+                    pos, tex, joints);
+            }).ToArray();
+
+            var materialCache = new Dictionary<int, MaterialBuilder>();
+
+            foreach (var section in model.Sections)
+            {
+                var matBuilder = BuildMaterals(section, materialCache);
+                var primitive = meshBuilder.UsePrimitive(matBuilder);
+
+                uint start = section.BaseIndex;
+                uint end = start + section.NumTriangles * 3;
+
+                for (uint i = start; i < end; i += 3)
+                {
+                    var i0 = model.Indices[i];
+                    var i1 = model.Indices[i + 1];
+                    var i2 = model.Indices[i + 2];
+
+                    primitive.AddTriangle(vertexBuilders[i0], vertexBuilders[i1], vertexBuilders[i2]);
+                }
+            }
+
+            var boneNodes = new List<NodeBuilder>(model.Bones.Count);
+
+            for (int i = 0; i < model.Bones.Count; i++)
+            {
+                var bone = model.Bones[i];
+                var gltfMat = MHInvert * bone.LocalTransform * MHInvert;
+                var node = new NodeBuilder(bone.Name);
+                node.LocalTransform = gltfMat;
+                boneNodes.Add(node);
+            }
+
+            for (int i = 0; i < model.Bones.Count; i++)
+            {
+                int parent = model.Bones[i].ParentIndex;
+                if (parent >= 0 && parent < boneNodes.Count && parent != i)
+                    boneNodes[parent].AddNode(boneNodes[i]);
+            }
+
+            var scene = new SceneBuilder();
+            scene.AddSkinnedMesh(meshBuilder, Matrix4x4.Identity, [.. boneNodes]);
+
+            return scene;
+        }
+
+        private static MaterialBuilder BuildMaterals(MeshSectionData section, Dictionary<int, MaterialBuilder> materialCache)
+        {
+            if (!materialCache.TryGetValue(section.MaterialIndex, out var matBuilder))
+            {
+                matBuilder = new MaterialBuilder($"{section.TextureName}");
+
+                if (section.DiffuseTexture != null)
+                {
+                    var imageBuilder = CreateImageFromRgba(section.DiffuseTexture, section.TextureData);
+                    matBuilder.WithChannelImage(KnownChannel.BaseColor, imageBuilder);
+                }
+
+                materialCache[section.MaterialIndex] = matBuilder;
+            }
+
+            return matBuilder;
         }
 
         private static ImageBuilder CreateImageFromRgba(UTexture2D texture, byte[] textureData)
