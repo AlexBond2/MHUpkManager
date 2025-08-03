@@ -1,4 +1,5 @@
 ﻿using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Types;
 
 namespace UpkManager.Models.UpkFile.Engine.MarvelGame
 {
@@ -265,6 +266,8 @@ namespace UpkManager.Models.UpkFile.Engine.MarvelGame
     [UnrealClass("MarvelEntityCompSounds")]
     public class UMarvelEntityCompSounds : UActorComponent
     {
+        [PropertyField]
+        public UArray<int> BanterTargets { get; set; }
     }
 
     [UnrealClass("MarvelGFxFloatingNumberComp")]

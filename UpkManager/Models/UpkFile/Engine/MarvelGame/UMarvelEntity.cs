@@ -71,6 +71,15 @@ namespace UpkManager.Models.UpkFile.Engine.MarvelGame
     {
         [PropertyField]
         public UArray<FObject> ModelMesh { get; set; } // SkeletalMesh
+
+        [PropertyField]
+        public UArray<FObject> ModelMaterialOverride { get; set; } // MaterialInstance
+
+        [PropertyField]
+        public UArray<FObject> ModelPhysicsAsset { get; set; } // PhysicsAsset
+
+        [PropertyField]
+        public UArray<FName> ModelPhysicsFloppyBones { get; set; }
     }
 
     [UnrealClass("MarvelAttachmentAnimated")]
