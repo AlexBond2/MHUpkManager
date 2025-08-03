@@ -142,6 +142,32 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
     }
 
+
+    [UnrealClass("StaticMeshComponent")]
+    public class UStaticMeshComponent : UMeshComponent
+    {
+        [StructField("StaticMeshComponentLODInfo")]
+
+        public UArray<FStaticMeshComponentLODInfo> LODData { get; set; }
+
+        public override void ReadBuffer(UBuffer buffer)
+        {
+            base.ReadBuffer(buffer);
+            LODData = buffer.ReadArray(FStaticMeshComponentLODInfo.ReadData);
+        }
+
+    }
+
+    public class FStaticMeshComponentLODInfo
+    {
+        public override string ToString() => "FStaticMeshComponentLODInfo";
+        public static FStaticMeshComponentLODInfo ReadData(UBuffer buffer)
+        {
+            // TODO
+            return new();
+        }
+    }
+
     public class FStaticMeshLODInfo
     {
         public override string ToString() => "FStaticMeshLODInfo";
