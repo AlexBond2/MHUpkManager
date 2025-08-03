@@ -3,6 +3,7 @@
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SharpGLTF.Transforms;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 
@@ -214,9 +215,13 @@ namespace MHUpkManager
             for (int i = 0; i < model.Bones.Count; i++)
             {
                 var bone = model.Bones[i];
-                var gltfMat = MHInvert * bone.LocalTransform * MHInvert;
+                var localMat = MHInvert * bone.LocalTransform * MHInvert;
                 var node = new NodeBuilder(bone.Name);
-                node.LocalTransform = gltfMat;
+
+                var transform = new AffineTransform(localMat);
+                var decomposed = transform.GetDecomposed();
+                node.SetLocalTransform(decomposed, true);
+
                 boneNodes.Add(node);
             }
 
@@ -227,8 +232,18 @@ namespace MHUpkManager
                     boneNodes[parent].AddNode(boneNodes[i]);
             }
 
+            var inverseBindMatrices = new (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[model.Bones.Count];
+            for (int i = 0; i < model.Bones.Count; i++)
+            {
+                var boneNode = boneNodes[i];
+
+                Matrix4x4 gltfGlobalTransform = boneNode.WorldMatrix;
+                Matrix4x4.Invert(gltfGlobalTransform, out var inverseBindMatrix);
+                inverseBindMatrices[i] = (boneNodes[i], inverseBindMatrix);
+            }
+
             var scene = new SceneBuilder();
-            scene.AddSkinnedMesh(meshBuilder, Matrix4x4.Identity, [.. boneNodes]);
+            scene.AddSkinnedMesh(meshBuilder, inverseBindMatrices);
 
             return scene;
         }
