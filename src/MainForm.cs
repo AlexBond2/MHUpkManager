@@ -85,18 +85,37 @@ namespace MHUpkManager
         }
 
         private async Task LoadUpkFile(UnrealUpkFile upkFile)
+        {            
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                ClearPropertiesView();
+
+                upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
+                var header = upkFile.Header;
+                await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
+
+                nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
+                importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
+                exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable);
+                propertyGrid.SelectedObject = new UnrealHeaderViewModel(header);
+
+                ViewEntities.BuildObjectTree(rootNodes, header);
+                UpdateObjectsTree();
+            }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
+        private void ClearPropertiesView()
         {
-            upkFile.Header = await repository.LoadUpkFile(Path.Combine(upkFile.ContentsRoot, upkFile.GameFilename));
-            var header = upkFile.Header;
-            await Task.Run(() => header.ReadHeaderAsync(OnLoadProgress));
+            if (propertiesView.Nodes.Count == 0) return;
 
-            nameGridView.DataSource = ViewEntities.GetDataSource(header.NameTable);
-            importGridView.DataSource = ViewEntities.GetDataSource(header.ImportTable);
-            exportGridView.DataSource = ViewEntities.GetDataSource(header.ExportTable);
-            propertyGrid.SelectedObject = new UnrealHeaderViewModel(header);
-
-            ViewEntities.BuildObjectTree(rootNodes, header);
-            UpdateObjectsTree();
+            propertiesView.BeginUpdate();
+            propertiesView.Nodes.Clear();
+            propertiesView.EndUpdate();
         }
 
         private void UpdateObjectsTree()
@@ -297,13 +316,51 @@ namespace MHUpkManager
             }
         }
 
+        private async void propertiesView_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            var node = e.Node;
+
+            if (node.Tag is VirtualNode virtualNode)
+            {
+                if (node.Nodes.Count == 1 && node.Nodes[0].Tag as string == "lazy-load")
+                {                    
+                    try
+                    {   
+                        UseWaitCursor = true;
+                        Cursor.Current = Cursors.WaitCursor;
+                        node.Tag = virtualNode.Tag;
+                        
+                        var childNodes = await Task.Run(() => LoadChildNodes(virtualNode));
+
+                        propertiesView.BeginUpdate();
+                        node.Nodes.Clear();
+                        node.Nodes.AddRange(childNodes.ToArray());
+                        propertiesView.EndUpdate();
+                        node.Expand();
+                    }
+                    finally
+                    {
+                        UseWaitCursor = false;
+                    }
+                }
+            }
+        }
+
+        private static List<TreeNode> LoadChildNodes(VirtualNode virtualNode)
+        {
+            var nodes = new List<TreeNode>();
+            foreach (var child in virtualNode.Children)
+                nodes.Add(CreateLazyNode(child));
+            return nodes;
+        }
+
         private void BuildPropertyTree(IUnrealObject uObject)
         {
             propertiesView.BeginUpdate();
             propertiesView.Nodes.Clear();
 
             foreach (VirtualNode virtualNode in uObject.FieldNodes)
-                propertiesView.Nodes.Add(CreateRealNode(virtualNode));
+                propertiesView.Nodes.Add(CreateLazyNode(virtualNode));
 
             var buffer = uObject.Buffer;
             if (!buffer.IsAbstractClass && (buffer.ResultProperty != ResultProperty.None || buffer.DataSize != 0))
@@ -335,22 +392,36 @@ namespace MHUpkManager
             return uObject.UObject is USkeletalMesh || uObject.UObject is UStaticMesh;
         }
 
-        private static void ExpandFiltered(TreeNodeCollection nodes)
+        private void ExpandFiltered(TreeNodeCollection nodes)
         {
             foreach (TreeNode node in nodes)
-                if ((node.Nodes.Count > 0 && node.Nodes.Count < 11) || node.Text == "Properties")
+            {
+                bool isLazy = node.Tag is VirtualNode;
+                bool shouldExpand = (node.Nodes.Count > 0 && node.Nodes.Count < 11) || node.Text == "Properties";
+
+                if (shouldExpand && !isLazy)
                 {
                     node.Expand();
                     ExpandFiltered(node.Nodes);
                 }
+            }       
         }
 
-        private static TreeNode CreateRealNode(VirtualNode virtualNode)
+        private static TreeNode CreateLazyNode(VirtualNode virtualNode)
         {
             var node = new TreeNode(virtualNode.Text);
-            node.Tag = virtualNode.Tag;
-            foreach (var child in virtualNode.Children)
-                node.Nodes.Add(CreateRealNode(child));
+
+            if (virtualNode.Children.Count > 10)
+            {
+                node.Tag = virtualNode;
+                node.Nodes.Add(new TreeNode("Loading...") { Tag = "lazy-load" });
+            }
+            else
+            {
+                node.Tag = virtualNode.Tag;
+                foreach (var child in virtualNode.Children)
+                    node.Nodes.Add(CreateLazyNode(child));
+            }
 
             return node;
         }

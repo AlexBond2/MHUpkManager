@@ -1,4 +1,5 @@
-﻿namespace MHUpkManager
+﻿
+namespace MHUpkManager
 {
     partial class MainForm
     {
@@ -396,6 +397,7 @@
             propertiesView.Name = "propertiesView";
             propertiesView.Size = new Size(796, 524);
             propertiesView.TabIndex = 0;
+            propertiesView.BeforeExpand += propertiesView_BeforeExpand;
             // 
             // propertiesMenu
             // 
