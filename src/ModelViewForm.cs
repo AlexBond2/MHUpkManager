@@ -31,8 +31,9 @@ namespace MHUpkManager
         ];
 
         private bool showNormal = false;
-        private bool showBones = false; 
+        private bool showBones = false;
         private bool showBoneNames = false;
+        private bool showTextures = true;
 
         public ModelViewForm()
         {
@@ -262,14 +263,20 @@ namespace MHUpkManager
         {
             if (model.Mesh == null || model.Vertices == null) return;
 
-            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            if (showTextures) 
+                gl.Enable(OpenGL.GL_TEXTURE_2D);
+            else
+                gl.Disable(OpenGL.GL_TEXTURE_2D);
 
             foreach (var section in model.Sections)
             {
-                if (section.GLTextureId != 0)
-                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, section.GLTextureId);
-                else
-                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0); // или текстура по умолчанию
+                if (showTextures)
+                {
+                    if (section.GLTextureId != 0)
+                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, section.GLTextureId);
+                    else
+                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+                }
 
                 gl.Begin(OpenGL.GL_TRIANGLES);
                 uint start = section.BaseIndex;
@@ -306,7 +313,7 @@ namespace MHUpkManager
             if (model.Bones != null)
             {
                 gl.Disable(OpenGL.GL_LIGHTING);
-                gl.Disable(OpenGL.GL_DEPTH_TEST);      
+                gl.Disable(OpenGL.GL_DEPTH_TEST);
 
                 for (int i = 0; i < model.Bones.Count; i++)
                 {
@@ -402,7 +409,7 @@ namespace MHUpkManager
             gl.EndList();
 
             gl.NewList(GLLib.OBJ_GRID, OpenGL.GL_COMPILE);
-            GLLib.DrawGrid(gl, 16);
+            GLLib.DrawGrid(gl, 25);
             gl.EndList();
         }
 
@@ -474,6 +481,13 @@ namespace MHUpkManager
             sceneControl.Invalidate();
         }
 
+        private void showTexturesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showTexturesToolStripMenuItem.Checked = !showTexturesToolStripMenuItem.Checked;
+            showTextures = showTexturesToolStripMenuItem.Checked;
+            sceneControl.Invalidate();
+        }
+
         public struct MeshSectionData
         {
             public uint BaseIndex;
@@ -489,7 +503,7 @@ namespace MHUpkManager
             public void LoadMaterial(OpenGL gl, FObject material)
             {
                 Material = material?.LoadObject<UMaterialInstanceConstant>();
-                var textureObj = Material?.GetTextureParameterValue("DiffuseTexture");
+                var textureObj = Material?.GetTextureParameterValue("Diffuse");
                 TextureName = textureObj?.Name;
                 DiffuseTexture = textureObj?.LoadObject<UTexture2D>();
                 GLTextureId = GLLib.BindGLTexture(gl, DiffuseTexture, out TextureData);

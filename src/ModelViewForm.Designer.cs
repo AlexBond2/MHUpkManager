@@ -36,6 +36,7 @@
             showNormalsToolStripMenuItem = new ToolStripMenuItem();
             showBonesToolStripMenuItem = new ToolStripMenuItem();
             showBoneNameToolStripMenuItem = new ToolStripMenuItem();
+            showTexturesToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -78,13 +79,13 @@
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(121, 22);
+            saveAsToolStripMenuItem.Size = new Size(180, 22);
             saveAsToolStripMenuItem.Text = "Save as...";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, showTexturesToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "View";
@@ -109,6 +110,15 @@
             showBoneNameToolStripMenuItem.Size = new Size(180, 22);
             showBoneNameToolStripMenuItem.Text = "Show Bone Names";
             showBoneNameToolStripMenuItem.Click += showBoneNameToolStripMenuItem_Click;
+            // 
+            // showTexturesToolStripMenuItem
+            // 
+            showTexturesToolStripMenuItem.Checked = true;
+            showTexturesToolStripMenuItem.CheckState = CheckState.Checked;
+            showTexturesToolStripMenuItem.Name = "showTexturesToolStripMenuItem";
+            showTexturesToolStripMenuItem.Size = new Size(180, 22);
+            showTexturesToolStripMenuItem.Text = "Show Textures";
+            showTexturesToolStripMenuItem.Click += showTexturesToolStripMenuItem_Click;
             // 
             // ModelViewForm
             // 
@@ -138,5 +148,6 @@
         private ToolStripMenuItem showNormalsToolStripMenuItem;
         private ToolStripMenuItem showBonesToolStripMenuItem;
         private ToolStripMenuItem showBoneNameToolStripMenuItem;
+        private ToolStripMenuItem showTexturesToolStripMenuItem;
     }
 }

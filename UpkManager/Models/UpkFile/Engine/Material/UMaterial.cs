@@ -443,7 +443,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             if (TextureParameterValues == null) return null;
 
             foreach (var parameter in TextureParameterValues)
-                if (parameterName.StartsWith(parameter.ParameterName.Name, StringComparison.OrdinalIgnoreCase))
+                if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))
                     return parameter.ParameterValue;
 
             return null;
