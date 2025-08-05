@@ -36,7 +36,9 @@
             showNormalsToolStripMenuItem = new ToolStripMenuItem();
             showBonesToolStripMenuItem = new ToolStripMenuItem();
             showBoneNameToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripSeparator();
             showTexturesToolStripMenuItem = new ToolStripMenuItem();
+            showGridToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -85,7 +87,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, showTexturesToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, toolStripMenuItem1, showTexturesToolStripMenuItem, showGridToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "View";
@@ -93,6 +95,7 @@
             // showNormalsToolStripMenuItem
             // 
             showNormalsToolStripMenuItem.Name = "showNormalsToolStripMenuItem";
+            showNormalsToolStripMenuItem.ShortcutKeyDisplayString = "N";
             showNormalsToolStripMenuItem.Size = new Size(180, 22);
             showNormalsToolStripMenuItem.Text = "Show Normals";
             showNormalsToolStripMenuItem.Click += showNormalsToolStripMenuItem_Click;
@@ -100,6 +103,7 @@
             // showBonesToolStripMenuItem
             // 
             showBonesToolStripMenuItem.Name = "showBonesToolStripMenuItem";
+            showBonesToolStripMenuItem.ShortcutKeyDisplayString = "B";
             showBonesToolStripMenuItem.Size = new Size(180, 22);
             showBonesToolStripMenuItem.Text = "Show Bones";
             showBonesToolStripMenuItem.Click += showBonesToolStripMenuItem_Click;
@@ -111,14 +115,30 @@
             showBoneNameToolStripMenuItem.Text = "Show Bone Names";
             showBoneNameToolStripMenuItem.Click += showBoneNameToolStripMenuItem_Click;
             // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(177, 6);
+            // 
             // showTexturesToolStripMenuItem
             // 
             showTexturesToolStripMenuItem.Checked = true;
             showTexturesToolStripMenuItem.CheckState = CheckState.Checked;
             showTexturesToolStripMenuItem.Name = "showTexturesToolStripMenuItem";
+            showTexturesToolStripMenuItem.ShortcutKeyDisplayString = "T";
             showTexturesToolStripMenuItem.Size = new Size(180, 22);
             showTexturesToolStripMenuItem.Text = "Show Textures";
             showTexturesToolStripMenuItem.Click += showTexturesToolStripMenuItem_Click;
+            // 
+            // showGridToolStripMenuItem
+            // 
+            showGridToolStripMenuItem.Checked = true;
+            showGridToolStripMenuItem.CheckState = CheckState.Checked;
+            showGridToolStripMenuItem.Name = "showGridToolStripMenuItem";
+            showGridToolStripMenuItem.ShortcutKeyDisplayString = "G";
+            showGridToolStripMenuItem.Size = new Size(180, 22);
+            showGridToolStripMenuItem.Text = "Show Grid";
+            showGridToolStripMenuItem.Click += showGridToolStripMenuItem_Click;
             // 
             // ModelViewForm
             // 
@@ -149,5 +169,7 @@
         private ToolStripMenuItem showBonesToolStripMenuItem;
         private ToolStripMenuItem showBoneNameToolStripMenuItem;
         private ToolStripMenuItem showTexturesToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem showGridToolStripMenuItem;
     }
 }

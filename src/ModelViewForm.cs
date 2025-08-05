@@ -34,6 +34,7 @@ namespace MHUpkManager
         private bool showBones = false;
         private bool showBoneNames = false;
         private bool showTextures = true;
+        private bool showGrid = true;
 
         public ModelViewForm()
         {
@@ -44,6 +45,10 @@ namespace MHUpkManager
         private void InitializeScene()
         {
             sceneControl.MouseWheel += sceneControl_MouseWheel;
+            SceneControlShortcut(Keys.T, showTexturesToolStripMenuItem_Click);
+            SceneControlShortcut(Keys.G, showGridToolStripMenuItem_Click);
+            SceneControlShortcut(Keys.N, showNormalsToolStripMenuItem_Click);
+            SceneControlShortcut(Keys.B, showBonesToolStripMenuItem_Click);
 
             transView = new TransView
             {
@@ -51,6 +56,18 @@ namespace MHUpkManager
                 Rot = new(20.0f, 0f, 45.0f),
                 Zoom = 60f,
                 Per = 35.0f
+            };
+        }
+
+        public void SceneControlShortcut(Keys key, EventHandler handler)
+        {
+            sceneControl.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == key && !e.Control && !e.Alt && !e.Shift)
+                {
+                    handler.Invoke(s, e);
+                    e.Handled = true;
+                }
             };
         }
 
@@ -228,10 +245,7 @@ namespace MHUpkManager
             gl.LoadIdentity();
 
             // grid
-            gl.Disable(OpenGL.GL_LIGHTING);
-            gl.Color(0.5f, 0.5f, 0.5f);
-            gl.CallList(GLLib.OBJ_GRID);
-            gl.Enable(OpenGL.GL_LIGHTING);
+            if (showGrid) GLLib.DrawGrid(gl, transView.Zoom);
 
             gl.PushMatrix();
             gl.MultMatrix(matMH);
@@ -263,7 +277,7 @@ namespace MHUpkManager
         {
             if (model.Mesh == null || model.Vertices == null) return;
 
-            if (showTextures) 
+            if (showTextures)
                 gl.Enable(OpenGL.GL_TEXTURE_2D);
             else
                 gl.Disable(OpenGL.GL_TEXTURE_2D);
@@ -407,10 +421,6 @@ namespace MHUpkManager
             gl.NewList(GLLib.OBJ_AXES, OpenGL.GL_COMPILE);
             GLLib.DrawAxes(gl);
             gl.EndList();
-
-            gl.NewList(GLLib.OBJ_GRID, OpenGL.GL_COMPILE);
-            GLLib.DrawGrid(gl, 25);
-            gl.EndList();
         }
 
         private void sceneControl_KeyDown(object sender, KeyEventArgs e)
@@ -455,7 +465,7 @@ namespace MHUpkManager
             {
                 Pos = model.Center,
                 Rot = new(20.0f, 0f, 45.0f),
-                Zoom = model.Radius * 3f,
+                Zoom = model.Radius * 3.5f,
                 Per = 35.0f
             };
         }
@@ -485,6 +495,13 @@ namespace MHUpkManager
         {
             showTexturesToolStripMenuItem.Checked = !showTexturesToolStripMenuItem.Checked;
             showTextures = showTexturesToolStripMenuItem.Checked;
+            sceneControl.Invalidate();
+        }
+
+        private void showGridToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showGridToolStripMenuItem.Checked = !showGridToolStripMenuItem.Checked;
+            showGrid = showGridToolStripMenuItem.Checked;
             sceneControl.Invalidate();
         }
 

@@ -26,18 +26,49 @@ namespace MHUpkManager
             Win32.wglUseFontBitmaps(hdc, 0, 255, FONT_GL);
         }
 
-        public static void DrawGrid(OpenGL gl, int gridMax)
+        public static void DrawGrid(OpenGL gl, float zoomLevel, int gridMax = 100)
         {
-            int size = 5;
+            gl.Disable(OpenGL.GL_LIGHTING);
+
+            float visibleGridSize = gridMax * 5.0f;
+
+            float step;
+            if (zoomLevel <= 10) step = 1.0f;
+            else if (zoomLevel <= 400) step = 10.0f;
+            else step = 100.0f;
+
+            int lineCount = (int)MathF.Ceiling(visibleGridSize / step);
+
             gl.Begin(OpenGL.GL_LINES);
-            for (int i = -gridMax; i <= gridMax; i++)
+
+            for (int i = -lineCount; i <= lineCount; i++)
             {
-                gl.Vertex(-gridMax * size, i * size, 0);
-                gl.Vertex(gridMax * size, i * size, 0);
-                gl.Vertex(i * size, -gridMax * size, 0);
-                gl.Vertex(i * size, gridMax * size, 0);
+                float pos = i * step;
+
+                float alpha;
+                if (MathF.Abs(pos % 1000f) < 0.01f)
+                    alpha = 0.5f;
+                else if (MathF.Abs(pos % 100f) < 0.01f)
+                    alpha = 0.35f;
+                else if (MathF.Abs(pos % 10f) < 0.01f)
+                    alpha = 0.2f;
+                else
+                    alpha = 0.1f;
+
+                gl.Color(alpha, alpha, alpha);
+
+                float zOffset = alpha / 10;
+
+                gl.Vertex(-visibleGridSize, pos, zOffset);
+                gl.Vertex(visibleGridSize, pos, zOffset);
+
+                gl.Vertex(pos, -visibleGridSize, zOffset);
+                gl.Vertex(pos, visibleGridSize, zOffset);
             }
+
             gl.End();
+
+            gl.Enable(OpenGL.GL_LIGHTING);
         }
 
         public static void DrawText(OpenGL gl, string text)
