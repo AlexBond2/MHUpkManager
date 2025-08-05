@@ -269,6 +269,7 @@ namespace MHUpkManager
             {
                 try
                 {
+                    Cursor.Current = Cursors.WaitCursor;
                     if (export.UnrealObject == null)
                         await export.ParseUnrealObject(false, false);
 
@@ -284,6 +285,10 @@ namespace MHUpkManager
                         "Parse error",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    Cursor.Current = Cursors.Default;
                 }
             }
             else if (currentObject is UnrealImportTableEntry importEntry)

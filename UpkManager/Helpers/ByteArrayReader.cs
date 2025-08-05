@@ -113,6 +113,7 @@ namespace UpkManager.Helpers
 
             var reader = new ByteArrayReader();
             reader.Initialize(ReadBytes(Offset, Length), 0);
+            reader.SpliceOffset = Offset;
 
             return reader;
         }
@@ -232,6 +233,8 @@ namespace UpkManager.Helpers
         public int CurrentOffset => index;
 
         public int Remaining => data.Length - index;
+
+        public int SpliceOffset { get; private set; }
 
         #endregion Public Methods
 

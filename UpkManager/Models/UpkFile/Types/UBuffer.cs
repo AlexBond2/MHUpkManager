@@ -183,6 +183,8 @@ namespace UpkManager.Models.UpkFile.Types
             return nameIndex;
         }
 
+        public static FName ReadName(UBuffer buffer) => buffer.ReadName();
+
         public int ReadInt32() => Reader.ReadInt32();
         public static int ReadInt32(UBuffer buffer) => buffer.ReadInt32();
 
@@ -214,6 +216,11 @@ namespace UpkManager.Models.UpkFile.Types
         public static UArray<uint> ReadArrayUInt32(UBuffer buffer)
         {
             return buffer.ReadArray(ReadUInt32);
+        }
+
+        public void SkipOffset(int skipOffset)
+        {
+            Reader.Seek(skipOffset - Reader.SpliceOffset);
         }
     }
 }
