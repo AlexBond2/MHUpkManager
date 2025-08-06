@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using UpkManager.Helpers;
 
-namespace UpkManager.Models.UpkFile.Objects.Textures
+namespace UpkManager.Models.UpkFile.Objects
 {
     public class UnrealTextureAllocations : UnrealUpkBuilderBase
     {

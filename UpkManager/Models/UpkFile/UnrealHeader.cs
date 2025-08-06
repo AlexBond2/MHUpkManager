@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UpkManager.Constants;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
-using UpkManager.Models.UpkFile.Objects.Textures;
+using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Tables;
 
 

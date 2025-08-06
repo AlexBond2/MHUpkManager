@@ -5,7 +5,6 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
 using UpkManager.Models.UpkFile.Engine.Texture;
-using UpkManager.Models.UpkFile.Objects.Textures;
 
 namespace MHUpkManager
 {

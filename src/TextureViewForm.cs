@@ -1,6 +1,7 @@
 ﻿
 using DDSLib;
 using System.Windows.Media.Imaging;
+using TextureManager;
 using UpkManager.Models.UpkFile.Engine.Texture;
 
 namespace MHUpkManager
@@ -8,13 +9,19 @@ namespace MHUpkManager
     public partial class TextureViewForm : Form
     {
         private DdsFile ddsFile;
+
+        private TextureEntry textureEntry;
+        private TextureFileCache textureCache;
         private UTexture2D textureObject;
+
+        private string ManifestPath;
         private string title;
         private int minIndex;
 
         public TextureViewForm()
         {
             ddsFile = new();
+            textureCache = new();
             InitializeComponent();
         }
 
@@ -43,12 +50,38 @@ namespace MHUpkManager
         {
             title = name;
             Text = $"Texture Viewer - [{title}]";
+            textureEntry = null;
         }
 
         public void SetTextureObject(UTexture2D data)
         {
             textureObject = data;
+            if (textureEntry != null)
+            {
+                textureEntry.Data.OverrideMipMap.SizeX = textureObject.SizeX;
+                textureEntry.Data.OverrideMipMap.SizeY = textureObject.SizeY;
+                textureEntry.Data.OverrideMipMap.OverrideFormat = UTexture2D.ParseFileFormat(textureObject.Format);
+                textureCache.Reset();
+                LoadTextureCache(textureEntry);
+            }
             ReloadTextureView();
+        }
+
+        private void LoadTextureCache(TextureEntry entry, int index = 0)
+        {
+            string tfcPath = Path.Combine(ManifestPath, entry.Data.TextureFileName + ".tfc");
+            if (entry.Data.Maps.Count == 0) return;
+
+            if (textureCache.LoadFromFile(tfcPath, entry) && textureCache.Texture2D.Mips.Count > 0) return;
+
+            MessageBox.Show($"Can't Load TFC: {entry.Head.TextureName}\nFile: {tfcPath}",
+                                 "Error load", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public void SetTextureEntry(string manifestPath, TextureEntry entry)
+        {
+            ManifestPath = manifestPath;
+            textureEntry = entry;
         }
 
         private void mipMapBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -56,6 +89,7 @@ namespace MHUpkManager
             if (mipMapBox.SelectedItem is MipMapInfo mipMap)
             {
                 sizeLabel.Text = mipMap.Size.ToString();
+                sourceLabel.Text = mipMap.Index < textureObject.FirstResourceMemMip ? "TFC" : "UPK";
                 LoadTexture(mipMap.Index);
             }
         }
@@ -76,6 +110,22 @@ namespace MHUpkManager
             mipMapBox.Items.Clear();
             int index = 0;
             minIndex = -1;
+
+            if (textureEntry != null)
+            {
+                index = (int)textureEntry.Data.Maps[0].Index;
+                foreach (var mipMap in textureCache.Texture2D.Mips)
+                {
+                    if (mipMap.Data != null)
+                    {
+                        if (minIndex == -1) minIndex = index;
+                        mipMapBox.Items.Add(MipMapInfo.AddMipMap(mipMap, index));
+                    }
+                    index++;
+                }
+            }
+
+            index = 0;
             foreach (var mipMap in textureObject.Mips) 
             {
                 if (mipMap.Data != null)
@@ -92,7 +142,13 @@ namespace MHUpkManager
             if (textureObject.Mips.Count > 0)
             {
                 UpdateTextureInfo(index);
-                var stream = textureObject.GetObjectStream(index);
+
+                Stream stream;
+                if (index < textureObject.FirstResourceMemMip)
+                    stream = textureCache.Texture2D.GetObjectStream(index - minIndex);
+                else
+                    stream = textureObject.GetObjectStream(index);
+
                 ddsFile.Load(stream);
                 textureView.Image = BitmapSourceToBitmap(ddsFile.BitmapSource);
                 CenterTexture();
@@ -165,7 +221,11 @@ namespace MHUpkManager
             {
                 string filename = saveFileDialog.FileName;
 
-                var stream = textureObject.GetMipMapsStream();
+                var texture = textureObject;
+                if (textureEntry != null && textureCache.Texture2D.Mips.Count > 0)
+                    texture = textureCache.Texture2D;
+
+                var stream = texture.GetMipMapsStream();
                 if (stream == null) return;
 
                 bool isPNG = filename.EndsWith(".png", StringComparison.OrdinalIgnoreCase);

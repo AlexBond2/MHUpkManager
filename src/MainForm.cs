@@ -1,7 +1,8 @@
 using MHUpkManager.Models;
+using System;
 using System.Reflection;
 using System.Security.Cryptography;
-
+using TextureManager;
 using UpkManager.Contracts;
 using UpkManager.Extensions;
 using UpkManager.Models;
@@ -18,8 +19,11 @@ namespace MHUpkManager
 {
     public partial class MainForm : Form
     {
+        private TextureManifest manifest;
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
+        public const string ManifestName = "TextureFileCacheManifest.bin"; 
+        public string ManifestPath = "";
         public UnrealUpkFile UpkFile { get; set; }
 
         private HexViewForm hexViewForm;
@@ -31,6 +35,7 @@ namespace MHUpkManager
         public MainForm()
         {
             InitializeComponent();
+            manifest = new TextureManifest();
             repository = new UpkFileRepository();
             rootNodes = [];
 
@@ -85,7 +90,7 @@ namespace MHUpkManager
         }
 
         private async Task LoadUpkFile(UnrealUpkFile upkFile)
-        {            
+        {
             try
             {
                 Cursor.Current = Cursors.WaitCursor;
@@ -323,13 +328,13 @@ namespace MHUpkManager
             if (node.Tag is VirtualNode virtualNode)
             {
                 if (node.Nodes.Count == 1 && node.Nodes[0].Tag as string == "lazy-load")
-                {                    
+                {
                     try
-                    {   
+                    {
                         UseWaitCursor = true;
                         Cursor.Current = Cursors.WaitCursor;
                         node.Tag = virtualNode.Tag;
-                        
+
                         var childNodes = await Task.Run(() => LoadChildNodes(virtualNode));
 
                         propertiesView.BeginUpdate();
@@ -404,7 +409,7 @@ namespace MHUpkManager
                     node.Expand();
                     ExpandFiltered(node.Nodes);
                 }
-            }       
+            }
         }
 
         private static TreeNode CreateLazyNode(VirtualNode virtualNode)
@@ -534,14 +539,19 @@ namespace MHUpkManager
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-                openTextureView(export.ObjectNameIndex.Name, export.UnrealObject);
+                openTextureView(export.ObjectNameIndex.Name, export.OuterReferenceNameIndex.Name, export.UnrealObject);
         }
 
-        private void openTextureView(string name, UnrealObjectBase unrealObject)
+        private void openTextureView(string name, string outher, UnrealObjectBase unrealObject)
         {
             if (unrealObject is IUnrealObject uObject && uObject.UObject is UTexture2D data)
             {
                 textureViewForm.SetTitle(name);
+                if (manifest.Entries.Count > 0)
+                {
+                    TextureEntry entry = manifest.GetTextureEntry(new TextureHead($"{outher}.{name}", data.TextureFileCacheGuid.ToSystemGuid()));
+                    textureViewForm.SetTextureEntry(ManifestPath, entry);
+                }
                 textureViewForm.SetTextureObject(data);
                 textureViewForm.ShowDialog();
             }
@@ -557,10 +567,44 @@ namespace MHUpkManager
         {
             if (unrealObject is IUnrealObject uObject && CheckMeshObject(uObject))
             {
-                using var modelViewForm = new ModelViewForm();                
+                using var modelViewForm = new ModelViewForm();
                 modelViewForm.SetMeshObject(name, uObject.UObject as UObject);
                 modelViewForm.ShowDialog();
             }
+        }
+
+        private void îpenManifestMenuItem_Click(object sender, EventArgs e)
+        {
+            using var openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Texture Manifest (*.bin)|" + ManifestName;
+            openFileDialog.Title = "Select " + ManifestName;
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string selectedFile = Path.GetFileName(openFileDialog.FileName);
+
+                if (selectedFile != ManifestName)
+                {
+                    MessageBox.Show("Please select the correct file: " + ManifestName,
+                                    "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string filePath = openFileDialog.FileName;
+                ManifestPath = Path.GetDirectoryName(filePath) ?? "";
+
+                try
+                {
+                    Cursor.Current = Cursors.WaitCursor;
+                    var entries = manifest.LoadManifest(filePath);
+                    int totalEntries = entries.Count;
+                    totalStatus.Text = $"{totalEntries:N0}";
+                }
+                finally
+                {
+                    Cursor.Current = Cursors.Default;
+                }
+        }
         }
     }
 }

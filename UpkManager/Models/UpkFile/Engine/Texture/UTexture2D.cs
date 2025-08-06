@@ -1,11 +1,15 @@
 ﻿using DDSLib;
 using DDSLib.Constants;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using UpkManager.Constants;
+using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Compression;
 using UpkManager.Models.UpkFile.Core;
-using UpkManager.Models.UpkFile.Objects.Textures;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
 
@@ -157,5 +161,173 @@ namespace UpkManager.Models.UpkFile.Engine.Texture
             FileFormat format;
             return buildDdsImage(mipMapIndex, out format);
         }
+
+        public int MipMapsCount { get; private set; }
+        protected List<UnrealCompressedChunkBulkData> CompressedChunks { get; } = [];
+
+        public void ResetMipMaps(int count)
+        {
+            Mips ??= [];
+            Mips.Clear();
+            MipMapsCount = count;
+        }
+
+        public async Task ReadMipMapCache(ByteArrayReader upkReader, uint index, FTexture2DMipMap overrideMipMap)
+        {
+            var header = new UnrealCompressedChunkHeader();
+
+            header.ReadCompressedChunkHeader(upkReader, 1, 0, 0);
+
+            if (TryGetImageProperties(header, (int)index, overrideMipMap, out int width, out int height, out FileFormat format))
+            {
+                FTexture2DMipMap mip = new()
+                {
+                    SizeX = width,
+                    SizeY = height,
+                    OverrideFormat = format
+                };
+
+                if (mip.SizeX >= 4 || mip.SizeY >= 4)
+                {
+                    var decompressedData = await header.DecompressChunk().ConfigureAwait(false);
+                    mip.Data = decompressedData?.GetBytes();
+                }
+
+                Mips.Add(mip);
+            }
+        }
+
+        public bool TryGetImageProperties(UnrealCompressedChunkHeader header, int index, FTexture2DMipMap overrideMipMap, out int width, out int height, out FileFormat ddsFormat)
+        {
+            if (overrideMipMap.SizeX > 0)
+            {
+                int shift = index;
+                if (shift < 0)
+                {
+                    width = overrideMipMap.SizeX << -shift;
+                    height = overrideMipMap.SizeY << -shift;
+                }
+                else
+                {
+                    width = overrideMipMap.SizeX >> shift;
+                    height = overrideMipMap.SizeY >> shift;
+                }
+                ddsFormat = overrideMipMap.OverrideFormat;
+                return true;
+            }
+
+            width = 0;
+            height = 0;
+            ddsFormat = 0;
+
+            return false;
+        }
+
+        public byte[] WriteMipMapChache(int index)
+        {
+            if (index >= Mips.Count) return [];
+
+            // build compressed Chunks
+            int dataSize = GetCompressedMipMapSize(index);
+            if (dataSize == 0) return [];
+
+            // write header and chunks
+            var writer = ByteArrayWriter.CreateNew(dataSize);
+            if (CompressedChunks.Count <= index) return [];
+            CompressedChunks[index].Header.WriteCompressedChunkHeader(writer, 0).Wait();
+
+            // write compressed data in stream
+            return writer.GetBytes();
+        }
+        protected int BuilderSize { get; set; }
+
+        public int GetCompressedMipMapSize(int index)
+        {
+            if (index >= Mips.Count) return 0;
+
+            BuilderSize = GetBuilderSize() + sizeof(int); // need sizeof(int)?
+            var mipMap = Mips[index];
+
+            BulkDataCompressionTypes flags = mipMap.Data == null ||
+                mipMap.Data.Length == 0
+                ? BulkDataCompressionTypes.Unused | BulkDataCompressionTypes.StoreInSeparatefile
+                : BulkDataCompressionTypes.LZO_ENC;
+
+            BuilderSize += Task.Run(() => ProcessUncompressedBulkData(ByteArrayReader.CreateNew(mipMap.Data, 0), flags)).Result
+                        + sizeof(int) * 2;
+
+            return BuilderSize;
+        }
+
+        protected async Task<int> ProcessUncompressedBulkData(ByteArrayReader reader, BulkDataCompressionTypes compressionFlags)
+        {
+            var compressedChunk = new UnrealCompressedChunkBulkData();
+            CompressedChunks.Add(compressedChunk);
+            int builderSize = await compressedChunk.BuildCompressedChunk(reader, compressionFlags);
+            return builderSize;
+        }
+
+        public int GetBuilderSize()
+        {
+            return sizeof(uint) * 3
+                 + sizeof(int);
+        }
+
+        public void ResetCompressedChunks()
+        {
+            CompressedChunks.Clear();
+        }
+
+        public void ExpandMipMaps(int count, List<DdsMipMap> mipMaps)
+        {
+            MipMapsCount = count;
+            int maxIndex = Mips.Count;
+            var format = Mips[0].OverrideFormat;
+            for (int index = maxIndex; index < MipMapsCount; index++)
+            {
+                FTexture2DMipMap mip = new FTexture2DMipMap
+                {
+                    SizeX = mipMaps[index].Width,
+                    SizeY = mipMaps[index].Height,
+                    OverrideFormat = format
+                };
+                Mips.Add(mip);
+            }
+        }
     }
+
+    public enum EPixelFormat
+    {
+        PF_Unknown,                     // 0
+        PF_A32B32G32R32F,               // 1
+        PF_A8R8G8B8,                    // 2
+        PF_G8,                          // 3
+        PF_G16,                         // 4
+        PF_DXT1,                        // 5
+        PF_DXT3,                        // 6
+        PF_DXT5,                        // 7
+        PF_UYVY,                        // 8
+        PF_FloatRGB,                    // 9
+        PF_FloatRGBA,                   // 10
+        PF_DepthStencil,                // 11
+        PF_ShadowDepth,                 // 12
+        PF_FilteredShadowDepth,         // 13
+        PF_R32F,                        // 14
+        PF_G16R16,                      // 15
+        PF_G16R16F,                     // 16
+        PF_G16R16F_FILTER,              // 17
+        PF_G32R32F,                     // 18
+        PF_A2B10G10R10,                 // 19
+        PF_A16B16G16R16,                // 20
+        PF_D24,                         // 21
+        PF_R16F,                        // 22
+        PF_R16F_FILTER,                 // 23
+        PF_BC5,                         // 24
+        PF_V8U8,                        // 25
+        PF_A1,                          // 26
+        PF_FloatR11G11B10,              // 27
+        PF_A4R4G4B4,                    // 28
+        PF_R5G6B5,                      // 29
+        PF_MAX                          // 30
+    };
 }

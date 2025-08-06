@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Design;
 using UpkManager.Constants;
-using UpkManager.Models.UpkFile.Objects.Textures;
-using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile;
+using UpkManager.Models.UpkFile.Engine.Texture;
+using UpkManager.Models.UpkFile.Objects;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace MHUpkManager.Models
 {
-
     public class UnrealHeaderViewModel
     {
         [Category("General")]
@@ -182,5 +182,51 @@ namespace MHUpkManager.Models
             popupForm.ShowDialog(parent);
             return value;
         }
+    }
+
+
+    [Flags]
+    public enum ETextureCreateFlags : ulong
+    {
+        None = 0,
+        RenderTargetable = 1ul << 0,
+        ResolveTargetable = 1ul << 1,
+        DepthStencilTargetable = 1ul << 2,
+        ShaderResource = 1ul << 3,
+        SRGB = 1ul << 4,
+        CPUWritable = 1ul << 5,
+        NoTiling = 1ul << 6,
+        VideoDecode = 1ul << 7,
+        Dynamic = 1ul << 8,
+        InputAttachmentRead = 1ul << 9,
+        Foveation = 1ul << 10,
+        Tiling3D = 1ul << 11,
+        Memoryless = 1ul << 12,
+        GenerateMipCapable = 1ul << 13,
+        FastVRAMPartialAlloc = 1ul << 14,
+        DisableSRVCreation = 1ul << 15,
+        DisableDCC = 1ul << 16,
+        UAV = 1ul << 17,
+        Presentable = 1ul << 18,
+        CPUReadback = 1ul << 19,
+        OfflineProcessed = 1ul << 20,
+        FastVRAM = 1ul << 21,
+        HideInVisualizeTexture = 1ul << 22,
+        Virtual = 1ul << 23,
+        TargetArraySlicesIndependently = 1ul << 24,
+        Shared = 1ul << 25,
+        NoFastClear = 1ul << 26,
+        DepthStencilResolveTarget = 1ul << 27,
+        Streamable = 1ul << 28,
+        NoFastClearFinalize = 1ul << 29,
+        Atomic64Compatible = 1ul << 30,
+        ReduceMemoryWithTilingMode = 1ul << 31,
+        AtomicCompatible = 1ul << 33,
+        External = 1ul << 34,
+        MultiGPUGraphIgnore = 1ul << 35,
+        ReservedResource = 1ul << 37,
+        ImmediateCommit = 1ul << 38,
+        ForceIntoNonStreamingMemoryTracking = 1ul << 39,
+        Invalid = 1ul << 40,
     }
 }

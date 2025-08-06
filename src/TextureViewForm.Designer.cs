@@ -47,6 +47,8 @@ namespace MHUpkManager
             textureGuidLabel = new Label();
             label2 = new Label();
             panel3 = new Panel();
+            sourceLabel = new Label();
+            label6 = new Label();
             sizeLabel = new Label();
             label13 = new Label();
             mipMapBox = new ComboBox();
@@ -80,7 +82,7 @@ namespace MHUpkManager
             menuStrip1.Items.AddRange(new ToolStripItem[] { textureToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(464, 24);
+            menuStrip1.Size = new Size(469, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -111,10 +113,11 @@ namespace MHUpkManager
             // 
             panel4.Controls.Add(texturePanel);
             panel4.Controls.Add(panel5);
+            panel4.Controls.Add(panel3);
             panel4.Dock = DockStyle.Fill;
             panel4.Location = new Point(0, 24);
             panel4.Name = "panel4";
-            panel4.Size = new Size(464, 374);
+            panel4.Size = new Size(469, 377);
             panel4.TabIndex = 5;
             // 
             // texturePanel
@@ -126,7 +129,7 @@ namespace MHUpkManager
             texturePanel.Dock = DockStyle.Fill;
             texturePanel.Location = new Point(0, 72);
             texturePanel.Name = "texturePanel";
-            texturePanel.Size = new Size(464, 302);
+            texturePanel.Size = new Size(469, 260);
             texturePanel.TabIndex = 2;
             texturePanel.Resize += texturePanel_Resize;
             // 
@@ -154,7 +157,7 @@ namespace MHUpkManager
             panel5.Dock = DockStyle.Top;
             panel5.Location = new Point(0, 0);
             panel5.Name = "panel5";
-            panel5.Size = new Size(464, 72);
+            panel5.Size = new Size(469, 72);
             panel5.TabIndex = 0;
             // 
             // textureFileLabel
@@ -231,6 +234,8 @@ namespace MHUpkManager
             // 
             // panel3
             // 
+            panel3.Controls.Add(sourceLabel);
+            panel3.Controls.Add(label6);
             panel3.Controls.Add(sizeLabel);
             panel3.Controls.Add(label13);
             panel3.Controls.Add(mipMapBox);
@@ -240,10 +245,28 @@ namespace MHUpkManager
             panel3.Controls.Add(formatLabel);
             panel3.Controls.Add(mipMapLabel);
             panel3.Dock = DockStyle.Bottom;
-            panel3.Location = new Point(0, 353);
+            panel3.Location = new Point(0, 332);
             panel3.Name = "panel3";
-            panel3.Size = new Size(464, 45);
+            panel3.Size = new Size(469, 45);
             panel3.TabIndex = 4;
+            // 
+            // sourceLabel
+            // 
+            sourceLabel.AutoSize = true;
+            sourceLabel.Location = new Point(426, 7);
+            sourceLabel.Name = "sourceLabel";
+            sourceLabel.Size = new Size(36, 15);
+            sourceLabel.TabIndex = 23;
+            sourceLabel.Text = "None";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(383, 7);
+            label6.Name = "label6";
+            label6.Size = new Size(46, 15);
+            label6.TabIndex = 22;
+            label6.Text = "Source:";
             // 
             // sizeLabel
             // 
@@ -383,8 +406,7 @@ namespace MHUpkManager
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(464, 398);
-            Controls.Add(panel3);
+            ClientSize = new Size(469, 401);
             Controls.Add(panel4);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
@@ -445,5 +467,7 @@ namespace MHUpkManager
         private ToolStripMenuItem modInfoToolStripMenuItem;
         private ToolStripMenuItem textureToolStripMenuItem1;
         private ToolStripSeparator toolStripMenuItem3;
+        private Label sourceLabel;
+        private Label label6;
     }
 }
