@@ -221,6 +221,15 @@ namespace UpkManager.Models.UpkFile.Tables
             return new UnrealObject<UObject>();
         }
 
+        public override string GetPathName()
+        {
+            var outer = UnrealHeader.GetObjectTableEntry(OuterReference);
+            if (outer != null)
+                return outer.GetPathName() + "." + base.GetPathName();
+            else
+                return base.GetPathName();
+        }
+
         #endregion Private Methods
 
     }

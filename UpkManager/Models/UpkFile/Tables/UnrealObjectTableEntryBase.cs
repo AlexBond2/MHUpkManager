@@ -1,8 +1,6 @@
 ﻿
-
 namespace UpkManager.Models.UpkFile.Tables
 {
-
     public abstract class UnrealObjectTableEntryBase : UnrealUpkBuilderBase
     {
 
@@ -20,6 +18,10 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #endregion Unreal Properties
 
+        public virtual string GetPathName()
+        {
+            return ObjectNameIndex.Name;
+        }
     }
 
 }

@@ -543,17 +543,17 @@ namespace MHUpkManager
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-                openTextureView(export.ObjectNameIndex.Name, export.OuterReferenceNameIndex.Name, export.UnrealObject);
+                openTextureView(export.ObjectNameIndex.Name, export.GetPathName(), export.UnrealObject);
         }
 
-        private void openTextureView(string name, string outher, UnrealObjectBase unrealObject)
+        private void openTextureView(string name, string texturePath, UnrealObjectBase unrealObject)
         {
             if (unrealObject is IUnrealObject uObject && uObject.UObject is UTexture2D data)
             {
                 textureViewForm.SetTitle(name);
                 if (manifest.Entries.Count > 0)
                 {
-                    TextureEntry entry = manifest.GetTextureEntry(new TextureHead($"{outher}.{name}", data.TextureFileCacheGuid.ToSystemGuid()));
+                    TextureEntry entry = manifest.GetTextureEntry(new TextureHead(texturePath, data.TextureFileCacheGuid.ToSystemGuid()));
                     textureViewForm.SetTextureEntry(ManifestPath, entry);
                 }
                 textureViewForm.SetTextureObject(data);
