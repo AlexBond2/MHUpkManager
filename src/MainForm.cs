@@ -1,8 +1,9 @@
-using MHUpkManager.Models;
-using System;
 using System.Reflection;
 using System.Security.Cryptography;
-using TextureManager;
+
+using MHUpkManager.Models;
+using MHUpkManager.TextureManager;
+
 using UpkManager.Contracts;
 using UpkManager.Extensions;
 using UpkManager.Models;
@@ -134,7 +135,8 @@ namespace MHUpkManager
             foreach (TreeNode node in objectsTree.Nodes) node.Expand();
             objectsTree.EndUpdate();
 
-            totalStatus.Text = objectsTree.Nodes.Count.ToString();
+            int count = objectsTree.Nodes[0]?.Nodes.Count ?? 0;
+            totalStatus.Text = $"{count:N0}";
         }
 
         private void OnLoadProgress(UnrealLoadProgress progress)
@@ -222,7 +224,9 @@ namespace MHUpkManager
                     e.Handled = true;
                     e.SuppressKeyPress = true;
                 }
-                totalStatus.Text = objectsTree.Nodes.Count.ToString();
+
+                int count = objectsTree.Nodes[0]?.Nodes.Count ?? 0;
+                totalStatus.Text = $"{count:N0}";
             }
         }
 
@@ -416,7 +420,7 @@ namespace MHUpkManager
         {
             var node = new TreeNode(virtualNode.Text);
 
-            if (virtualNode.Children.Count > 10)
+            if (virtualNode.Children.Count > 10 && node.Text != "Properties")
             {
                 node.Tag = virtualNode;
                 node.Nodes.Add(new TreeNode("Loading...") { Tag = "lazy-load" });
@@ -592,19 +596,18 @@ namespace MHUpkManager
 
                 string filePath = openFileDialog.FileName;
                 ManifestPath = Path.GetDirectoryName(filePath) ?? "";
-
+                int totalEntries = 0;
                 try
                 {
                     Cursor.Current = Cursors.WaitCursor;
-                    var entries = manifest.LoadManifest(filePath);
-                    int totalEntries = entries.Count;
-                    totalStatus.Text = $"{totalEntries:N0}";
+                    totalEntries = manifest.LoadManifest(filePath);
                 }
                 finally
                 {
                     Cursor.Current = Cursors.Default;
+                    tfcStatus.Text = $"Ready ({totalEntries:N0} textures)";
                 }
-        }
+            }
         }
     }
 }

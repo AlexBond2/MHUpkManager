@@ -2,7 +2,7 @@
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Engine.Texture;
 
-namespace TextureManager
+namespace MHUpkManager.TextureManager
 {
     public enum ImportType
     {

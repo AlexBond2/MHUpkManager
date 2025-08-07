@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using UpkManager.Models.UpkFile.Engine.Texture;
 
-namespace TextureManager
+namespace MHUpkManager.TextureManager
 {
     public enum ModResult
     {
@@ -16,7 +16,7 @@ namespace TextureManager
     {
         public SortedDictionary<TextureHead, TextureEntry> Entries { get; private set; } = [];
 
-        public List<TextureEntry> LoadManifest(string filePath)
+        public int LoadManifest(string filePath)
         {
             Entries.Clear();
 
@@ -31,15 +31,23 @@ namespace TextureManager
                 }
             }
 
-            return [.. Entries.Values.OrderBy(entry => entry.Head.TextureName)];
+            return Entries.Count;
         }
 
         public TextureEntry GetTextureEntry(TextureHead head)
         {
-            var guidIndex = Entries.Keys.ToLookup(key => key.TextureName, StringComparer.OrdinalIgnoreCase);
-            var keys = guidIndex[head.TextureName].ToList();
-            foreach (var key in keys)
-                if (key.TextureGuid == head.TextureGuid) return Entries[key];
+            var matchedByName = Entries
+                .Where(pair => string.Equals(pair.Key.TextureName, head.TextureName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var pair in matchedByName)
+                if (pair.Key.TextureGuid == head.TextureGuid)
+                    return pair.Value;
+
+            foreach (var pair in Entries)
+                if (pair.Key.TextureGuid == head.TextureGuid)
+                    return pair.Value;
+
             return null;
         }
     }

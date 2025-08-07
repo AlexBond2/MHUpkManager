@@ -1,7 +1,7 @@
 ﻿
 using DDSLib;
 using System.Windows.Media.Imaging;
-using TextureManager;
+using MHUpkManager.TextureManager;
 using UpkManager.Models.UpkFile.Engine.Texture;
 
 namespace MHUpkManager

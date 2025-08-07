@@ -36,11 +36,15 @@ namespace MHUpkManager
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openFileMenuItem = new ToolStripMenuItem();
+            оpenManifestMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem3 = new ToolStripSeparator();
             saveMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             totalStatus = new ToolStripStatusLabel();
             progressStatus = new ToolStripStatusLabel();
+            toolStripStatusLabel2 = new ToolStripStatusLabel();
+            tfcStatus = new ToolStripStatusLabel();
             splitContainer1 = new SplitContainer();
             tabControl2 = new TabControl();
             objectsPage = new TabPage();
@@ -88,8 +92,6 @@ namespace MHUpkManager
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
-            toolStripMenuItem3 = new ToolStripSeparator();
-            оpenManifestMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -136,6 +138,18 @@ namespace MHUpkManager
             openFileMenuItem.Text = "Open Upk...";
             openFileMenuItem.Click += openMenuItem_Click;
             // 
+            // оpenManifestMenuItem
+            // 
+            оpenManifestMenuItem.Name = "оpenManifestMenuItem";
+            оpenManifestMenuItem.Size = new Size(180, 22);
+            оpenManifestMenuItem.Text = "Load Manifest...";
+            оpenManifestMenuItem.Click += оpenManifestMenuItem_Click;
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(177, 6);
+            // 
             // saveMenuItem
             // 
             saveMenuItem.Name = "saveMenuItem";
@@ -145,7 +159,7 @@ namespace MHUpkManager
             // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, totalStatus, progressStatus });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, totalStatus, progressStatus, toolStripStatusLabel2, tfcStatus });
             statusStrip1.Location = new Point(0, 582);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1218, 22);
@@ -170,6 +184,18 @@ namespace MHUpkManager
             // 
             progressStatus.Name = "progressStatus";
             progressStatus.Size = new Size(0, 17);
+            // 
+            // toolStripStatusLabel2
+            // 
+            toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            toolStripStatusLabel2.Size = new Size(105, 17);
+            toolStripStatusLabel2.Text = "Texture File Cache:";
+            // 
+            // tfcStatus
+            // 
+            tfcStatus.Name = "tfcStatus";
+            tfcStatus.Size = new Size(72, 17);
+            tfcStatus.Text = "No Manifest";
             // 
             // splitContainer1
             // 
@@ -680,18 +706,6 @@ namespace MHUpkManager
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(177, 6);
-            // 
-            // оpenManifestMenuItem
-            // 
-            оpenManifestMenuItem.Name = "оpenManifestMenuItem";
-            оpenManifestMenuItem.Size = new Size(180, 22);
-            оpenManifestMenuItem.Text = "Load Manifest...";
-            оpenManifestMenuItem.Click += оpenManifestMenuItem_Click;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -792,5 +806,7 @@ namespace MHUpkManager
         private ToolStripMenuItem viewModelMenuItem;
         private ToolStripMenuItem оpenManifestMenuItem;
         private ToolStripSeparator toolStripMenuItem3;
+        private ToolStripStatusLabel toolStripStatusLabel2;
+        private ToolStripStatusLabel tfcStatus;
     }
 }
