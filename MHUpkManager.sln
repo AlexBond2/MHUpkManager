@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DDSLib", "DDSLib\DDSLib.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UpkManager", "UpkManager\UpkManager.csproj", "{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGL", "SharpGL\SharpGL\SharpGL.csproj", "{721B83FD-7757-79A9-1A7E-78E99E6A59A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGL.WinForms", "SharpGL\SharpGL.WinForms\SharpGL.WinForms.csproj", "{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +31,14 @@ Global
 		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Debug|x64.Build.0 = Debug|x64
 		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Release|x64.ActiveCfg = Release|x64
 		{04C2CFAF-8F1E-4631-88A6-0B9DC017452E}.Release|x64.Build.0 = Release|x64
+		{721B83FD-7757-79A9-1A7E-78E99E6A59A6}.Debug|x64.ActiveCfg = Debug|x64
+		{721B83FD-7757-79A9-1A7E-78E99E6A59A6}.Debug|x64.Build.0 = Debug|x64
+		{721B83FD-7757-79A9-1A7E-78E99E6A59A6}.Release|x64.ActiveCfg = Release|x64
+		{721B83FD-7757-79A9-1A7E-78E99E6A59A6}.Release|x64.Build.0 = Release|x64
+		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Debug|x64.ActiveCfg = Debug|x64
+		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Debug|x64.Build.0 = Debug|x64
+		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Release|x64.ActiveCfg = Release|x64
+		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

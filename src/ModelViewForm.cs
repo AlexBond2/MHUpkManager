@@ -1,6 +1,7 @@
 ﻿using SharpGL;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine.Material;
@@ -49,7 +50,7 @@ namespace MHUpkManager
         {
             sceneControl = new SceneControl();
 
-            ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
+            ((ISupportInitialize)sceneControl).BeginInit();
 
             sceneControl.Dock = DockStyle.Fill;
             sceneControl.DrawFPS = false;
@@ -76,7 +77,7 @@ namespace MHUpkManager
 
             Controls.Add(sceneControl);
 
-            ((System.ComponentModel.ISupportInitialize)sceneControl).EndInit();
+            ((ISupportInitialize)sceneControl).EndInit();
 
             transView = new TransView
             {
