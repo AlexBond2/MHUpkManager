@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            sceneControl = new SharpGL.SceneControl();
             menuStrip1 = new MenuStrip();
             modelToolStripMenuItem = new ToolStripMenuItem();
             saveAsToolStripMenuItem = new ToolStripMenuItem();
@@ -39,28 +38,8 @@
             toolStripMenuItem1 = new ToolStripSeparator();
             showTexturesToolStripMenuItem = new ToolStripMenuItem();
             showGridToolStripMenuItem = new ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // sceneControl
-            // 
-            sceneControl.Dock = DockStyle.Fill;
-            sceneControl.DrawFPS = false;
-            sceneControl.Location = new Point(0, 24);
-            sceneControl.Margin = new Padding(4, 3, 4, 3);
-            sceneControl.Name = "sceneControl";
-            sceneControl.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL2_1;
-            sceneControl.RenderContextType = SharpGL.RenderContextType.NativeWindow;
-            sceneControl.RenderTrigger = SharpGL.RenderTrigger.Manual;
-            sceneControl.Size = new Size(800, 426);
-            sceneControl.TabIndex = 0;
-            sceneControl.OpenGLInitialized += sceneControl_OpenGLInitialized;
-            sceneControl.OpenGLDraw += sceneControl_OpenGLDraw;
-            sceneControl.KeyDown += sceneControl_KeyDown;
-            sceneControl.MouseDown += sceneControl_MouseDown;
-            sceneControl.MouseMove += sceneControl_MouseMove;
-            sceneControl.MouseUp += sceneControl_MouseUp;
             // 
             // menuStrip1
             // 
@@ -81,7 +60,7 @@
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(180, 22);
+            saveAsToolStripMenuItem.Size = new Size(121, 22);
             saveAsToolStripMenuItem.Text = "Save as...";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
@@ -96,7 +75,7 @@
             // 
             showNormalsToolStripMenuItem.Name = "showNormalsToolStripMenuItem";
             showNormalsToolStripMenuItem.ShortcutKeyDisplayString = "N";
-            showNormalsToolStripMenuItem.Size = new Size(180, 22);
+            showNormalsToolStripMenuItem.Size = new Size(173, 22);
             showNormalsToolStripMenuItem.Text = "Show Normals";
             showNormalsToolStripMenuItem.Click += showNormalsToolStripMenuItem_Click;
             // 
@@ -104,21 +83,21 @@
             // 
             showBonesToolStripMenuItem.Name = "showBonesToolStripMenuItem";
             showBonesToolStripMenuItem.ShortcutKeyDisplayString = "B";
-            showBonesToolStripMenuItem.Size = new Size(180, 22);
+            showBonesToolStripMenuItem.Size = new Size(173, 22);
             showBonesToolStripMenuItem.Text = "Show Bones";
             showBonesToolStripMenuItem.Click += showBonesToolStripMenuItem_Click;
             // 
             // showBoneNameToolStripMenuItem
             // 
             showBoneNameToolStripMenuItem.Name = "showBoneNameToolStripMenuItem";
-            showBoneNameToolStripMenuItem.Size = new Size(180, 22);
+            showBoneNameToolStripMenuItem.Size = new Size(173, 22);
             showBoneNameToolStripMenuItem.Text = "Show Bone Names";
             showBoneNameToolStripMenuItem.Click += showBoneNameToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(177, 6);
+            toolStripMenuItem1.Size = new Size(170, 6);
             // 
             // showTexturesToolStripMenuItem
             // 
@@ -126,7 +105,7 @@
             showTexturesToolStripMenuItem.CheckState = CheckState.Checked;
             showTexturesToolStripMenuItem.Name = "showTexturesToolStripMenuItem";
             showTexturesToolStripMenuItem.ShortcutKeyDisplayString = "T";
-            showTexturesToolStripMenuItem.Size = new Size(180, 22);
+            showTexturesToolStripMenuItem.Size = new Size(173, 22);
             showTexturesToolStripMenuItem.Text = "Show Textures";
             showTexturesToolStripMenuItem.Click += showTexturesToolStripMenuItem_Click;
             // 
@@ -136,7 +115,7 @@
             showGridToolStripMenuItem.CheckState = CheckState.Checked;
             showGridToolStripMenuItem.Name = "showGridToolStripMenuItem";
             showGridToolStripMenuItem.ShortcutKeyDisplayString = "G";
-            showGridToolStripMenuItem.Size = new Size(180, 22);
+            showGridToolStripMenuItem.Size = new Size(173, 22);
             showGridToolStripMenuItem.Text = "Show Grid";
             showGridToolStripMenuItem.Click += showGridToolStripMenuItem_Click;
             // 
@@ -145,13 +124,11 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(sceneControl);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Name = "ModelViewForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Model Viewer";
-            ((System.ComponentModel.ISupportInitialize)sceneControl).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
@@ -159,8 +136,6 @@
         }
 
         #endregion
-
-        private SharpGL.SceneControl sceneControl;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem modelToolStripMenuItem;
         private ToolStripMenuItem saveAsToolStripMenuItem;
