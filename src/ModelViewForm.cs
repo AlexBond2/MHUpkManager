@@ -529,6 +529,7 @@ namespace MHUpkManager
             public int MaterialIndex;
             public UMaterialInstanceConstant Material;
             public UTexture2D DiffuseTexture;
+            public int MipIndex;
             public uint GLTextureId;
             public string TextureName;
             public byte[] TextureData;
@@ -538,8 +539,7 @@ namespace MHUpkManager
                 Material = material?.LoadObject<UMaterialInstanceConstant>();
                 var textureObj = Material?.GetTextureParameterValue("Diffuse");
                 TextureName = textureObj?.Name;
-                DiffuseTexture = textureObj?.LoadObject<UTexture2D>();
-                GLTextureId = GLLib.BindGLTexture(gl, DiffuseTexture, out TextureData);
+                GLTextureId = GLLib.BindGLTexture(gl, textureObj, out MipIndex, out DiffuseTexture, out TextureData);
             }
         }
 

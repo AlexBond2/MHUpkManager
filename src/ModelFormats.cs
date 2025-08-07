@@ -259,7 +259,7 @@ namespace MHUpkManager
 
                 if (section.DiffuseTexture != null)
                 {
-                    var imageBuilder = CreateImageFromRgba(section.DiffuseTexture, section.TextureData);
+                    var imageBuilder = CreateImageFromRgba(section.DiffuseTexture, section.MipIndex, section.TextureData);
                     matBuilder.WithChannelImage(KnownChannel.BaseColor, imageBuilder);
                 }
 
@@ -269,10 +269,9 @@ namespace MHUpkManager
             return matBuilder;
         }
 
-        private static ImageBuilder CreateImageFromRgba(UTexture2D texture, byte[] textureData)
+        private static ImageBuilder CreateImageFromRgba(UTexture2D texture, int mipIndex, byte[] textureData)
         {
-            int width = texture.Mips[texture.FirstResourceMemMip].SizeX;
-            int height = texture.Mips[texture.FirstResourceMemMip].SizeY;
+            int width = texture.Mips[mipIndex].SizeX;
 
             var bitmapSource = new RgbaBitmapSource(textureData, width);
             MemoryStream outStream = new();

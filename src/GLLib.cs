@@ -1,10 +1,12 @@
 ﻿using DDSLib;
+using MHUpkManager.TextureManager;
 using SharpGL;
 
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Text;
 using UpkManager.Models.UpkFile.Engine.Texture;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace MHUpkManager
 {
@@ -146,9 +148,11 @@ namespace MHUpkManager
             return textureId;
         }
 
-        public static uint BindGLTexture(OpenGL gl, UTexture2D texture, out byte[] outData)
+        public static uint BindGLTexture(OpenGL gl, FObject textureObject, out int mipIndex, out UTexture2D texture, out byte[] outData)
         {
+            texture = textureObject?.LoadObject<UTexture2D>();
             outData = [];
+            mipIndex = -1;
             if (texture == null)
                 return 0;
 
@@ -159,7 +163,23 @@ namespace MHUpkManager
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, textureId);
             SetDefaultTextureParameters(gl);
 
-            var mip = texture.Mips[texture.FirstResourceMemMip];
+            mipIndex = texture.FirstResourceMemMip;
+            FTexture2DMipMap mip;
+            var textureCache = TextureFileCache.Instance;
+
+            var textureEntry = TextureManifest.Instance.GetTextureEntryFromObject(textureObject);
+            if (textureEntry != null)
+            {
+                textureCache.SetEntry(textureEntry, texture);
+                textureCache.LoadTextureCache();
+                mipIndex = (int)textureEntry.Data.Maps[0].Index;
+                mip = textureCache.Texture2D.Mips[0];
+            }
+            else 
+            {
+                mip = texture.Mips[mipIndex];
+            }
+
             var data = mip.Data;
             int width = mip.SizeX;
             int height = mip.SizeY;
@@ -167,7 +187,12 @@ namespace MHUpkManager
             if (texture.Format != EPixelFormat.PF_A8R8G8B8)
             {
                 DdsFile ddsFile = new();
-                var stream = texture.GetObjectStream(texture.FirstResourceMemMip);
+                Stream stream;
+                if (textureEntry != null)
+                    stream = textureCache.Texture2D.GetObjectStream(0);
+                else
+                    stream = texture.GetObjectStream(mipIndex);
+
                 ddsFile.Load(stream);
                 data = ddsFile.BitmapData;
                 UploadUncompressedTexture(gl, OpenGL.GL_RGBA, width, height, data);                
