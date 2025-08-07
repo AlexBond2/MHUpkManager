@@ -1,11 +1,13 @@
 ﻿using SharpGL;
 using System.Numerics;
-
+using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine.Material;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Models.UpkFile.Types;
 
 namespace MHUpkManager
 {
@@ -282,6 +284,25 @@ namespace MHUpkManager
             else
                 gl.Disable(OpenGL.GL_TEXTURE_2D);
 
+            gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, model.vboId);
+            gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, model.iboId);
+
+            gl.EnableClientState(OpenGL.GL_VERTEX_ARRAY);
+            gl.EnableClientState(OpenGL.GL_NORMAL_ARRAY);
+            if (showTextures)
+                gl.EnableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
+
+            int stride = Marshal.SizeOf(typeof(GLVertex));
+
+            gl.VertexPointer(3, OpenGL.GL_FLOAT, stride, IntPtr.Zero);
+
+            gl.NormalPointer(OpenGL.GL_FLOAT, stride, new IntPtr(Marshal.OffsetOf(typeof(GLVertex), nameof(GLVertex.Normal)).ToInt32()));
+
+            if (showTextures)
+            {
+                gl.TexCoordPointer(2, OpenGL.GL_FLOAT, stride, new IntPtr(Marshal.OffsetOf(typeof(GLVertex), nameof(GLVertex.TexCoord)).ToInt32()));
+            }
+
             foreach (var section in model.Sections)
             {
                 if (showTextures)
@@ -292,20 +313,16 @@ namespace MHUpkManager
                         gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
                 }
 
-                gl.Begin(OpenGL.GL_TRIANGLES);
-                uint start = section.BaseIndex;
-                uint end = start + section.NumTriangles * 3;
+                int indexStart = (int)section.BaseIndex;
+                int indexCount = (int)(section.NumTriangles * 3);
 
-                for (uint i = start; i < end; i++)
-                {
-                    var vertex = model.Vertices[model.Indices[i]];
-                    gl.Normal(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z);
-                    gl.TexCoord(vertex.TexCoord.X, vertex.TexCoord.Y);
-                    gl.Vertex(vertex.Position.X, vertex.Position.Y, vertex.Position.Z);
-                }
-
-                gl.End();
+                gl.DrawElements(OpenGL.GL_TRIANGLES, indexCount, OpenGL.GL_UNSIGNED_INT, new IntPtr(indexStart * sizeof(uint)));
             }
+
+            gl.DisableClientState(OpenGL.GL_VERTEX_ARRAY);
+            gl.DisableClientState(OpenGL.GL_NORMAL_ARRAY);
+            if (showTextures)
+                gl.DisableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
 
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.Disable(OpenGL.GL_TEXTURE_2D);
@@ -547,6 +564,8 @@ namespace MHUpkManager
             public List<Bone> Bones;
 
             public List<MeshSectionData> Sections;
+            public uint iboId;
+            public uint vboId;
 
             public ModelMeshData(UObject obj, string name, OpenGL gl)
             {
@@ -578,18 +597,7 @@ namespace MHUpkManager
                             var vertexIndex = Indices[i];
                             if (processed.Contains(vertexIndex)) continue;
 
-                            var vertex = Vertices[vertexIndex];
-
-                            for (int b = 0; b < vertex.Bones.Length; b++)
-                            {
-                                byte chunkBone = vertex.Bones[b];
-                                if (chunkBone < boneMap.Count)
-                                    vertex.Bones[b] = (byte)boneMap[chunkBone];
-                                else
-                                    vertex.Bones[b] = 0;
-                            }
-
-                            Vertices[vertexIndex] = vertex;
+                            RemapBoneIndices(vertexIndex, boneMap);
                             processed.Add(vertexIndex);
                         }
 
@@ -658,6 +666,64 @@ namespace MHUpkManager
                         Sections.Add(sectionData);
                     }
                 }
+
+                uint[] buffers = new uint[2];
+                gl.GenBuffers(2, buffers);
+                iboId = buffers[0];
+                vboId = buffers[1];
+
+                BindIndexBuffer(gl);
+                BindVertexBuffer(gl);
+            }
+
+            private readonly void BindVertexBuffer(OpenGL gl)
+            {
+                var handle = GCHandle.Alloc(Vertices, GCHandleType.Pinned);
+                try
+                {
+                    gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, vboId);
+                    gl.BufferData(OpenGL.GL_ARRAY_BUFFER, Vertices.Length * Marshal.SizeOf(typeof(GLVertex)),
+                        handle.AddrOfPinnedObject(), OpenGL.GL_STATIC_DRAW);
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+
+            private readonly void BindIndexBuffer(OpenGL gl)
+            {
+                var handle = GCHandle.Alloc(Indices, GCHandleType.Pinned);
+                try
+                {
+                    gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, iboId);
+                    gl.BufferData(OpenGL.GL_ELEMENT_ARRAY_BUFFER, Indices.Length * sizeof(int),
+                        handle.AddrOfPinnedObject(), OpenGL.GL_STATIC_DRAW);
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
+
+            public void RemapBoneIndices(int vertexIndex, UArray<ushort> boneMap)
+            {
+                var vertex = Vertices[vertexIndex];
+
+                vertex.Bone0 = RemapBone(vertex.Bone0, boneMap);
+                vertex.Bone1 = RemapBone(vertex.Bone1, boneMap);
+                vertex.Bone2 = RemapBone(vertex.Bone2, boneMap);
+                vertex.Bone3 = RemapBone(vertex.Bone3, boneMap);
+
+                Vertices[vertexIndex] = vertex;
+            }
+
+            private static byte RemapBone(byte boneIndex, UArray<ushort> boneMap)
+            {
+                if (boneIndex < boneMap.Count)
+                    return (byte)boneMap[boneIndex];
+                else
+                    return 0;
             }
 
             public static int[] ConvertIndices<T>(IEnumerable<T> indices) where T : struct, IConvertible

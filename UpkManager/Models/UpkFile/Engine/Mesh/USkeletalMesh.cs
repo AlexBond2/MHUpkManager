@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Tables;
@@ -446,8 +445,21 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public Vector3 Normal;
         public Vector3 Tangent;
         public Vector2 TexCoord;
-        public byte[] Bones;
-        public byte[] Weights;
+        public byte Bone0, Bone1, Bone2, Bone3;
+        public byte Weight0, Weight1, Weight2, Weight3;
+
+        public void SetBoneData(byte[] bones, byte[] weights)
+        {
+            Bone0 = bones[0];
+            Bone1 = bones[1];
+            Bone2 = bones[2];
+            Bone3 = bones[3];
+
+            Weight0 = weights[0];
+            Weight1 = weights[1];
+            Weight2 = weights[2];
+            Weight3 = weights[3];
+        }
     }
 
     public class FSkeletalMeshVertexBuffer : FVertexBuffer
@@ -494,10 +506,10 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
                     Position = vertex.GetVector3(),
                     Normal = vertex.TangentZ.ToVector().ToVector3(),
                     Tangent = vertex.TangentX.ToVector().ToVector3(),
-                    TexCoord = vertex.GetVector2(0), // Assuming we only need the first UV set
-                    Bones = vertex.InfluenceBones,
-                    Weights = vertex.InfluenceWeights
+                    TexCoord = vertex.GetVector2(0) // Assuming we only need the first UV set
                 };
+
+                glVertex.SetBoneData(vertex.InfluenceBones, vertex.InfluenceWeights);
                 yield return glVertex;
             }
         }

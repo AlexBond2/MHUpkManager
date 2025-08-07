@@ -178,13 +178,16 @@ namespace MHUpkManager
                 var pos = ToVertexPositionNormal(v);
                 var tex = ToVertexTexture1(v);
 
-                var bindings = v.Bones
-                    .Zip(v.Weights, (b, w) => (JointIndex: (int)b, Weight: w / 255.0f))
-                    .Where(pair => pair.Weight > 0)
-                    .Take(4)
-                    .ToArray();
+                var bindings = new[]
+                {
+                    ((int)v.Bone0, v.Weight0 / 255.0f),
+                    ((int)v.Bone1, v.Weight1 / 255.0f),
+                    ((int)v.Bone2, v.Weight2 / 255.0f),
+                    ((int)v.Bone3, v.Weight3 / 255.0f)
+                };
 
-                var joints = new VertexJoints4(bindings);
+                var sparse = SparseWeight8.Create(bindings.Where(x => x.Item2 > 0).ToArray());
+                var joints = new VertexJoints4(sparse);
 
                 return new VertexBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(
                     pos, tex, joints);
