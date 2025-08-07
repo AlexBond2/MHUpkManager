@@ -1,8 +1,9 @@
 ﻿
 using DDSLib;
-using System.Windows.Media.Imaging;
 using MHUpkManager.TextureManager;
+using System.Windows.Media.Imaging;
 using UpkManager.Models.UpkFile.Engine.Texture;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace MHUpkManager
 {
@@ -14,7 +15,6 @@ namespace MHUpkManager
         private TextureFileCache textureCache;
         private UTexture2D textureObject;
 
-        private string ManifestPath;
         private string title;
         private int minIndex;
 
@@ -50,38 +50,20 @@ namespace MHUpkManager
         {
             title = name;
             Text = $"Texture Viewer - [{title}]";
-            textureEntry = null;
         }
 
-        public void SetTextureObject(UTexture2D data)
+        public void SetTextureObject(FObject textObject, UTexture2D data)
         {
             textureObject = data;
+
+            textureEntry = TextureManifest.Instance.GetTextureEntryFromObject(textObject);
             if (textureEntry != null)
             {
-                textureEntry.Data.OverrideMipMap.SizeX = textureObject.SizeX;
-                textureEntry.Data.OverrideMipMap.SizeY = textureObject.SizeY;
-                textureEntry.Data.OverrideMipMap.OverrideFormat = UTexture2D.ParseFileFormat(textureObject.Format);
-                textureCache.Reset();
-                LoadTextureCache(textureEntry);
+                textureCache.SetEntry(textureEntry, textureObject);
+                textureCache.LoadTextureCache();
             }
+
             ReloadTextureView();
-        }
-
-        private void LoadTextureCache(TextureEntry entry, int index = 0)
-        {
-            string tfcPath = Path.Combine(ManifestPath, entry.Data.TextureFileName + ".tfc");
-            if (entry.Data.Maps.Count == 0) return;
-
-            if (textureCache.LoadFromFile(tfcPath, entry) && textureCache.Texture2D.Mips.Count > 0) return;
-
-            MessageBox.Show($"Can't Load TFC: {entry.Head.TextureName}\nFile: {tfcPath}",
-                                 "Error load", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        public void SetTextureEntry(string manifestPath, TextureEntry entry)
-        {
-            ManifestPath = manifestPath;
-            textureEntry = entry;
         }
 
         private void mipMapBox_SelectedIndexChanged(object sender, EventArgs e)

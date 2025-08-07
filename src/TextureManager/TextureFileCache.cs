@@ -1,4 +1,5 @@
 ﻿using DDSLib;
+using System.Windows.Media.TextFormatting;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Engine.Texture;
 
@@ -33,6 +34,17 @@ namespace MHUpkManager.TextureManager
         public void Reset()
         {
             Entry = null;
+        }
+
+        public void LoadTextureCache()
+        {
+            string tfcPath = Path.Combine(TextureManifest.Instance.ManifestPath, Entry.Data.TextureFileName + ".tfc");
+            if (Entry.Data.Maps.Count == 0) return;
+
+            if (LoadFromFile(tfcPath, Entry) && Texture2D.Mips.Count > 0) return;
+
+            MessageBox.Show($"Can't Load TFC: {Entry.Head.TextureName}\nFile: {tfcPath}",
+                                 "Error load", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         public bool LoadFromFile(string filePath, TextureEntry entry, bool onlyFirst = false)
@@ -114,6 +126,18 @@ namespace MHUpkManager.TextureManager
             Entry.Data.TextureFileName = textureCacheName;
 
             return WriteResult.Success;
+        }
+
+        public void SetEntry(TextureEntry entry, UTexture2D textureObject)
+        {
+            if (Loaded && Entry == entry) return;
+
+            Entry = entry;
+            Entry.Data.OverrideMipMap.SizeX = textureObject.SizeX;
+            Entry.Data.OverrideMipMap.SizeY = textureObject.SizeY;
+            Entry.Data.OverrideMipMap.OverrideFormat = UTexture2D.ParseFileFormat(textureObject.Format);
+            Loaded = false;
+            Texture2D.ResetMipMaps(Entry.Data.Maps.Count);
         }
     }
 }

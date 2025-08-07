@@ -1,4 +1,5 @@
 ﻿
+using System;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Objects;
 
@@ -8,6 +9,13 @@ namespace UpkManager.Models.UpkFile.Tables
     {
         public UObject Object { get; private set; }
         public UnrealObjectTableEntryBase TableEntry { get; set; } = tableEntry;
+
+        public string GetPathName()
+        {
+            if (TableEntry is UnrealExportTableEntry export)
+                return export.GetPathName();
+            return string.Empty;
+        }
 
         public T LoadObject<T>() where T : UObject
         {

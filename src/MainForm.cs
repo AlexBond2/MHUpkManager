@@ -20,11 +20,8 @@ namespace MHUpkManager
 {
     public partial class MainForm : Form
     {
-        private TextureManifest manifest;
         private readonly IUpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
-        public const string ManifestName = "TextureFileCacheManifest.bin"; 
-        public string ManifestPath = "";
         public UnrealUpkFile UpkFile { get; set; }
 
         private HexViewForm hexViewForm;
@@ -36,7 +33,7 @@ namespace MHUpkManager
         public MainForm()
         {
             InitializeComponent();
-            manifest = new TextureManifest();
+            TextureManifest.Initialize();
             repository = new UpkFileRepository();
             rootNodes = [];
 
@@ -543,20 +540,15 @@ namespace MHUpkManager
         {
             if (currentObject == null) return;
             if (currentObject is UnrealExportTableEntry export)
-                openTextureView(export.ObjectNameIndex.Name, export.GetPathName(), export.UnrealObject);
+                openTextureView(export.ObjectNameIndex, export.UnrealObject);
         }
 
-        private void openTextureView(string name, string texturePath, UnrealObjectBase unrealObject)
+        private void openTextureView(FObject textureObject, UnrealObjectBase unrealObject)
         {
             if (unrealObject is IUnrealObject uObject && uObject.UObject is UTexture2D data)
             {
-                textureViewForm.SetTitle(name);
-                if (manifest.Entries.Count > 0)
-                {
-                    TextureEntry entry = manifest.GetTextureEntry(new TextureHead(texturePath, data.TextureFileCacheGuid.ToSystemGuid()));
-                    textureViewForm.SetTextureEntry(ManifestPath, entry);
-                }
-                textureViewForm.SetTextureObject(data);
+                textureViewForm.SetTitle(textureObject.Name);
+                textureViewForm.SetTextureObject(textureObject, data);
                 textureViewForm.ShowDialog();
             }
         }
@@ -579,28 +571,28 @@ namespace MHUpkManager
 
         private void îpenManifestMenuItem_Click(object sender, EventArgs e)
         {
+            string manifestName = TextureManifest.ManifestName;
             using var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Texture Manifest (*.bin)|" + ManifestName;
-            openFileDialog.Title = "Select " + ManifestName;
+            openFileDialog.Filter = "Texture Manifest (*.bin)|" + manifestName;
+            openFileDialog.Title = "Select " + manifestName;
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string selectedFile = Path.GetFileName(openFileDialog.FileName);
 
-                if (selectedFile != ManifestName)
+                if (selectedFile != manifestName)
                 {
-                    MessageBox.Show("Please select the correct file: " + ManifestName,
+                    MessageBox.Show("Please select the correct file: " + manifestName,
                                     "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 string filePath = openFileDialog.FileName;
-                ManifestPath = Path.GetDirectoryName(filePath) ?? "";
                 int totalEntries = 0;
                 try
                 {
                     Cursor.Current = Cursors.WaitCursor;
-                    totalEntries = manifest.LoadManifest(filePath);
+                    totalEntries = TextureManifest.Instance.LoadManifest(filePath);
                 }
                 finally
                 {

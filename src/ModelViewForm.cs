@@ -1,6 +1,5 @@
 ﻿using SharpGL;
 using System.Numerics;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine.Material;
@@ -647,7 +646,6 @@ namespace MHUpkManager
                     var lod = staticMesh.LODModels[0];
 
                     Vertices = [.. lod.GetGLVertexData()];
-
                     Indices = ConvertIndices(lod.IndexBuffer.Indices);
 
                     CalculateCenterAndRadius(Vertices);

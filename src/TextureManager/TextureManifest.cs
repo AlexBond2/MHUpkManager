@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
 using UpkManager.Models.UpkFile.Engine.Texture;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace MHUpkManager.TextureManager
 {
@@ -14,10 +15,16 @@ namespace MHUpkManager.TextureManager
 
     public class TextureManifest
     {
+        public static TextureManifest Instance { get; private set; }
+
+        public const string ManifestName = "TextureFileCacheManifest.bin";
+        public string ManifestPath { get; private set; } = "";
+        private TextureManifest() { }
         public SortedDictionary<TextureHead, TextureEntry> Entries { get; private set; } = [];
 
         public int LoadManifest(string filePath)
         {
+            ManifestPath = Path.GetDirectoryName(filePath) ?? "";
             Entries.Clear();
 
             using (var reader = new BinaryReader(File.Open(filePath, FileMode.Open)))
@@ -49,6 +56,22 @@ namespace MHUpkManager.TextureManager
                     return pair.Value;
 
             return null;
+        }
+
+        public TextureEntry GetTextureEntryFromObject(FObject textureObject)
+        {
+            if (Entries.Count > 0)
+            {
+                string texturePath = textureObject.GetPathName();
+                var texture2D = textureObject.LoadObject<UTexture2D>();
+                return GetTextureEntry(new TextureHead(texturePath, texture2D.TextureFileCacheGuid.ToSystemGuid()));
+            }
+            return null;
+        }
+
+        public static void Initialize()
+        {
+            Instance ??= new();
         }
     }
 
