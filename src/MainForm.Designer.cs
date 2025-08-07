@@ -36,7 +36,7 @@ namespace MHUpkManager
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openFileMenuItem = new ToolStripMenuItem();
-            оpenManifestMenuItem = new ToolStripMenuItem();
+            loadManifestMenuItem = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripSeparator();
             saveMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
@@ -126,7 +126,7 @@ namespace MHUpkManager
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openFileMenuItem, оpenManifestMenuItem, toolStripMenuItem3, saveMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openFileMenuItem, loadManifestMenuItem, toolStripMenuItem3, saveMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new Size(37, 20);
             fileToolStripMenuItem.Text = "File";
@@ -138,12 +138,12 @@ namespace MHUpkManager
             openFileMenuItem.Text = "Open Upk...";
             openFileMenuItem.Click += openMenuItem_Click;
             // 
-            // оpenManifestMenuItem
+            // loadManifestMenuItem
             // 
-            оpenManifestMenuItem.Name = "оpenManifestMenuItem";
-            оpenManifestMenuItem.Size = new Size(180, 22);
-            оpenManifestMenuItem.Text = "Load Manifest...";
-            оpenManifestMenuItem.Click += оpenManifestMenuItem_Click;
+            loadManifestMenuItem.Name = "loadManifestMenuItem";
+            loadManifestMenuItem.Size = new Size(180, 22);
+            loadManifestMenuItem.Text = "Load Manifest...";
+            loadManifestMenuItem.Click += loadManifestMenuItem_Click;
             // 
             // toolStripMenuItem3
             // 
@@ -804,7 +804,7 @@ namespace MHUpkManager
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem viewTextureMenuItem;
         private ToolStripMenuItem viewModelMenuItem;
-        private ToolStripMenuItem оpenManifestMenuItem;
+        private ToolStripMenuItem loadManifestMenuItem;
         private ToolStripSeparator toolStripMenuItem3;
         private ToolStripStatusLabel toolStripStatusLabel2;
         private ToolStripStatusLabel tfcStatus;

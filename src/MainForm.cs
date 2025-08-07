@@ -571,7 +571,7 @@ namespace MHUpkManager
             }
         }
 
-        private void îpenManifestMenuItem_Click(object sender, EventArgs e)
+        private void loadManifestMenuItem_Click(object sender, EventArgs e)
         {
             string manifestName = TextureManifest.ManifestName;
             using var openFileDialog = new OpenFileDialog();
