@@ -1,5 +1,5 @@
 ﻿using DDSLib;
-using System.Windows.Media.TextFormatting;
+
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Engine.Texture;
 
@@ -21,14 +21,17 @@ namespace MHUpkManager.TextureManager
 
     public class TextureFileCache
     {
-        public UTexture2D Texture2D { get; }
+        public static TextureFileCache Instance { get; private set; }
+        public UTexture2D Texture2D { get; } = new();
 
         public TextureEntry Entry { get; private set; }
         public bool Loaded { get; private set; }
 
-        public TextureFileCache()
+        private TextureFileCache() { }
+
+        public static void Initialize()
         {
-            Texture2D = new();
+            Instance ??= new();
         }
 
         public void Reset()

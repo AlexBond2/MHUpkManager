@@ -2,6 +2,7 @@
 using DDSLib;
 using MHUpkManager.TextureManager;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.TextFormatting;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Tables;
 
@@ -12,7 +13,6 @@ namespace MHUpkManager
         private DdsFile ddsFile;
 
         private TextureEntry textureEntry;
-        private TextureFileCache textureCache;
         private UTexture2D textureObject;
 
         private string title;
@@ -21,7 +21,6 @@ namespace MHUpkManager
         public TextureViewForm()
         {
             ddsFile = new();
-            textureCache = new();
             InitializeComponent();
         }
 
@@ -59,6 +58,7 @@ namespace MHUpkManager
             textureEntry = TextureManifest.Instance.GetTextureEntryFromObject(textObject);
             if (textureEntry != null)
             {
+                var textureCache = TextureFileCache.Instance;
                 textureCache.SetEntry(textureEntry, textureObject);
                 textureCache.LoadTextureCache();
             }
@@ -96,7 +96,8 @@ namespace MHUpkManager
             if (textureEntry != null)
             {
                 index = (int)textureEntry.Data.Maps[0].Index;
-                foreach (var mipMap in textureCache.Texture2D.Mips)
+                var mips = TextureFileCache.Instance.Texture2D.Mips;
+                foreach (var mipMap in mips)
                 {
                     if (mipMap.Data != null)
                     {
@@ -127,7 +128,7 @@ namespace MHUpkManager
 
                 Stream stream;
                 if (index < textureObject.FirstResourceMemMip)
-                    stream = textureCache.Texture2D.GetObjectStream(index - minIndex);
+                    stream = TextureFileCache.Instance.Texture2D.GetObjectStream(index - minIndex);
                 else
                     stream = textureObject.GetObjectStream(index);
 
@@ -204,8 +205,9 @@ namespace MHUpkManager
                 string filename = saveFileDialog.FileName;
 
                 var texture = textureObject;
-                if (textureEntry != null && textureCache.Texture2D.Mips.Count > 0)
-                    texture = textureCache.Texture2D;
+                var cacheTexture = TextureFileCache.Instance.Texture2D;
+                if (textureEntry != null && cacheTexture.Mips.Count > 0)
+                    texture = cacheTexture;
 
                 var stream = texture.GetMipMapsStream();
                 if (stream == null) return;

@@ -34,6 +34,8 @@ namespace MHUpkManager
         {
             InitializeComponent();
             TextureManifest.Initialize();
+            TextureFileCache.Initialize();
+
             repository = new UpkFileRepository();
             rootNodes = [];
 
