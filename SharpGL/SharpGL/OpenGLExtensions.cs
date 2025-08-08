@@ -4993,6 +4993,126 @@ namespace SharpGL
 
         #endregion
 
+        #region WGL_ARB_choose_format
+
+        /// <summary>
+        /// Loads the WGL extensions using a dummy window.
+        /// </summary>
+        private bool LoadWglExtensionsUsingDummyWindow(int bitDepth, out wglChoosePixelFormatARB choosePixelFormatARB)
+        {
+            choosePixelFormatARB = null;
+            const string CLASS_NAME = "Dummy_WGL_Class_MSAA";
+
+            Win32.WNDCLASSEX wc = new()
+            {
+                cbSize = (uint)Marshal.SizeOf(typeof(Win32.WNDCLASSEX)),
+                lpfnWndProc = Win32.DefWindowProc,
+                hInstance = Marshal.GetHINSTANCE(System.Reflection.Assembly.GetExecutingAssembly().ManifestModule),
+                lpszClassName = CLASS_NAME
+            };
+
+            if (Win32.RegisterClassEx(ref wc) == 0) return false;
+
+            IntPtr dummyWnd = IntPtr.Zero;
+            IntPtr dummyDC = IntPtr.Zero;
+            IntPtr tempRC = IntPtr.Zero;
+
+            bool success = false;
+
+            try
+            {
+                dummyWnd = Win32.CreateWindowEx(0, CLASS_NAME, "Dummy", 0, 0, 0, 1, 1, IntPtr.Zero, IntPtr.Zero, wc.hInstance, IntPtr.Zero);
+                if (dummyWnd == IntPtr.Zero) return false;
+
+                dummyDC = Win32.GetDC(dummyWnd);
+                if (dummyDC == IntPtr.Zero) return false;
+
+                Win32.PIXELFORMATDESCRIPTOR pfd = new();
+                pfd.Init();
+                pfd.nVersion = 1;
+                pfd.dwFlags = Win32.PFD_DRAW_TO_WINDOW | Win32.PFD_SUPPORT_OPENGL | Win32.PFD_DOUBLEBUFFER;
+                pfd.iPixelType = Win32.PFD_TYPE_RGBA;
+                pfd.cColorBits = (byte)bitDepth;
+                pfd.cDepthBits = 24;
+                pfd.cStencilBits = 8;
+                pfd.iLayerType = Win32.PFD_MAIN_PLANE;
+
+                int pixelFormat = Win32.ChoosePixelFormat(dummyDC, pfd);
+                if (pixelFormat == 0) return false;
+
+                if (Win32.SetPixelFormat(dummyDC, pixelFormat, pfd) == 0) return false;
+
+                tempRC = Win32.wglCreateContext(dummyDC);
+                if (tempRC == IntPtr.Zero) return false;
+
+                if (Win32.wglMakeCurrent(dummyDC, tempRC) == 0) return false;
+
+                IntPtr procChoose = Win32.wglGetProcAddress("wglChoosePixelFormatARB");
+                if (procChoose == IntPtr.Zero) return false;
+
+                choosePixelFormatARB = GetDelegateFor<wglChoosePixelFormatARB>();
+
+                success = true;
+            }
+            finally
+            {
+                if (tempRC != IntPtr.Zero)
+                {
+                    Win32.wglMakeCurrent(IntPtr.Zero, IntPtr.Zero);
+                    Win32.wglDeleteContext(tempRC);
+                }
+                if (dummyDC != IntPtr.Zero) Win32.ReleaseDC(dummyWnd, dummyDC);
+                if (dummyWnd != IntPtr.Zero) Win32.DestroyWindow(dummyWnd);
+                Win32.UnregisterClass(CLASS_NAME, wc.hInstance);
+            }
+
+            return success;
+        }
+
+        private static wglChoosePixelFormatARB cachedChoosePixelFormatARB = null;
+        private static readonly object loadLock = new();
+
+        /// <summary>
+        /// Chooses a pixel format for the current device context using the ARB extension.
+        /// </summary> 
+        public bool ChoosePixelFormatARB(int bitDepth, int[] attribIList, float[] attribFList, uint maxFormats, [Out] int[] formats, out uint numFormats)
+        {
+            if (cachedChoosePixelFormatARB == null)
+            {
+                lock (loadLock)
+                {
+                    if (cachedChoosePixelFormatARB == null)
+                    {
+                        if (!LoadWglExtensionsUsingDummyWindow(bitDepth, out var func))
+                        {
+                            numFormats = 0;
+                            return false;
+                        }
+                        cachedChoosePixelFormatARB = func;
+                    }
+                }
+            }
+
+            return cachedChoosePixelFormatARB(RenderContextProvider.DeviceContextHandle, attribIList, attribFList, maxFormats, formats, out numFormats);
+        }
+
+        //  Delegates
+        private delegate bool wglChoosePixelFormatARB(IntPtr hDC, int[] attribIList, float[] attribFList, uint maxFormats, [Out] int[] formats, out uint numFormats);
+
+        //  Constants
+        public const int WGL_DRAW_TO_WINDOW_ARB = 0x2001;
+        public const int WGL_SUPPORT_OPENGL_ARB = 0x2010;
+        public const int WGL_DOUBLE_BUFFER_ARB = 0x2011;
+        public const int WGL_PIXEL_TYPE_ARB = 0x2013;
+        public const int WGL_TYPE_RGBA_ARB = 0x202B;
+        public const int WGL_COLOR_BITS_ARB = 0x2014;
+        public const int WGL_DEPTH_BITS_ARB = 0x2022;
+        public const int WGL_STENCIL_BITS_ARB = 0x2023;
+        public const int WGL_SAMPLE_BUFFERS_ARB = 0x2041;
+        public const int WGL_SAMPLES_ARB = 0x2042;
+
+        #endregion
+
         #region GL_ARB_explicit_uniform_location
 
         //  Constants

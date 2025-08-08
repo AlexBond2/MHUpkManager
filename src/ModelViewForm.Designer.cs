@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            sceneControl = new SharpGL.SceneControl();
             menuStrip1 = new MenuStrip();
             modelToolStripMenuItem = new ToolStripMenuItem();
             saveAsToolStripMenuItem = new ToolStripMenuItem();
@@ -38,8 +39,29 @@
             toolStripMenuItem1 = new ToolStripSeparator();
             showTexturesToolStripMenuItem = new ToolStripMenuItem();
             showGridToolStripMenuItem = new ToolStripMenuItem();
+            ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
+            // 
+            // sceneControl
+            // 
+            sceneControl.Dock = DockStyle.Fill;
+            sceneControl.DrawFPS = false;
+            sceneControl.Location = new Point(0, 24);
+            sceneControl.Margin = new Padding(4, 3, 4, 3);
+            sceneControl.Name = "sceneControl";
+            sceneControl.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL2_1;
+            sceneControl.RenderContextType = SharpGL.RenderContextType.NativeWindowMSAA;
+            sceneControl.RenderTrigger = SharpGL.RenderTrigger.Manual;
+            sceneControl.Size = new Size(800, 426);
+            sceneControl.TabIndex = 0;
+            sceneControl.OpenGLInitialized += sceneControl_OpenGLInitialized;
+            sceneControl.OpenGLDraw += sceneControl_OpenGLDraw;
+            sceneControl.KeyDown += sceneControl_KeyDown;
+            sceneControl.MouseDown += sceneControl_MouseDown;
+            sceneControl.MouseMove += sceneControl_MouseMove;
+            sceneControl.MouseUp += sceneControl_MouseUp; 
+            sceneControl.MouseWheel += sceneControl_MouseWheel;
             // 
             // menuStrip1
             // 
@@ -124,11 +146,13 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(sceneControl);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
             Name = "ModelViewForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Model Viewer";
+            ((System.ComponentModel.ISupportInitialize)sceneControl).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
@@ -136,6 +160,7 @@
         }
 
         #endregion
+        private SharpGL.SceneControl sceneControl;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem modelToolStripMenuItem;
         private ToolStripMenuItem saveAsToolStripMenuItem;

@@ -15,6 +15,16 @@ namespace SharpGL
     [Designer(typeof(OpenGLCtrlDesigner))]
     public partial class OpenGLControl : UserControl, ISupportInitialize
     {
+        [Browsable(true)]
+        [EditorBrowsable(EditorBrowsableState.Always)]
+        [Category("Mouse")]
+        [Description("Occurs when the mouse wheel moves while the control has focus.")]
+        public new event MouseEventHandler MouseWheel
+        {
+            add { base.MouseWheel += value; }
+            remove { base.MouseWheel -= value; }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenGLControl"/> class.
         /// </summary>
@@ -58,7 +68,7 @@ namespace SharpGL
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            if (RenderContextType == RenderContextType.NativeWindow)
+            if (RenderContextType == RenderContextType.NativeWindow || RenderContextType == RenderContextType.NativeWindowMSAA)
                 return;
             base.OnPaintBackground(e);
         }
@@ -71,7 +81,7 @@ namespace SharpGL
             object parameter = null;
            
             //  Native render context providers need a little bit more attention.
-            if(RenderContextType == RenderContextType.NativeWindow)
+            if(RenderContextType == RenderContextType.NativeWindow || RenderContextType == RenderContextType.NativeWindowMSAA)
             {
                 SetStyle(ControlStyles.OptimizedDoubleBuffer, false);
                 parameter = Handle;

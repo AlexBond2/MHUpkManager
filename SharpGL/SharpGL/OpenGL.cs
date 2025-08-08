@@ -7067,6 +7067,9 @@ namespace SharpGL
             case RenderContextType.NativeWindow:
                 renderContextProvider = new NativeWindowRenderContextProvider();
                 break;
+			case RenderContextType.NativeWindowMSAA:
+				renderContextProvider = new NativeWindowMSAARenderContextProvider();
+				break;
 			case RenderContextType.HiddenWindow:
 				renderContextProvider = new HiddenWindowRenderContextProvider();
 				break;

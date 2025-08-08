@@ -24,6 +24,11 @@ namespace SharpGL
         NativeWindow,
 
         /// <summary>
+        /// A Native Window with MSAA - directly render to a window with Multi-Sample Anti-Aliasing.
+        /// </summary>
+        NativeWindowMSAA,
+
+        /// <summary>
         /// A Hidden Window - more initial overhead but acceleratable.
         /// </summary>
         HiddenWindow,

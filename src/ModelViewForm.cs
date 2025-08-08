@@ -1,7 +1,6 @@
 ﻿using SharpGL;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
 
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Engine.Material;
@@ -14,7 +13,6 @@ namespace MHUpkManager
 {
     public partial class ModelViewForm : Form
     {
-        SceneControl sceneControl;
         private string title;
         private UObject mesh;
         private ModelMeshData model;
@@ -48,36 +46,10 @@ namespace MHUpkManager
 
         private void InitializeScene()
         {
-            sceneControl = new SceneControl();
-
-            ((ISupportInitialize)sceneControl).BeginInit();
-
-            sceneControl.Dock = DockStyle.Fill;
-            sceneControl.DrawFPS = false;
-            sceneControl.Location = new Point(0, 24);
-            sceneControl.Margin = new Padding(4, 3, 4, 3);
-            sceneControl.Name = "sceneControl";
-            sceneControl.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL2_1;
-            sceneControl.RenderContextType = RenderContextType.NativeWindow;
-            sceneControl.RenderTrigger = RenderTrigger.Manual;
-            sceneControl.Size = new Size(800, 426);
-            sceneControl.TabIndex = 0;
-            sceneControl.OpenGLInitialized += sceneControl_OpenGLInitialized;
-            sceneControl.OpenGLDraw += sceneControl_OpenGLDraw;
-            sceneControl.KeyDown += sceneControl_KeyDown;
-            sceneControl.MouseDown += sceneControl_MouseDown;
-            sceneControl.MouseMove += sceneControl_MouseMove;
-            sceneControl.MouseUp += sceneControl_MouseUp;
-
-            sceneControl.MouseWheel += sceneControl_MouseWheel;
             SceneControlShortcut(Keys.T, showTexturesToolStripMenuItem_Click);
             SceneControlShortcut(Keys.G, showGridToolStripMenuItem_Click);
             SceneControlShortcut(Keys.N, showNormalsToolStripMenuItem_Click);
             SceneControlShortcut(Keys.B, showBonesToolStripMenuItem_Click);
-
-            Controls.Add(sceneControl);
-
-            ((ISupportInitialize)sceneControl).EndInit();
 
             transView = new TransView
             {
