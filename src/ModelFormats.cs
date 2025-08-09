@@ -255,12 +255,18 @@ namespace MHUpkManager
         {
             if (!materialCache.TryGetValue(section.MaterialIndex, out var matBuilder))
             {
-                matBuilder = new MaterialBuilder($"{section.TextureName}");
+                matBuilder = new MaterialBuilder($"Material_{section.MaterialIndex}");                
 
-                if (section.DiffuseTexture != null)
+                if (section.GetTextureType(TextureType.uDiffuseMap, out var texture))
                 {
-                    var imageBuilder = CreateImageFromRgba(section.DiffuseTexture, section.MipIndex, section.TextureData);
+                    var imageBuilder = CreateImageFromRgba(texture.Texture2D, texture.MipIndex, texture.Data);
                     matBuilder.WithChannelImage(KnownChannel.BaseColor, imageBuilder);
+                }
+
+                if (section.GetTextureType(TextureType.uNormalMap, out texture))
+                {
+                    var imageBuilder = CreateImageFromRgba(texture.Texture2D, texture.MipIndex, texture.Data);
+                    matBuilder.WithChannelImage(KnownChannel.Normal, imageBuilder);
                 }
 
                 materialCache[section.MaterialIndex] = matBuilder;
@@ -291,24 +297,12 @@ namespace MHUpkManager
         private static VertexPositionNormal ToVertexPositionNormal(GLVertex v)
         {
             var p = v.Position;
-            var n = SafeNormal(v.Normal);
+            var n = v.Normal;
 
             var pos = new Vector3(p.X, p.Z, p.Y); // MH invert
             var norm = new Vector3(n.X, n.Z, n.Y); // MH invert
 
             return new VertexPositionNormal(pos, norm);
-        }
-
-        private static Vector3 SafeNormal(Vector3 n)
-        {
-            if (float.IsNaN(n.X) || float.IsNaN(n.Y) || float.IsNaN(n.Z) ||
-                float.IsInfinity(n.X) || float.IsInfinity(n.Y) || float.IsInfinity(n.Z))
-                return Vector3.UnitY;
-
-            if (n.LengthSquared() < 1e-5f) 
-                return Vector3.UnitY;
-
-            return Vector3.Normalize(n);
         }
 
         public static ExportFormat GetExportFormat(string extension)

@@ -504,14 +504,28 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
                 GLVertex glVertex = new()
                 {
                     Position = vertex.GetVector3(),
-                    Normal = vertex.TangentZ.ToVector().ToVector3(),
-                    Tangent = vertex.TangentX.ToVector().ToVector3(),
+                    Normal = SafeNormal(vertex.TangentZ),
+                    Tangent = SafeNormal(vertex.TangentX),
                     TexCoord = vertex.GetVector2(0) // Assuming we only need the first UV set
                 };
 
                 glVertex.SetBoneData(vertex.InfluenceBones, vertex.InfluenceWeights);
                 yield return glVertex;
             }
+        }
+
+        private static Vector3 SafeNormal(FPackedNormal pn)
+        {
+            Vector3 n = pn.ToVector().ToVector3();
+
+            if (float.IsNaN(n.X) || float.IsNaN(n.Y) || float.IsNaN(n.Z) ||
+                float.IsInfinity(n.X) || float.IsInfinity(n.Y) || float.IsInfinity(n.Z))
+                return Vector3.UnitY;
+
+            if (n.LengthSquared() < 1e-5f)
+                return Vector3.UnitY;
+
+            return Vector3.Normalize(n);
         }
 
         public static FSkeletalMeshVertexBuffer ReadData(UBuffer buffer)

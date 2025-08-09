@@ -81,7 +81,7 @@ namespace MHUpkManager
             textureNameLabel.Text = title;
             textureGuidLabel.Text = textureObject.TextureFileCacheGuid.ToString();
             mipMapsLabel.Text = textureObject.Mips.Count.ToString();
-            textureFileLabel.Text = textureObject.TextureFileCacheName.Name;
+            textureFileLabel.Text = textureObject.TextureFileCacheName?.Name;
 
             UpdateMipMapBox();
             LoadTexture(minIndex);

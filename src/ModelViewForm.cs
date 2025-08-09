@@ -1,4 +1,6 @@
-﻿using SharpGL;
+﻿using MHUpkManager.Models;
+using SharpGL;
+using SharpGLTF.Schema2;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -306,8 +308,11 @@ namespace MHUpkManager
             {
                 if (showTextures)
                 {
-                    if (section.GLTextureId != 0)
-                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, section.GLTextureId);
+                    if (section.IsTexture())
+                    {
+                        if (section.GetTextureType(TextureType.uDiffuseMap, out var texture))
+                            gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
+                    }
                     else
                         gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
                 }
@@ -521,25 +526,69 @@ namespace MHUpkManager
             sceneControl.Invalidate();
         }
 
+        public struct Texture2DData
+        {
+            public TextureType Type;
+            public UTexture2D Texture2D;
+            public int MipIndex;
+            public uint TextureId;
+            public string Name;
+            public byte[] Data;
+
+            public Texture2DData(TextureType type, OpenGL gl, FObject textureObj) : this()
+            {
+                Type = type;
+                Name = textureObj?.Name;
+                TextureId = GLLib.BindGLTexture(gl, textureObj, out MipIndex, out Texture2D, out Data);
+            }
+        }
+
+        public enum TextureType
+        {
+            uDiffuseMap,
+            uNormalMap
+        }
+
         public struct MeshSectionData
         {
             public uint BaseIndex;
             public uint NumTriangles;
 
-            public int MaterialIndex;
             public UMaterialInstanceConstant Material;
-            public UTexture2D DiffuseTexture;
-            public int MipIndex;
-            public uint GLTextureId;
-            public string TextureName;
-            public byte[] TextureData;
+            public int MaterialIndex;
+            public List<Texture2DData> Textures;
 
             public void LoadMaterial(OpenGL gl, FObject material)
             {
+                Textures = [];
                 Material = material?.LoadObject<UMaterialInstanceConstant>();
+
                 var textureObj = Material?.GetTextureParameterValue("Diffuse");
-                TextureName = textureObj?.Name;
-                GLTextureId = GLLib.BindGLTexture(gl, textureObj, out MipIndex, out DiffuseTexture, out TextureData);
+                if (textureObj != null) Textures.Add(new(TextureType.uDiffuseMap, gl, textureObj));
+
+                textureObj = Material?.GetTextureParameterValue("Normal");
+                if (textureObj != null) Textures.Add(new(TextureType.uNormalMap, gl, textureObj));
+            }
+
+            public bool IsTexture()
+            {
+                if (GetTextureType(TextureType.uDiffuseMap, out var texture))
+                    return texture.TextureId != 0;
+                return false;
+            }
+
+            public readonly bool GetTextureType(TextureType type, out Texture2DData texture)
+            {
+                if (Textures != null)
+                    foreach (var tex in Textures)
+                        if (tex.Type == type)
+                        {
+                            texture = tex;
+                            return true;
+                        }
+
+                texture = default;
+                return false;
             }
         }
 
