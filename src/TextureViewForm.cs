@@ -1,8 +1,6 @@
-﻿
-using DDSLib;
+﻿using DDSLib;
 using MHUpkManager.TextureManager;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.TextFormatting;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Tables;
 

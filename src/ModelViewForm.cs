@@ -1,5 +1,5 @@
-﻿using MHUpkManager.Models;
-using SharpGL;
+﻿using SharpGL;
+using SharpGL.Shaders;
 using SharpGLTF.Schema2;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -18,6 +18,7 @@ namespace MHUpkManager
         private string title;
         private UObject mesh;
         private ModelMeshData model;
+        private ModelShaders modelShaders;
 
         private const float MaxDepth = 100000.0f;
 
@@ -39,6 +40,8 @@ namespace MHUpkManager
         private bool showBoneNames = false;
         private bool showTextures = true;
         private bool showGrid = true;
+        private bool enableShaders = false;
+        private uint whiteTexId;
 
         public ModelViewForm()
         {
@@ -60,6 +63,8 @@ namespace MHUpkManager
                 Zoom = 60f,
                 Per = 35.0f
             };
+
+            modelShaders = new();
         }
 
         public void SceneControlShortcut(Keys key, EventHandler handler)
@@ -86,8 +91,8 @@ namespace MHUpkManager
         private void SetupLighting(OpenGL gl)
         {
             float[] ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
-            float[] lightPos = { -400.0f, -400.0f, 400f, 1.0f };
-            float[] light1Pos = { 200.0f, 200.0f, 200f, 1.0f };
+            float[] lightPos = { -1.0f, -1.0f, 1.0f, 0.0f };
+            float[] light1Pos = { 1.0f, 1.0f, 1.0f, 0.0f };
 
             float[] matDiffuse1 = { 0.9f, 0.9f, 0.9f, 1.0f };
             float[] matDiffuse2 = { 0.6f, 0.6f, 0.6f, 1.0f };
@@ -125,8 +130,29 @@ namespace MHUpkManager
                 return;
             }
 
-            model = new ModelMeshData(mesh, name, sceneControl.OpenGL);
+            var gl = sceneControl.OpenGL;
+
+            BindBlankTexture(gl);
+
+            model = new ModelMeshData(mesh, name, gl);
+
+            if (model.NeedShaders())
+                modelShaders.InitShaders(gl);
+
             ResetTransView();
+        }
+
+        private void BindBlankTexture(OpenGL gl)
+        {
+            uint[] tmp = new uint[1];
+            gl.GenTextures(1, tmp);
+            whiteTexId = tmp[0];
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+            byte[] white = [255, 255, 255, 255];
+            gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA, 1, 1, 0,
+                          OpenGL.GL_RGBA, OpenGL.GL_UNSIGNED_BYTE, white);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_NEAREST);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_NEAREST);
         }
 
         public void SetTitle(string name)
@@ -285,36 +311,117 @@ namespace MHUpkManager
             else
                 gl.Disable(OpenGL.GL_TEXTURE_2D);
 
+            var shaderMode = enableShaders && modelShaders.Initialized;
+            if (shaderMode)
+            {
+                var sh = modelShaders.ShaderProgram;
+
+                sh.Bind(gl);
+
+                float[] modelViewMatrix = new float[16];
+                float[] projectionMatrix = new float[16];
+
+                gl.GetFloat(OpenGL.GL_MODELVIEW_MATRIX, modelViewMatrix);
+                gl.GetFloat(OpenGL.GL_PROJECTION_MATRIX, projectionMatrix);
+
+                sh.SetUniformMatrix4(gl, "uProj", projectionMatrix);
+                sh.SetUniformMatrix4(gl, "uModel", modelViewMatrix);
+
+                // Light 0
+                float[] lightPos = new float[4];
+                gl.GetLight(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, lightPos);
+                Vector3 uLightDir = Vector3.Normalize(new(lightPos[0], lightPos[1], lightPos[2]));
+                sh.SetUniform3(gl, "uLightDir", uLightDir.X, uLightDir.Y, uLightDir.Z);
+                float[] diffuse0 = new float[4];
+                gl.GetLight(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, diffuse0);
+                sh.SetUniform3(gl, "uLight0Color", diffuse0[0], diffuse0[1], diffuse0[2]);
+
+                // Light 1
+                float[] light1Pos = new float[4];
+                gl.GetLight(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, light1Pos);
+                Vector3 uLight1Dir = Vector3.Normalize(new(light1Pos[0], light1Pos[1], light1Pos[2]));
+                sh.SetUniform3(gl, "uLight1Dir", uLight1Dir.X, uLight1Dir.Y, uLight1Dir.Z);
+                float[] diffuse1 = new float[4];
+                gl.GetLight(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, diffuse1);
+                sh.SetUniform3(gl, "uLight1Color", diffuse1[0], diffuse1[1], diffuse1[2]);
+
+                sh.SetUniform1(gl, "uDiffuseMap", 0);
+                sh.SetUniform1(gl, "uNormalMap", 1);
+
+                gl.ActiveTexture(OpenGL.GL_TEXTURE1);
+                gl.Enable(OpenGL.GL_TEXTURE_2D);
+                gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+                gl.Enable(OpenGL.GL_TEXTURE_2D);
+            }
+
             gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, model.vboId);
             gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, model.iboId);
 
-            gl.EnableClientState(OpenGL.GL_VERTEX_ARRAY);
-            gl.EnableClientState(OpenGL.GL_NORMAL_ARRAY);
-            if (showTextures)
-                gl.EnableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
-
             int stride = Marshal.SizeOf(typeof(GLVertex));
 
-            gl.VertexPointer(3, OpenGL.GL_FLOAT, stride, IntPtr.Zero);
+            uint positionLoc = 0, normalLoc = 0, texCoordLoc = 0, tangentLoc = 0;
 
-            gl.NormalPointer(OpenGL.GL_FLOAT, stride, new IntPtr(Marshal.OffsetOf(typeof(GLVertex), nameof(GLVertex.Normal)).ToInt32()));
-
-            if (showTextures)
+            if (shaderMode)
             {
-                gl.TexCoordPointer(2, OpenGL.GL_FLOAT, stride, new IntPtr(Marshal.OffsetOf(typeof(GLVertex), nameof(GLVertex.TexCoord)).ToInt32()));
+                var sh = modelShaders.ShaderProgram;
+                positionLoc = (uint)sh.GetAttributeLocation(gl, "aPosition");
+                normalLoc = (uint)sh.GetAttributeLocation(gl, "aNormal");
+                texCoordLoc = (uint)sh.GetAttributeLocation(gl, "aTexCoord");
+                tangentLoc = (uint)sh.GetAttributeLocation(gl, "aTangent");
+
+                gl.EnableVertexAttribArray(positionLoc);
+                gl.VertexAttribPointer(positionLoc, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Position);
+
+                gl.EnableVertexAttribArray(normalLoc);
+                gl.VertexAttribPointer(normalLoc, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Normal);
+
+                gl.EnableVertexAttribArray(texCoordLoc);
+                gl.VertexAttribPointer(texCoordLoc, 2, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.TexCoord);
+
+                gl.EnableVertexAttribArray(tangentLoc);
+                gl.VertexAttribPointer(tangentLoc, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Tangent);
+            }
+            else
+            {
+                gl.EnableClientState(OpenGL.GL_VERTEX_ARRAY);
+                gl.EnableClientState(OpenGL.GL_NORMAL_ARRAY);
+                if (showTextures)
+                    gl.EnableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
+
+                gl.VertexPointer(3, OpenGL.GL_FLOAT, stride, GLVertexOffsets.Position);
+                gl.NormalPointer(OpenGL.GL_FLOAT, stride, GLVertexOffsets.Normal);
+                if (showTextures)
+                    gl.TexCoordPointer(2, OpenGL.GL_FLOAT, stride, GLVertexOffsets.TexCoord);
             }
 
             foreach (var section in model.Sections)
             {
                 if (showTextures)
                 {
-                    if (section.IsTexture())
-                    {
-                        if (section.GetTextureType(TextureType.uDiffuseMap, out var texture))
-                            gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
-                    }
+                    gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+                    if (section.GetTextureType(TextureType.uDiffuseMap, out var texture))
+                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
                     else
-                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+
+                    if (enableShaders)
+                    {
+                        gl.ActiveTexture(OpenGL.GL_TEXTURE1);
+                        if (section.GetTextureType(TextureType.uNormalMap, out texture))
+                            gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
+                        else
+                            gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+                    }
+                }
+                else if (enableShaders)
+                {
+                    gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+                    gl.ActiveTexture(OpenGL.GL_TEXTURE1);
+                    if (section.GetTextureType(TextureType.uNormalMap, out var texture))
+                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
+                    else
+                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
                 }
 
                 int indexStart = (int)section.BaseIndex;
@@ -323,12 +430,34 @@ namespace MHUpkManager
                 gl.DrawElements(OpenGL.GL_TRIANGLES, indexCount, OpenGL.GL_UNSIGNED_INT, new IntPtr(indexStart * sizeof(uint)));
             }
 
-            gl.DisableClientState(OpenGL.GL_VERTEX_ARRAY);
-            gl.DisableClientState(OpenGL.GL_NORMAL_ARRAY);
-            if (showTextures)
-                gl.DisableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
+            if (shaderMode)
+            {
+                gl.DisableVertexAttribArray(positionLoc);
+                gl.DisableVertexAttribArray(normalLoc);  
+                gl.DisableVertexAttribArray(texCoordLoc);
+                gl.DisableVertexAttribArray(tangentLoc);
 
-            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+                if (showTextures)
+                {                    
+                    gl.ActiveTexture(OpenGL.GL_TEXTURE1);
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+                    gl.Disable(OpenGL.GL_TEXTURE_2D);
+                    gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+                }
+
+                modelShaders.ShaderProgram.Unbind(gl);
+            }
+            else
+            {
+                gl.DisableClientState(OpenGL.GL_VERTEX_ARRAY);
+                gl.DisableClientState(OpenGL.GL_NORMAL_ARRAY);
+                if (showTextures)
+                    gl.DisableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
+
+                gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+            }
+
             gl.Disable(OpenGL.GL_TEXTURE_2D);
 
             if (showNormal)
@@ -526,6 +655,13 @@ namespace MHUpkManager
             sceneControl.Invalidate();
         }
 
+        private void enableShadersMenuItem_Click(object sender, EventArgs e)
+        {
+            enableShadersMenuItem.Checked = !enableShadersMenuItem.Checked;
+            enableShaders = enableShadersMenuItem.Checked;
+            sceneControl.Invalidate();
+        }
+
         public struct Texture2DData
         {
             public TextureType Type;
@@ -570,9 +706,16 @@ namespace MHUpkManager
                 if (textureObj != null) Textures.Add(new(TextureType.uNormalMap, gl, textureObj));
             }
 
-            public bool IsTexture()
+            public bool IsDiffuse()
             {
                 if (GetTextureType(TextureType.uDiffuseMap, out var texture))
+                    return texture.TextureId != 0;
+                return false;
+            }
+
+            public bool IsNormal()
+            {
+                if (GetTextureType(TextureType.uNormalMap, out var texture))
                     return texture.TextureId != 0;
                 return false;
             }
@@ -598,6 +741,19 @@ namespace MHUpkManager
             public int ParentIndex;
             public Matrix4x4 LocalTransform;
             public Matrix4x4 GlobalTransform;
+        }
+
+        public static class GLVertexOffsets
+        {
+            public static readonly IntPtr Position = new(0);
+            public static readonly IntPtr Normal = GetOffset(nameof(GLVertex.Normal));
+            public static readonly IntPtr TexCoord = GetOffset(nameof(GLVertex.TexCoord));
+            public static readonly IntPtr Tangent = GetOffset(nameof(GLVertex.Tangent));
+
+            private static IntPtr GetOffset(string fieldName)
+            {
+                return new IntPtr(Marshal.OffsetOf(typeof(GLVertex), fieldName).ToInt32());
+            }
         }
 
         public struct ModelMeshData
@@ -721,6 +877,14 @@ namespace MHUpkManager
 
                 BindIndexBuffer(gl);
                 BindVertexBuffer(gl);
+            }
+
+            public bool NeedShaders()
+            {
+                foreach (var section in Sections)
+                    if (section.IsNormal())
+                        return true;
+                return false;
             }
 
             private readonly void BindVertexBuffer(OpenGL gl)

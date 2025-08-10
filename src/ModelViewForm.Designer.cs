@@ -39,6 +39,7 @@
             toolStripMenuItem1 = new ToolStripSeparator();
             showTexturesToolStripMenuItem = new ToolStripMenuItem();
             showGridToolStripMenuItem = new ToolStripMenuItem();
+            enableShadersMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -55,13 +56,13 @@
             sceneControl.RenderTrigger = SharpGL.RenderTrigger.Manual;
             sceneControl.Size = new Size(800, 426);
             sceneControl.TabIndex = 0;
+            sceneControl.MouseWheel += sceneControl_MouseWheel;
             sceneControl.OpenGLInitialized += sceneControl_OpenGLInitialized;
             sceneControl.OpenGLDraw += sceneControl_OpenGLDraw;
             sceneControl.KeyDown += sceneControl_KeyDown;
             sceneControl.MouseDown += sceneControl_MouseDown;
             sceneControl.MouseMove += sceneControl_MouseMove;
-            sceneControl.MouseUp += sceneControl_MouseUp; 
-            sceneControl.MouseWheel += sceneControl_MouseWheel;
+            sceneControl.MouseUp += sceneControl_MouseUp;
             // 
             // menuStrip1
             // 
@@ -88,7 +89,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, toolStripMenuItem1, showTexturesToolStripMenuItem, showGridToolStripMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, toolStripMenuItem1, showTexturesToolStripMenuItem, showGridToolStripMenuItem, enableShadersMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "View";
@@ -97,7 +98,7 @@
             // 
             showNormalsToolStripMenuItem.Name = "showNormalsToolStripMenuItem";
             showNormalsToolStripMenuItem.ShortcutKeyDisplayString = "N";
-            showNormalsToolStripMenuItem.Size = new Size(173, 22);
+            showNormalsToolStripMenuItem.Size = new Size(180, 22);
             showNormalsToolStripMenuItem.Text = "Show Normals";
             showNormalsToolStripMenuItem.Click += showNormalsToolStripMenuItem_Click;
             // 
@@ -105,21 +106,21 @@
             // 
             showBonesToolStripMenuItem.Name = "showBonesToolStripMenuItem";
             showBonesToolStripMenuItem.ShortcutKeyDisplayString = "B";
-            showBonesToolStripMenuItem.Size = new Size(173, 22);
+            showBonesToolStripMenuItem.Size = new Size(180, 22);
             showBonesToolStripMenuItem.Text = "Show Bones";
             showBonesToolStripMenuItem.Click += showBonesToolStripMenuItem_Click;
             // 
             // showBoneNameToolStripMenuItem
             // 
             showBoneNameToolStripMenuItem.Name = "showBoneNameToolStripMenuItem";
-            showBoneNameToolStripMenuItem.Size = new Size(173, 22);
+            showBoneNameToolStripMenuItem.Size = new Size(180, 22);
             showBoneNameToolStripMenuItem.Text = "Show Bone Names";
             showBoneNameToolStripMenuItem.Click += showBoneNameToolStripMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(170, 6);
+            toolStripMenuItem1.Size = new Size(177, 6);
             // 
             // showTexturesToolStripMenuItem
             // 
@@ -127,7 +128,7 @@
             showTexturesToolStripMenuItem.CheckState = CheckState.Checked;
             showTexturesToolStripMenuItem.Name = "showTexturesToolStripMenuItem";
             showTexturesToolStripMenuItem.ShortcutKeyDisplayString = "T";
-            showTexturesToolStripMenuItem.Size = new Size(173, 22);
+            showTexturesToolStripMenuItem.Size = new Size(180, 22);
             showTexturesToolStripMenuItem.Text = "Show Textures";
             showTexturesToolStripMenuItem.Click += showTexturesToolStripMenuItem_Click;
             // 
@@ -137,9 +138,16 @@
             showGridToolStripMenuItem.CheckState = CheckState.Checked;
             showGridToolStripMenuItem.Name = "showGridToolStripMenuItem";
             showGridToolStripMenuItem.ShortcutKeyDisplayString = "G";
-            showGridToolStripMenuItem.Size = new Size(173, 22);
+            showGridToolStripMenuItem.Size = new Size(180, 22);
             showGridToolStripMenuItem.Text = "Show Grid";
             showGridToolStripMenuItem.Click += showGridToolStripMenuItem_Click;
+            // 
+            // enableShadersMenuItem
+            // 
+            enableShadersMenuItem.Name = "enableShadersMenuItem";
+            enableShadersMenuItem.Size = new Size(180, 22);
+            enableShadersMenuItem.Text = "Enable Shaders";
+            enableShadersMenuItem.Click += enableShadersMenuItem_Click;
             // 
             // ModelViewForm
             // 
@@ -171,5 +179,6 @@
         private ToolStripMenuItem showTexturesToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem showGridToolStripMenuItem;
+        private ToolStripMenuItem enableShadersMenuItem;
     }
 }
