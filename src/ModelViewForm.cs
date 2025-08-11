@@ -292,7 +292,7 @@ namespace MHUpkManager
             var matViewFinal =  matTranslate * matRotZ * matRotX * matView * matScale;
 
             // grid
-            if (showGrid) gridRenderer.DrawGrid(gl, zoom, matProjection,  matViewFinal);
+            if (showGrid) gridRenderer.DrawGrid(gl, zoom, matProjection,  matViewFinal, Matrix4x4.Identity);
 
             // model
             DrawModel(gl, matProjection, matViewFinal, matMH);
@@ -314,7 +314,7 @@ namespace MHUpkManager
                                    Matrix4x4.CreateRotationX(MathF.PI * transView.Rot.X / 180.0f) *
                                    matViewAxis;
 
-            axisRenderer.DrawAxes(gl, matProjectionAxis, matViewAxisFinal);
+            axisRenderer.DrawAxes(gl, matProjectionAxis, matViewAxisFinal, Matrix4x4.Identity);
 
             gl.Flush();
         }
@@ -381,7 +381,7 @@ namespace MHUpkManager
                 DrawLines(gl, 1, modelShaders.ColorShader1, matProjection, matView, matModel);
 
             if (showBones || showBoneNames)
-                DrawBones(gl);            
+                DrawBones(gl, modelShaders.ColorShader1, matProjection, matView, matModel);            
         }
 
         private static Vector3 GetTranslation(Matrix4x4 m)
@@ -389,50 +389,127 @@ namespace MHUpkManager
             return new Vector3(m.M41, m.M42, m.M43);
         }
 
-        private void DrawBones(OpenGL gl)
+        private void DrawBones(OpenGL gl, ShaderProgram shader, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
         {
-   /*         if (model.Bones != null)
+            if (model.Bones == null) return;
+
+            gl.Disable(OpenGL.GL_DEPTH_TEST);
+
+            List<Vector3> pointVertices = [];
+            List<Vector3> lineVertices = [];
+            List<Tuple<Vector3, string>> boneNames = [];
+
+            for (int i = 0; i < model.Bones.Count; i++)
             {
-                gl.Disable(OpenGL.GL_LIGHTING);
-                gl.Disable(OpenGL.GL_DEPTH_TEST);
-
-                for (int i = 0; i < model.Bones.Count; i++)
+                var bone = model.Bones[i];
+                if (bone.ParentIndex >= 0)
                 {
-                    var bone = model.Bones[i];
-                    if (bone.ParentIndex >= 0)
+                    var to = GetTranslation(bone.GlobalTransform);
+
+                    if (showBones)
                     {
-                        var to = GetTranslation(bone.GlobalTransform);
+                        pointVertices.Add(to);
 
-                        if (showBones)
-                        {
-                            gl.PointSize(4.0f);
-                            gl.Color(0.8f, 0.8f, 0.8f);
-                            gl.Begin(OpenGL.GL_POINTS);
-                            gl.Vertex(to.X, to.Y, to.Z);
-                            gl.End();
-                            gl.PointSize(1.0f);
-
-                            gl.LineWidth(1f);
-                            gl.Color(0.5f, 0.5f, 0.5f);
-                            var parent = model.Bones[bone.ParentIndex];
-                            var from = GetTranslation(parent.GlobalTransform);
-                            gl.Begin(OpenGL.GL_LINES);
-                            gl.Vertex(from.X, from.Y, from.Z);
-                            gl.Vertex(to.X, to.Y, to.Z);
-                            gl.End();
-                        }
-
-                        if (showBoneNames)
-                        {
-                            gl.Color(1.0f, 1.0f, 0.0f);
-                            gl.RasterPos(to.X, to.Y, to.Z);
-                            GLLib.DrawText(gl, " " + bone.Name);
-                        }
+                        var parent = model.Bones[bone.ParentIndex];
+                        var from = GetTranslation(parent.GlobalTransform);
+                        lineVertices.Add(from);
+                        lineVertices.Add(to);
                     }
+
+                    if (showBoneNames)
+                        boneNames.Add(Tuple.Create(to, bone.Name));
                 }
-                gl.Enable(OpenGL.GL_LIGHTING);
-                gl.Enable(OpenGL.GL_DEPTH_TEST);
-            }*/
+            }
+
+            if (showBones && pointVertices.Count > 0)
+            {
+                shader.Bind(gl);
+                shader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
+                shader.SetUniformMatrix4(gl, "uView", matView.ToArray());
+                shader.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
+                shader.SetUniform4(gl, "uColor", 0.8f, 0.8f, 0.8f, 1.0f);
+
+                uint[] vaos = new uint[1];
+                gl.GenVertexArrays(1, vaos);
+                uint vao = vaos[0];
+
+                gl.BindVertexArray(vao);
+
+                uint[] vbos = new uint[1];
+                gl.GenBuffers(1, vbos);
+                uint vbo = vbos[0];
+
+                BindVertexBuffer(gl, vbo, sizeof(float), OpenGL.GL_STATIC_DRAW, Vector3ToFloatArray(pointVertices));
+                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.EnableVertexAttribArray(0);
+
+                gl.PointSize(4.0f);
+
+                gl.DrawArrays(OpenGL.GL_POINTS, 0, pointVertices.Count);
+
+                gl.DeleteBuffers(1, vbos);
+                gl.DeleteVertexArrays(1, vaos);
+
+                shader.Unbind(gl);
+            }
+
+            if (showBones && lineVertices.Count > 0)
+            {
+                shader.Bind(gl);
+                shader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
+                shader.SetUniformMatrix4(gl, "uView", matView.ToArray());
+                shader.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
+                shader.SetUniform4(gl, "uColor", 0.5f, 0.5f, 0.5f, 1.0f);
+
+                uint[] vaos = new uint[1];
+                gl.GenVertexArrays(1, vaos);
+                uint vao = vaos[0];
+
+                gl.BindVertexArray(vao);
+
+                uint[] vbos = new uint[1];
+                gl.GenBuffers(1, vbos);
+                uint vbo = vbos[0];
+
+                BindVertexBuffer(gl, vbo, sizeof(float), OpenGL.GL_STATIC_DRAW, Vector3ToFloatArray(lineVertices));
+                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.EnableVertexAttribArray(0);
+
+                gl.LineWidth(1f);
+
+                gl.DrawArrays(OpenGL.GL_LINES, 0, lineVertices.Count);
+
+                gl.DeleteBuffers(1, vbos);
+                gl.DeleteVertexArrays(1, vaos);
+
+                shader.Unbind(gl);
+            }
+
+            if (showBoneNames)
+            {
+                Vector4 color = new (1.0f, 1.0f, 0.0f, 1.0f);
+                foreach (var bone in boneNames)
+                    fontRenderer.DrawText(gl, " " + bone.Item2, bone.Item1, matProjection, matView, matModel, color);
+            }
+
+            gl.Enable(OpenGL.GL_DEPTH_TEST);
+        }
+
+        private static float[] Vector3ToFloatArray(List<Vector3> pointVertices)
+        {
+            if (pointVertices == null || pointVertices.Count == 0)
+                return [];
+
+            float[] result = new float[pointVertices.Count * 3];
+
+            for (int i = 0; i < pointVertices.Count; i++)
+            {
+                result[i * 3] = pointVertices[i].X;
+                result[i * 3 + 1] = pointVertices[i].Y;
+                result[i * 3 + 2] = pointVertices[i].Z;
+            }
+
+            return result;
         }
 
         private void PrepareLines(OpenGL gl, int type)

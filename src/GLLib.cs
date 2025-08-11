@@ -162,7 +162,7 @@ namespace MHUpkManager
             }
 
             public void DrawText(OpenGL gl, string text, Vector3 startPos, 
-                Matrix4x4 matProjection, Matrix4x4 matView, Vector4 color, float scale = 1.0f)
+                Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel, Vector4 color, float scale = 1.0f)
             {
                 if (string.IsNullOrEmpty(text))
                     return;
@@ -188,6 +188,7 @@ namespace MHUpkManager
 
                 FontShader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
                 FontShader.SetUniformMatrix4(gl, "uView", matView.ToArray());
+                FontShader.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
 
                 FontShader.SetUniform3(gl, "uStartPos", startPos.X, startPos.Y, startPos.Z);
                 FontShader.SetUniform1(gl, "uScale", scale);
@@ -307,7 +308,7 @@ namespace MHUpkManager
                 gl.BindVertexArray(0);               
             }
 
-            public void DrawGrid(OpenGL gl, float zoomLevel, Matrix4x4 matProjection, Matrix4x4 matView)
+            public void DrawGrid(OpenGL gl, float zoomLevel, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
             {
                 float step;
                 if (zoomLevel <= 10) step = 1.0f;
@@ -324,6 +325,7 @@ namespace MHUpkManager
 
                 shader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
                 shader.SetUniformMatrix4(gl, "uView", matView.ToArray());
+                shader.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
 
                 gl.BindVertexArray(gridVAO);
                 gl.DrawArrays(OpenGL.GL_LINES, 0, gridVertexCount);
@@ -481,11 +483,12 @@ namespace MHUpkManager
                 gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, 0);
             }
 
-            public void DrawAxes(OpenGL gl, Matrix4x4 matProjection, Matrix4x4 matView)
+            public void DrawAxes(OpenGL gl, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
             {
                 shader.Bind(gl);
                 shader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
                 shader.SetUniformMatrix4(gl, "uView", matView.ToArray());
+                shader.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
 
                 gl.BindVertexArray(axesVao);
                 gl.DrawArrays(OpenGL.GL_LINES, 0, 6);
@@ -494,9 +497,9 @@ namespace MHUpkManager
                 shader.Unbind(gl);
 
                 // Draw labels
-                font.DrawText(gl, "x", new Vector3(1.2f, 0f, 0f), matProjection, matView, new(1f, 0f, 0f, 1f));
-                font.DrawText(gl, "y", new Vector3(0f, 1.2f, 0f), matProjection, matView, new(0f, 1f, 0f, 1f));
-                font.DrawText(gl, "z", new Vector3(0f, 0f, 1.2f), matProjection, matView, new(0f, 0f, 1f, 1f));
+                font.DrawText(gl, "x", new Vector3(1.2f, 0f, 0f), matProjection, matView, matModel, new(1f, 0f, 0f, 1f));
+                font.DrawText(gl, "y", new Vector3(0f, 1.2f, 0f), matProjection, matView, matModel, new(0f, 1f, 0f, 1f));
+                font.DrawText(gl, "z", new Vector3(0f, 0f, 1.2f), matProjection, matView, matModel, new(0f, 0f, 1f, 1f));
             }
         }
 

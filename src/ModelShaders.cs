@@ -62,27 +62,24 @@ void main() {
         private const string vertexFont = @"#version 150 core
 in vec3 inPosition;
 in vec2 inUV;
-
 uniform mat4 uProjection;
 uniform mat4 uView;
+uniform mat4 uModel;
 uniform mat4 uOrtho;
 uniform vec3 uStartPos;
 uniform vec2 uViewportSize;
 uniform float uScale;
-
 out vec2 passUV;
-
 void main()
 {
     vec4 worldPos = vec4(uStartPos, 1.0);
-    vec4 clipPos = uProjection * uView * worldPos;
+    vec4 clipPos = uProjection * uView * uModel * worldPos;
     vec3 ndc = clipPos.xyz / clipPos.w;
     vec2 screenPixels = (ndc.xy * 0.5 + 0.5) * uViewportSize;
     screenPixels.y = uViewportSize.y - screenPixels.y;
     vec2 textOffset = inPosition.xy * uScale;
     vec2 finalScreenPos = screenPixels + textOffset;
-    gl_Position = uOrtho * vec4(finalScreenPos, 0.0, 1.0);
-    
+    gl_Position = uOrtho * vec4(finalScreenPos, 0.0, 1.0);    
     passUV = inUV;
 }";
         private const string fragmentFont = @"#version 150 core
@@ -101,9 +98,10 @@ in vec4 inColor;
 out vec4 vertColor;
 uniform mat4 uProjection;
 uniform mat4 uView;
+uniform mat4 uModel;
 void main()
 {
-    gl_Position = uProjection * uView * vec4(inPosition, 1.0);
+    gl_Position = uProjection * uView * uModel * vec4(inPosition, 1.0);
     vertColor = inColor;
 }";
         private const string fragmentColor = @"#version 150 core
