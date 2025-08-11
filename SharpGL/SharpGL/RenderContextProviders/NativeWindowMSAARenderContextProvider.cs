@@ -88,7 +88,7 @@ namespace SharpGL.RenderContextProviders
 
             MakeCurrent();
 
-            // UpdateContextVersion(gl);
+            UpdateContextVersion(gl);
 
             //  Return success.
             return true;

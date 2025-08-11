@@ -39,7 +39,7 @@
             toolStripMenuItem1 = new ToolStripSeparator();
             showTexturesToolStripMenuItem = new ToolStripMenuItem();
             showGridToolStripMenuItem = new ToolStripMenuItem();
-            enableShadersMenuItem = new ToolStripMenuItem();
+            showTangentMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)sceneControl).BeginInit();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -51,7 +51,7 @@
             sceneControl.Location = new Point(0, 24);
             sceneControl.Margin = new Padding(4, 3, 4, 3);
             sceneControl.Name = "sceneControl";
-            sceneControl.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL2_1;
+            sceneControl.OpenGLVersion = SharpGL.Version.OpenGLVersion.OpenGL3_2;
             sceneControl.RenderContextType = SharpGL.RenderContextType.NativeWindowMSAA;
             sceneControl.RenderTrigger = SharpGL.RenderTrigger.Manual;
             sceneControl.Size = new Size(800, 426);
@@ -89,7 +89,7 @@
             // 
             // viewToolStripMenuItem
             // 
-            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, toolStripMenuItem1, showTexturesToolStripMenuItem, showGridToolStripMenuItem, enableShadersMenuItem });
+            viewToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { showNormalsToolStripMenuItem, showTangentMenuItem, showBonesToolStripMenuItem, showBoneNameToolStripMenuItem, toolStripMenuItem1, showTexturesToolStripMenuItem, showGridToolStripMenuItem });
             viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             viewToolStripMenuItem.Size = new Size(44, 20);
             viewToolStripMenuItem.Text = "View";
@@ -142,12 +142,12 @@
             showGridToolStripMenuItem.Text = "Show Grid";
             showGridToolStripMenuItem.Click += showGridToolStripMenuItem_Click;
             // 
-            // enableShadersMenuItem
+            // showTangentMenuItem
             // 
-            enableShadersMenuItem.Name = "enableShadersMenuItem";
-            enableShadersMenuItem.Size = new Size(180, 22);
-            enableShadersMenuItem.Text = "Enable Shaders";
-            enableShadersMenuItem.Click += enableShadersMenuItem_Click;
+            showTangentMenuItem.Name = "showTangentMenuItem";
+            showTangentMenuItem.Size = new Size(180, 22);
+            showTangentMenuItem.Text = "Show Tantens";
+            showTangentMenuItem.Click += showTangentsMenuItem_Click;
             // 
             // ModelViewForm
             // 
@@ -179,6 +179,6 @@
         private ToolStripMenuItem showTexturesToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem showGridToolStripMenuItem;
-        private ToolStripMenuItem enableShadersMenuItem;
+        private ToolStripMenuItem showTangentMenuItem;
     }
 }

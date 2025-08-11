@@ -1,6 +1,6 @@
 ﻿using SharpGL;
 using SharpGL.Shaders;
-using SharpGLTF.Schema2;
+
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -10,6 +10,7 @@ using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Tables;
 using UpkManager.Models.UpkFile.Types;
+using static MHUpkManager.GLLib;
 
 namespace MHUpkManager
 {
@@ -19,6 +20,9 @@ namespace MHUpkManager
         private UObject mesh;
         private ModelMeshData model;
         private ModelShaders modelShaders;
+        private FontRenderer fontRenderer;
+        private GridRenderer gridRenderer;
+        private AxisRenderer axisRenderer;
 
         private const float MaxDepth = 100000.0f;
 
@@ -27,20 +31,20 @@ namespace MHUpkManager
         private bool isRotating = false;
         private TransView transView;
 
-        public double[] matMH =
-        [
+        public Matrix4x4 matMH = new
+        (
             -1,  0,  0, 0,
             0,  1,  0, 0,
             0,  0,  1, 0,
             0,  0,  0, 1
-        ];
+        );
 
         private bool showNormal = false;
+        private bool showTangent = false;
         private bool showBones = false;
         private bool showBoneNames = false;
         private bool showTextures = true;
         private bool showGrid = true;
-        private bool enableShaders = false;
         private uint whiteTexId;
 
         public ModelViewForm()
@@ -63,8 +67,6 @@ namespace MHUpkManager
                 Zoom = 60f,
                 Per = 35.0f
             };
-
-            modelShaders = new();
         }
 
         public void SceneControlShortcut(Keys key, EventHandler handler)
@@ -83,14 +85,23 @@ namespace MHUpkManager
         {
             var gl = sceneControl.OpenGL;
 
-            GLLib.InitializeFont(gl);
-            GenerateDisplayLists(gl);
-            SetupLighting(gl);
+            modelShaders = new();
+            modelShaders.InitShaders(gl);
+
+            fontRenderer = new();
+            fontRenderer.InitializeFont(gl, modelShaders.FontShader);
+
+            gridRenderer = new();
+            gridRenderer.InitializeBuffers(gl, modelShaders.ColorShader);
+
+            axisRenderer = new();
+            axisRenderer.InitializeBuffers(gl, fontRenderer, modelShaders.ColorShader);
+            //SetupLighting(gl);
         }
 
         private void SetupLighting(OpenGL gl)
         {
-            float[] ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
+          /*  float[] ambient = { 0.1f, 0.1f, 0.1f, 1.0f };
             float[] lightPos = { -1.0f, -1.0f, 1.0f, 0.0f };
             float[] light1Pos = { 1.0f, 1.0f, 1.0f, 0.0f };
 
@@ -115,7 +126,7 @@ namespace MHUpkManager
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPECULAR, matSpecular);
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SHININESS, shininess);
 
-            gl.LightModel(OpenGL.GL_LIGHT_MODEL_TWO_SIDE, 1);
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_TWO_SIDE, 1);*/
         }
 
         public void SetMeshObject(string name, UObject obj)
@@ -134,10 +145,7 @@ namespace MHUpkManager
 
             BindBlankTexture(gl);
 
-            model = new ModelMeshData(mesh, name, gl);
-
-            if (model.NeedShaders())
-                modelShaders.InitShaders(gl);
+            model = new ModelMeshData(mesh, name, gl);                
 
             ResetTransView();
         }
@@ -248,181 +256,108 @@ namespace MHUpkManager
             int height = sceneControl.Height;
             float aspect = width / (float)height;
 
+            gl.Viewport(0, 0, width, height);
+
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
 
             // face culling
             gl.Enable(OpenGL.GL_CULL_FACE);
 
-            // --- perspective ---
-            gl.MatrixMode(OpenGL.GL_PROJECTION);
-            gl.LoadIdentity();
-            gl.Viewport(0, 0, width, height);
+            // perspective
+            float zoom = transView.Zoom;
 
-            gl.Perspective(transView.Per, aspect, transView.Zoom / 50.0f, MaxDepth);
+            var matProjection = Matrix4x4.CreatePerspectiveFieldOfView(
+                MathF.PI * transView.Per / 180.0f,
+                aspect,
+                zoom / 50.0f,
+                MaxDepth);
 
             if (transView.Rot.Z > 360.0f) transView.Rot.Z -= 360.0f;
             if (transView.Rot.Z < -360.0f) transView.Rot.Z += 360.0f;
 
             // camera
-            gl.LookAt(0, -transView.Zoom, 0, 0, 0, 0, 0, 0, 1);
-            gl.Rotate(transView.Rot.X, 1, 0, 0);
-            gl.Rotate(transView.Rot.Z, 0, 0, 1);
-            gl.Translate(-transView.Pos.X, -transView.Pos.Y, -transView.Pos.Z);
+            var matView = Matrix4x4.CreateLookAt(
+                new Vector3(0, -zoom, 0),
+                Vector3.Zero,
+                new Vector3(0, 0, 1));
 
-            gl.MatrixMode(OpenGL.GL_MODELVIEW);
-            gl.LoadIdentity();
+            var matTranslate = Matrix4x4.CreateTranslation(-transView.Pos.X, -transView.Pos.Y, -transView.Pos.Z);
+            var matRotZ = Matrix4x4.CreateRotationZ(MathF.PI * transView.Rot.Z / 180.0f);
+            var matRotX = Matrix4x4.CreateRotationX(MathF.PI * transView.Rot.X / 180.0f);
+
+            float fzoom = zoom / 15.0f;
+            var matScale = Matrix4x4.CreateScale(fzoom);
+
+            var matViewFinal =  matTranslate * matRotZ * matRotX * matView * matScale;
 
             // grid
-            if (showGrid) GLLib.DrawGrid(gl, transView.Zoom);
+            if (showGrid) gridRenderer.DrawGrid(gl, zoom, matProjection,  matViewFinal);
 
-            gl.PushMatrix();
-            gl.MultMatrix(matMH);
-            DrawModel(gl);
-            gl.PopMatrix();
+            // model
+            DrawModel(gl, matProjection, matViewFinal, matMH);
 
-            float fzoom = transView.Zoom / 15.0f;
-            gl.Scale(fzoom, fzoom, fzoom);
+            // axis
+            int axisWidth = width / 7;
+            int axisHeight = axisWidth;
+            gl.Viewport(0, 0, axisWidth, axisHeight);
 
-            // --- axis ---
-            gl.MatrixMode(OpenGL.GL_PROJECTION);
-            gl.LoadIdentity();
-            gl.Viewport(0, 0, width / 7, height / 7);
+            var matProjectionAxis = Matrix4x4.CreatePerspectiveFieldOfView(
+                    MathF.PI * 20.0f / 180.0f, 1.0f, 5.0f, 20.0f);
 
-            gl.Perspective(20.0f, aspect, 5.0f, 20.0f);
-            gl.LookAt(0, -10, 0, 0, 0, 0, 0, 0, 1);
-            gl.Rotate(transView.Rot.X, 1, 0, 0);
-            gl.Rotate(transView.Rot.Z, 0, 0, 1);
+            var matViewAxis = Matrix4x4.CreateLookAt(
+                new Vector3(0, -10, 0),
+                Vector3.Zero,
+                new Vector3(0, 0, 1));
 
-            gl.MatrixMode(OpenGL.GL_MODELVIEW);
-            gl.LoadIdentity();
+            var matViewAxisFinal = Matrix4x4.CreateRotationZ(MathF.PI * transView.Rot.Z / 180.0f) *
+                                   Matrix4x4.CreateRotationX(MathF.PI * transView.Rot.X / 180.0f) *
+                                   matViewAxis;
 
-            gl.CallList(GLLib.OBJ_AXES);
+            axisRenderer.DrawAxes(gl, matProjectionAxis, matViewAxisFinal);
 
             gl.Flush();
         }
 
-        private void DrawModel(OpenGL gl)
+        private void DrawModel(OpenGL gl, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
         {
-            if (model.Mesh == null || model.Vertices == null) return;
+            if (model.Mesh == null || model.Vertices == null) return;            
 
-            if (showTextures)
-                gl.Enable(OpenGL.GL_TEXTURE_2D);
-            else
-                gl.Disable(OpenGL.GL_TEXTURE_2D);
+            var sh = modelShaders.NormalShader;
+            sh.Bind(gl);
 
-            var shaderMode = enableShaders && modelShaders.Initialized;
-            if (shaderMode)
-            {
-                var sh = modelShaders.ShaderProgram;
+            sh.SetUniformMatrix4(gl, "uProj", matProjection.ToArray());
+            sh.SetUniformMatrix4(gl, "uView", matView.ToArray());
+            sh.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
 
-                sh.Bind(gl);
+            // Light 0
+            Vector3 uLightDir = Vector3.Normalize(new(1.0f, 1.0f, 1.0f));
+            sh.SetUniform3(gl, "uLightDir", uLightDir.X, uLightDir.Y, uLightDir.Z);
+            sh.SetUniform3(gl, "uLight0Color", 0.9f, 0.9f, 0.9f);
 
-                float[] modelViewMatrix = new float[16];
-                float[] projectionMatrix = new float[16];
+            // Light 1
+            Vector3 uLight1Dir = Vector3.Normalize(new(-1.0f, -1.0f, 1.0f));
+            sh.SetUniform3(gl, "uLight1Dir", uLight1Dir.X, uLight1Dir.Y, uLight1Dir.Z);
+            sh.SetUniform3(gl, "uLight1Color", 0.6f, 0.6f, 0.6f);
 
-                gl.GetFloat(OpenGL.GL_MODELVIEW_MATRIX, modelViewMatrix);
-                gl.GetFloat(OpenGL.GL_PROJECTION_MATRIX, projectionMatrix);
+            sh.SetUniform1(gl, "uDiffuseMap", 0);
+            sh.SetUniform1(gl, "uNormalMap", 2);
 
-                sh.SetUniformMatrix4(gl, "uProj", projectionMatrix);
-                sh.SetUniformMatrix4(gl, "uModel", modelViewMatrix);
-
-                // Light 0
-                float[] lightPos = new float[4];
-                gl.GetLight(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, lightPos);
-                Vector3 uLightDir = Vector3.Normalize(new(lightPos[0], lightPos[1], lightPos[2]));
-                sh.SetUniform3(gl, "uLightDir", uLightDir.X, uLightDir.Y, uLightDir.Z);
-                float[] diffuse0 = new float[4];
-                gl.GetLight(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, diffuse0);
-                sh.SetUniform3(gl, "uLight0Color", diffuse0[0], diffuse0[1], diffuse0[2]);
-
-                // Light 1
-                float[] light1Pos = new float[4];
-                gl.GetLight(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, light1Pos);
-                Vector3 uLight1Dir = Vector3.Normalize(new(light1Pos[0], light1Pos[1], light1Pos[2]));
-                sh.SetUniform3(gl, "uLight1Dir", uLight1Dir.X, uLight1Dir.Y, uLight1Dir.Z);
-                float[] diffuse1 = new float[4];
-                gl.GetLight(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, diffuse1);
-                sh.SetUniform3(gl, "uLight1Color", diffuse1[0], diffuse1[1], diffuse1[2]);
-
-                sh.SetUniform1(gl, "uDiffuseMap", 0);
-                sh.SetUniform1(gl, "uNormalMap", 1);
-
-                gl.ActiveTexture(OpenGL.GL_TEXTURE1);
-                gl.Enable(OpenGL.GL_TEXTURE_2D);
-                gl.ActiveTexture(OpenGL.GL_TEXTURE0);
-                gl.Enable(OpenGL.GL_TEXTURE_2D);
-            }
-
-            gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, model.vboId);
-            gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, model.iboId);
-
-            int stride = Marshal.SizeOf(typeof(GLVertex));
-
-            uint positionLoc = 0, normalLoc = 0, texCoordLoc = 0, tangentLoc = 0;
-
-            if (shaderMode)
-            {
-                var sh = modelShaders.ShaderProgram;
-                positionLoc = (uint)sh.GetAttributeLocation(gl, "aPosition");
-                normalLoc = (uint)sh.GetAttributeLocation(gl, "aNormal");
-                texCoordLoc = (uint)sh.GetAttributeLocation(gl, "aTexCoord");
-                tangentLoc = (uint)sh.GetAttributeLocation(gl, "aTangent");
-
-                gl.EnableVertexAttribArray(positionLoc);
-                gl.VertexAttribPointer(positionLoc, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Position);
-
-                gl.EnableVertexAttribArray(normalLoc);
-                gl.VertexAttribPointer(normalLoc, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Normal);
-
-                gl.EnableVertexAttribArray(texCoordLoc);
-                gl.VertexAttribPointer(texCoordLoc, 2, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.TexCoord);
-
-                gl.EnableVertexAttribArray(tangentLoc);
-                gl.VertexAttribPointer(tangentLoc, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Tangent);
-            }
-            else
-            {
-                gl.EnableClientState(OpenGL.GL_VERTEX_ARRAY);
-                gl.EnableClientState(OpenGL.GL_NORMAL_ARRAY);
-                if (showTextures)
-                    gl.EnableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
-
-                gl.VertexPointer(3, OpenGL.GL_FLOAT, stride, GLVertexOffsets.Position);
-                gl.NormalPointer(OpenGL.GL_FLOAT, stride, GLVertexOffsets.Normal);
-                if (showTextures)
-                    gl.TexCoordPointer(2, OpenGL.GL_FLOAT, stride, GLVertexOffsets.TexCoord);
-            }
+            gl.BindVertexArray(model.vaoId);
 
             foreach (var section in model.Sections)
             {
-                if (showTextures)
-                {
-                    gl.ActiveTexture(OpenGL.GL_TEXTURE0);
-                    if (section.GetTextureType(TextureType.uDiffuseMap, out var texture))
-                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
-                    else
-                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
-
-                    if (enableShaders)
-                    {
-                        gl.ActiveTexture(OpenGL.GL_TEXTURE1);
-                        if (section.GetTextureType(TextureType.uNormalMap, out texture))
-                            gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
-                        else
-                            gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
-                    }
-                }
-                else if (enableShaders)
-                {
-                    gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+                gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+                if (showTextures && section.GetTextureType(TextureType.uDiffuseMap, out var diffuse))
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, diffuse.TextureId);
+                else
                     gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
-                    gl.ActiveTexture(OpenGL.GL_TEXTURE1);
-                    if (section.GetTextureType(TextureType.uNormalMap, out var texture))
-                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
-                    else
-                        gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
-                }
+
+                gl.ActiveTexture(OpenGL.GL_TEXTURE2);
+                if (section.GetTextureType(TextureType.uNormalMap, out var normal))
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, normal.TextureId);
+                else
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
 
                 int indexStart = (int)section.BaseIndex;
                 int indexCount = (int)(section.NumTriangles * 3);
@@ -430,41 +365,23 @@ namespace MHUpkManager
                 gl.DrawElements(OpenGL.GL_TRIANGLES, indexCount, OpenGL.GL_UNSIGNED_INT, new IntPtr(indexStart * sizeof(uint)));
             }
 
-            if (shaderMode)
-            {
-                gl.DisableVertexAttribArray(positionLoc);
-                gl.DisableVertexAttribArray(normalLoc);  
-                gl.DisableVertexAttribArray(texCoordLoc);
-                gl.DisableVertexAttribArray(tangentLoc);
+            gl.BindVertexArray(0);
 
-                if (showTextures)
-                {                    
-                    gl.ActiveTexture(OpenGL.GL_TEXTURE1);
-                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
-                    gl.Disable(OpenGL.GL_TEXTURE_2D);
-                    gl.ActiveTexture(OpenGL.GL_TEXTURE0);
-                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
-                }
+            gl.ActiveTexture(OpenGL.GL_TEXTURE0);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+            gl.ActiveTexture(OpenGL.GL_TEXTURE2);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
 
-                modelShaders.ShaderProgram.Unbind(gl);
-            }
-            else
-            {
-                gl.DisableClientState(OpenGL.GL_VERTEX_ARRAY);
-                gl.DisableClientState(OpenGL.GL_NORMAL_ARRAY);
-                if (showTextures)
-                    gl.DisableClientState(OpenGL.GL_TEXTURE_COORD_ARRAY);
-
-                gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
-            }
-
-            gl.Disable(OpenGL.GL_TEXTURE_2D);
+            sh.Unbind(gl);
 
             if (showNormal)
-                DrawNormal(gl);
+                DrawLines(gl, 0, modelShaders.ColorShader1, matProjection, matView, matModel);
+
+            if (showTangent)
+                DrawLines(gl, 1, modelShaders.ColorShader1, matProjection, matView, matModel);
 
             if (showBones || showBoneNames)
-                DrawBones(gl);
+                DrawBones(gl);            
         }
 
         private static Vector3 GetTranslation(Matrix4x4 m)
@@ -474,7 +391,7 @@ namespace MHUpkManager
 
         private void DrawBones(OpenGL gl)
         {
-            if (model.Bones != null)
+   /*         if (model.Bones != null)
             {
                 gl.Disable(OpenGL.GL_LIGHTING);
                 gl.Disable(OpenGL.GL_DEPTH_TEST);
@@ -515,15 +432,21 @@ namespace MHUpkManager
                 }
                 gl.Enable(OpenGL.GL_LIGHTING);
                 gl.Enable(OpenGL.GL_DEPTH_TEST);
-            }
+            }*/
         }
 
-        private void DrawNormal(OpenGL gl)
+        private void PrepareLines(OpenGL gl, int type)
         {
-            gl.Disable(OpenGL.GL_LIGHTING);
-            gl.Color(1.0f, 0.0f, 1.0f);
+            uint[] vaos = new uint[1];
+            gl.GenVertexArrays(1, vaos);
+            uint vaoId = vaos[0];
 
-            gl.Begin(OpenGL.GL_LINES);
+            uint[] vbos = new uint[1];
+            gl.GenBuffers(1, vbos);
+            uint vboId = vbos[0];
+
+            List<float> lines = []; 
+
             foreach (var section in model.Sections)
             {
                 uint start = section.BaseIndex;
@@ -533,22 +456,78 @@ namespace MHUpkManager
                     var vertex = model.Vertices[model.Indices[i]];
 
                     var pos = vertex.Position;
-                    var norm = vertex.Normal;
+                    var line = type == 0 ? vertex.Normal : vertex.Tangent;
 
                     float scale = 1.0f;
                     var endPos = new Vector3(
-                        pos.X + norm.X * scale,
-                        pos.Y + norm.Y * scale,
-                        pos.Z + norm.Z * scale
+                        pos.X + line.X * scale,
+                        pos.Y + line.Y * scale,
+                        pos.Z + line.Z * scale
                     );
 
-                    gl.Vertex(pos.X, pos.Y, pos.Z);
-                    gl.Vertex(endPos.X, endPos.Y, endPos.Z);
+                    lines.Add(pos.X);
+                    lines.Add(pos.Y);
+                    lines.Add(pos.Z);
+
+                    lines.Add(endPos.X);
+                    lines.Add(endPos.Y);
+                    lines.Add(endPos.Z);
                 }
             }
 
-            gl.End();
-            gl.Enable(OpenGL.GL_LIGHTING);
+            int count = lines.Count / 3;
+            gl.BindVertexArray(vaoId);
+            BindVertexBuffer(gl, vboId, sizeof(float), OpenGL.GL_STATIC_DRAW, [.. lines]);
+            gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, 0);
+            gl.EnableVertexAttribArray(0);
+            gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, 0);
+            gl.BindVertexArray(0);
+
+            if (type == 0)
+            {
+                model.nlvao = vaoId;
+                model.nlCount = count;
+            }
+            else
+            {
+                model.ntvao = vaoId;
+                model.ntCount = count;
+            }
+        }
+
+        private void DrawLines(OpenGL gl, int type, ShaderProgram shader, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
+        {
+            uint vaoId;
+            int count;
+            Vector4 color;
+            if (type == 0) 
+            {
+                vaoId = model.nlvao;
+                count = model.nlCount;
+                color = new Vector4(1f, 0f, 1f, 1f);
+            }
+            else
+            {
+                vaoId = model.ntvao;
+                count = model.ntCount;
+                color = new Vector4(0f, 1f, 1f, 1f);
+            }              
+
+            if (vaoId == 0) PrepareLines(gl, type);
+
+            shader.Bind(gl);
+
+            shader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
+            shader.SetUniformMatrix4(gl, "uView", matView.ToArray());
+            shader.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
+
+            shader.SetUniform4(gl, "uColor", color.X, color.Y, color.Z, color.W);
+
+            gl.BindVertexArray(vaoId);
+            gl.DrawArrays(OpenGL.GL_LINES, 0, count);
+            gl.BindVertexArray(0);
+
+            shader.Unbind(gl);
         }
 
         private void sceneControl_MouseWheel(object sender, MouseEventArgs e)
@@ -564,13 +543,6 @@ namespace MHUpkManager
                 transView.Zoom = 1000.0f;
 
             sceneControl.DoRender();
-        }
-
-        private void GenerateDisplayLists(OpenGL gl)
-        {
-            gl.NewList(GLLib.OBJ_AXES, OpenGL.GL_COMPILE);
-            GLLib.DrawAxes(gl);
-            gl.EndList();
         }
 
         private void sceneControl_KeyDown(object sender, KeyEventArgs e)
@@ -655,10 +627,10 @@ namespace MHUpkManager
             sceneControl.Invalidate();
         }
 
-        private void enableShadersMenuItem_Click(object sender, EventArgs e)
+        private void showTangentsMenuItem_Click(object sender, EventArgs e)
         {
-            enableShadersMenuItem.Checked = !enableShadersMenuItem.Checked;
-            enableShaders = enableShadersMenuItem.Checked;
+            showTangentMenuItem.Checked = !showTangentMenuItem.Checked;
+            showTangent = showTangentMenuItem.Checked;
             sceneControl.Invalidate();
         }
 
@@ -770,6 +742,11 @@ namespace MHUpkManager
             public List<MeshSectionData> Sections;
             public uint iboId;
             public uint vboId;
+            public uint vaoId;
+            public uint nlvao;
+            public int nlCount;
+            public uint ntvao;
+            public int ntCount;
 
             public ModelMeshData(UObject obj, string name, OpenGL gl)
             {
@@ -870,51 +847,64 @@ namespace MHUpkManager
                     }
                 }
 
+                InitBuffers(gl);
+
+            }
+
+            private void InitBuffers(OpenGL gl)
+            {
+                // Gen VAO, VBO, IBO
                 uint[] buffers = new uint[2];
+                gl.GenVertexArrays(1, buffers);
+                vaoId = buffers[0];
+
                 gl.GenBuffers(2, buffers);
-                iboId = buffers[0];
-                vboId = buffers[1];
+                vboId = buffers[0];
+                iboId = buffers[1];
 
-                BindIndexBuffer(gl);
-                BindVertexBuffer(gl);
-            }
+                gl.BindVertexArray(vaoId);
 
-            public bool NeedShaders()
-            {
-                foreach (var section in Sections)
-                    if (section.IsNormal())
-                        return true;
-                return false;
-            }
-
-            private readonly void BindVertexBuffer(OpenGL gl)
-            {
-                var handle = GCHandle.Alloc(Vertices, GCHandleType.Pinned);
+                // VBO
+                gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, vboId);
+                var handleVertices = GCHandle.Alloc(Vertices, GCHandleType.Pinned);
                 try
                 {
-                    gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, vboId);
                     gl.BufferData(OpenGL.GL_ARRAY_BUFFER, Vertices.Length * Marshal.SizeOf(typeof(GLVertex)),
-                        handle.AddrOfPinnedObject(), OpenGL.GL_STATIC_DRAW);
+                        handleVertices.AddrOfPinnedObject(), OpenGL.GL_STATIC_DRAW);
                 }
                 finally
                 {
-                    handle.Free();
+                    handleVertices.Free();
                 }
-            }
 
-            private readonly void BindIndexBuffer(OpenGL gl)
-            {
-                var handle = GCHandle.Alloc(Indices, GCHandleType.Pinned);
+                int stride = Marshal.SizeOf(typeof(GLVertex));
+
+                gl.EnableVertexAttribArray(0);
+                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Position);
+
+                gl.EnableVertexAttribArray(1);
+                gl.VertexAttribPointer(1, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Normal);
+
+                gl.EnableVertexAttribArray(2);
+                gl.VertexAttribPointer(2, 2, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.TexCoord);
+
+                gl.EnableVertexAttribArray(3);
+                gl.VertexAttribPointer(3, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Tangent);
+
+                // IBO
+                gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, iboId);
+                var handleIndices = GCHandle.Alloc(Indices, GCHandleType.Pinned);
                 try
                 {
-                    gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, iboId);
-                    gl.BufferData(OpenGL.GL_ELEMENT_ARRAY_BUFFER, Indices.Length * sizeof(int),
-                        handle.AddrOfPinnedObject(), OpenGL.GL_STATIC_DRAW);
+                    gl.BufferData(OpenGL.GL_ELEMENT_ARRAY_BUFFER, Indices.Length * sizeof(uint),
+                        handleIndices.AddrOfPinnedObject(), OpenGL.GL_STATIC_DRAW);
                 }
                 finally
                 {
-                    handle.Free();
+                    handleIndices.Free();
                 }
+
+                gl.BindVertexArray(0);
             }
 
             public void RemapBoneIndices(int vertexIndex, UArray<ushort> boneMap)
