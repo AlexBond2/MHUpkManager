@@ -12,9 +12,10 @@ using System.Windows.Media.Imaging;
 
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
+
 using static MHUpkManager.ModelViewForm;
 
-namespace MHUpkManager
+namespace MHUpkManager.Model
 {
     public class ModelFormats
     {
@@ -26,7 +27,7 @@ namespace MHUpkManager
             OBJ
         }
 
-        public static void ExportToDAE(string fileName, ModelMeshData model)
+        public static void ExportToDAE(string fileName, ModelMesh model)
         {
             using var writer = new StreamWriter(fileName);
             writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
@@ -92,7 +93,7 @@ namespace MHUpkManager
             writer.WriteLine("</COLLADA>");
         }
 
-        public static void ExportModel(string filename, ModelMeshData model, ExportFormat format)
+        public static void ExportModel(string filename, ModelMesh model, ExportFormat format)
         {
             if (model.Vertices == null || model.Indices == null || model.Indices.Length % 3 != 0)
                 return;
@@ -126,7 +127,7 @@ namespace MHUpkManager
             }
         }
 
-        private static SceneBuilder BuildSceneRigid(ModelMeshData model)
+        private static SceneBuilder BuildSceneRigid(ModelMesh model)
         {
             var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexEmpty>(model.ModelName);
 
@@ -169,7 +170,7 @@ namespace MHUpkManager
             0, 0, 0, 1
         );
 
-        private static SceneBuilder BuildSceneWithSkeleton(ModelMeshData model)
+        private static SceneBuilder BuildSceneWithSkeleton(ModelMesh model)
         {
             var meshBuilder = new MeshBuilder<VertexPositionNormal, VertexTexture1, VertexJoints4>(model.ModelName);
 
@@ -180,9 +181,9 @@ namespace MHUpkManager
 
                 var bindings = new[]
                 {
-                    ((int)v.Bone0, v.Weight0 / 255.0f),
-                    ((int)v.Bone1, v.Weight1 / 255.0f),
-                    ((int)v.Bone2, v.Weight2 / 255.0f),
+                    (v.Bone0, v.Weight0 / 255.0f),
+                    (v.Bone1, v.Weight1 / 255.0f),
+                    (v.Bone2, v.Weight2 / 255.0f),
                     ((int)v.Bone3, v.Weight3 / 255.0f)
                 };
 

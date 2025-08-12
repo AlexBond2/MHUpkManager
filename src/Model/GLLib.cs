@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using UpkManager.Models.UpkFile.Engine.Texture;
 using UpkManager.Models.UpkFile.Tables;
 
-namespace MHUpkManager
+namespace MHUpkManager.Model
 {
     public class GLLib
     {
@@ -133,14 +133,14 @@ namespace MHUpkManager
                 gl.BindVertexArray(vaoId);
 
                 gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, vboVertices);
-                gl.BufferData(OpenGL.GL_ARRAY_BUFFER, maxVertexCount * 3 * sizeof(float), IntPtr.Zero, OpenGL.GL_DYNAMIC_DRAW);                 
-                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.BufferData(OpenGL.GL_ARRAY_BUFFER, maxVertexCount * 3 * sizeof(float), nint.Zero, OpenGL.GL_DYNAMIC_DRAW);                 
+                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, nint.Zero);
                 gl.EnableVertexAttribArray(0);
 
 
                 gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, vboUVs);
-                gl.BufferData(OpenGL.GL_ARRAY_BUFFER, maxVertexCount * 2 * sizeof(float), IntPtr.Zero, OpenGL.GL_DYNAMIC_DRAW);                
-                gl.VertexAttribPointer(1, 2, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.BufferData(OpenGL.GL_ARRAY_BUFFER, maxVertexCount * 2 * sizeof(float), nint.Zero, OpenGL.GL_DYNAMIC_DRAW);                
+                gl.VertexAttribPointer(1, 2, OpenGL.GL_FLOAT, false, 0, nint.Zero);
                 gl.EnableVertexAttribArray(1);
 
                 gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, 0);
@@ -149,6 +149,11 @@ namespace MHUpkManager
 
             public void DeleteBuffers(OpenGL gl)
             {
+                if (vaoId != 0)
+                {
+                    gl.DeleteVertexArrays(1, [vaoId]);
+                    vaoId = 0;
+                }
                 if (vboVertices != 0)
                 {
                     gl.DeleteBuffers(1, [vboVertices]);
@@ -161,8 +166,8 @@ namespace MHUpkManager
                 }
             }
 
-            public void DrawText(OpenGL gl, string text, Vector3 startPos, 
-                Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel, Vector4 color, float scale = 1.0f)
+            public void DrawText(OpenGL gl, string text, in Vector3 startPos, 
+                in Matrix4x4 matProjection, in Matrix4x4 matView, in Matrix4x4 matModel, in Vector4 color, float scale = 1.0f)
             {
                 if (string.IsNullOrEmpty(text))
                     return;
@@ -297,18 +302,18 @@ namespace MHUpkManager
                 BindVertexBuffer(gl, gridVBOVertices, sizeof(float), OpenGL.GL_DYNAMIC_DRAW,
                                 new float[maxVerticesArraySize]);
                 gl.EnableVertexAttribArray(0);
-                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, nint.Zero);
 
                 BindVertexBuffer(gl, gridVBOColors, sizeof(float), OpenGL.GL_DYNAMIC_DRAW,
                                 new float[maxColorsArraySize]);
                 gl.EnableVertexAttribArray(1);
-                gl.VertexAttribPointer(1, 4, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.VertexAttribPointer(1, 4, OpenGL.GL_FLOAT, false, 0, nint.Zero);
 
                 gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, 0);
                 gl.BindVertexArray(0);               
             }
 
-            public void DrawGrid(OpenGL gl, float zoomLevel, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
+            public void DrawGrid(OpenGL gl, float zoomLevel, in Matrix4x4 matProjection, in Matrix4x4 matView, in Matrix4x4 matModel)
             {
                 float step;
                 if (zoomLevel <= 10) step = 1.0f;
@@ -400,6 +405,25 @@ namespace MHUpkManager
                 BindVertexSubBuffer(gl, gridVBOVertices, sizeof(float), vertices);
                 BindVertexSubBuffer(gl, gridVBOColors, sizeof(float), colors);
             }
+
+            public void DeleteBuffers(OpenGL gl)
+            {
+                if (gridVAO != 0)
+                {
+                    gl.DeleteVertexArrays(1, [gridVAO]);
+                    gridVAO = 0;
+                }
+                if (gridVBOVertices != 0)
+                {
+                    gl.DeleteBuffers(1, [gridVBOVertices]);
+                    gridVBOVertices = 0;
+                }
+                if (gridVBOColors != 0)
+                {
+                    gl.DeleteBuffers(1, [gridVBOColors]);
+                    gridVBOColors = 0;
+                }
+            }
         }
 
         public static void BindVertexBuffer(OpenGL gl, uint vbo, int elementSize, uint draw, float[] vertices)
@@ -473,17 +497,17 @@ namespace MHUpkManager
 
                 BindVertexBuffer(gl, axesVboVertices, sizeof(float), OpenGL.GL_STATIC_DRAW, vertices);
                 gl.EnableVertexAttribArray(0);
-                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.VertexAttribPointer(0, 3, OpenGL.GL_FLOAT, false, 0, nint.Zero);
 
                 BindVertexBuffer(gl, axesVboColors, sizeof(float), OpenGL.GL_STATIC_DRAW, colors);
                 gl.EnableVertexAttribArray(1);
-                gl.VertexAttribPointer(1, 4, OpenGL.GL_FLOAT, false, 0, IntPtr.Zero);
+                gl.VertexAttribPointer(1, 4, OpenGL.GL_FLOAT, false, 0, nint.Zero);
 
                 gl.BindVertexArray(0);
                 gl.BindBuffer(OpenGL.GL_ARRAY_BUFFER, 0);
             }
 
-            public void DrawAxes(OpenGL gl, Matrix4x4 matProjection, Matrix4x4 matView, Matrix4x4 matModel)
+            public void DrawAxes(OpenGL gl, in Matrix4x4 matProjection, in Matrix4x4 matView, in Matrix4x4 matModel)
             {
                 shader.Bind(gl);
                 shader.SetUniformMatrix4(gl, "uProjection", matProjection.ToArray());
@@ -500,6 +524,25 @@ namespace MHUpkManager
                 font.DrawText(gl, "x", new Vector3(1.2f, 0f, 0f), matProjection, matView, matModel, new(1f, 0f, 0f, 1f));
                 font.DrawText(gl, "y", new Vector3(0f, 1.2f, 0f), matProjection, matView, matModel, new(0f, 1f, 0f, 1f));
                 font.DrawText(gl, "z", new Vector3(0f, 0f, 1.2f), matProjection, matView, matModel, new(0f, 0f, 1f, 1f));
+            }
+
+            public void DeleteBuffers(OpenGL gl)
+            {
+                if (axesVao != 0)
+                {
+                    gl.DeleteVertexArrays(1, [axesVao]);
+                    axesVao = 0;
+                }
+                if (axesVboVertices != 0)
+                {
+                    gl.DeleteBuffers(1, [axesVboVertices]);
+                    axesVboVertices = 0;
+                }
+                if (axesVboColors != 0)
+                {
+                    gl.DeleteBuffers(1, [axesVboColors]);
+                    axesVboColors = 0;
+                }
             }
         }
 
@@ -600,7 +643,7 @@ namespace MHUpkManager
             GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
             try
             {
-                IntPtr ptr = handle.AddrOfPinnedObject();
+                nint ptr = handle.AddrOfPinnedObject();
                 gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA, width, height, 0, format, OpenGL.GL_UNSIGNED_BYTE, ptr);
             }
             finally
@@ -615,7 +658,7 @@ namespace MHUpkManager
             GCHandle handle = GCHandle.Alloc(whitePixel, GCHandleType.Pinned);
             try
             {
-                IntPtr ptr = handle.AddrOfPinnedObject();
+                nint ptr = handle.AddrOfPinnedObject();
                 gl.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, OpenGL.GL_RGBA, 1, 1, 0, OpenGL.GL_RGBA, OpenGL.GL_UNSIGNED_BYTE, ptr);
             }
             finally

@@ -1,7 +1,7 @@
 ﻿using SharpGL;
 using SharpGL.Shaders;
 
-namespace MHUpkManager
+namespace MHUpkManager.Model
 {
     public class ModelShaders
     {
@@ -157,6 +157,18 @@ void main()
             NormalShader.Create(gl, vertexNormal, fragmentNormal, attributes);
 
             Initialized = true;
+        }
+
+        public void DestroyShaders(OpenGL gl)
+        {
+            if (Initialized)
+            {
+                NormalShader.Delete(gl);
+                FontShader.Delete(gl);
+                ColorShader.Delete(gl);
+                ColorShader1.Delete(gl);
+                Initialized = false;
+            }
         }
     }
 }
