@@ -77,6 +77,8 @@ namespace UpkManager.Models.UpkFile.Core
             );
         }
 
+        public float GetW() => W * Scale + Offset;
+
         public string Format => ToVector().Format;
 
         public static FPackedNormal ReadData(UBuffer buffer)

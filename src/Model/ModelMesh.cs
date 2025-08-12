@@ -171,6 +171,9 @@ namespace MHUpkManager.Model
             gl.VertexAttribPointer(3, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Tangent);
             gl.EnableVertexAttribArray(3);
 
+            gl.VertexAttribPointer(4, 3, OpenGL.GL_FLOAT, false, stride, GLVertexOffsets.Bitangent);
+            gl.EnableVertexAttribArray(4);
+
             // IBO
             gl.BindBuffer(OpenGL.GL_ELEMENT_ARRAY_BUFFER, iboId);
             var handleIndices = GCHandle.Alloc(Indices, GCHandleType.Pinned);
@@ -560,6 +563,7 @@ namespace MHUpkManager.Model
         public static readonly IntPtr Normal = GetOffset(nameof(GLVertex.Normal));
         public static readonly IntPtr TexCoord = GetOffset(nameof(GLVertex.TexCoord));
         public static readonly IntPtr Tangent = GetOffset(nameof(GLVertex.Tangent));
+        public static readonly IntPtr Bitangent = GetOffset(nameof(GLVertex.Bitangent));
 
         private static IntPtr GetOffset(string fieldName)
         {

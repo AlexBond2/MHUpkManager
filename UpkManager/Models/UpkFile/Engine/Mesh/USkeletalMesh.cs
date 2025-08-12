@@ -444,6 +444,7 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         public Vector3 Position;
         public Vector3 Normal;
         public Vector3 Tangent;
+        public Vector3 Bitangent;
         public Vector2 TexCoord;
         public byte Bone0, Bone1, Bone2, Bone3;
         public byte Weight0, Weight1, Weight2, Weight3;
@@ -498,20 +499,48 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         }
 
         public IEnumerable<GLVertex> GetGLVertexData()
-        { 
+        {
             foreach (var vertex in VertexData)
             {
+                Vector3 normal = SafeNormal(vertex.TangentZ);
+                Vector3 tangent = SafeNormal(vertex.TangentX);
+
+                Vector3 bitangent = ComputeBitangent(normal, tangent, vertex.TangentZ);
+
                 GLVertex glVertex = new()
                 {
                     Position = vertex.GetVector3(),
-                    Normal = SafeNormal(vertex.TangentZ),
-                    Tangent = SafeNormal(vertex.TangentX),
+                    Normal = normal,
+                    Tangent = tangent,
+                    Bitangent = bitangent,
                     TexCoord = vertex.GetVector2(0) // Assuming we only need the first UV set
                 };
-
                 glVertex.SetBoneData(vertex.InfluenceBones, vertex.InfluenceWeights);
                 yield return glVertex;
             }
+        }
+
+        private static Vector3 ComputeBitangent(Vector3 normal, Vector3 tangent, FPackedNormal normalPacked)
+        {
+            float determinantSign = normalPacked.GetW();
+
+            if (float.IsNaN(determinantSign) || float.IsInfinity(determinantSign))
+                determinantSign = 1.0f;
+
+            // B = (N × T) * sign
+            Vector3 bitangent = Vector3.Cross(normal, tangent);
+
+            if (determinantSign < 0.0f)
+                bitangent = -bitangent;
+
+            if (bitangent.LengthSquared() < 1e-5f)
+            {
+                Vector3 arbitrary = Math.Abs(Vector3.Dot(normal, Vector3.UnitX)) < 0.9f
+                    ? Vector3.UnitX : Vector3.UnitY;
+                bitangent = Vector3.Cross(normal, arbitrary);
+            }
+
+            return Vector3.Normalize(bitangent);
         }
 
         private static Vector3 SafeNormal(FPackedNormal pn)

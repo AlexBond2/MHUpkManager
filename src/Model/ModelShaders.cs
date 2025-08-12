@@ -6,14 +6,15 @@ namespace MHUpkManager.Model
     public class ModelShaders
     {
         private const string vertexNormal = @"#version 150 core
-
 in vec3 aPosition;
 in vec3 aNormal;
 in vec2 aTexCoord;
 in vec3 aTangent;
+in vec3 aBitangent;
 out vec3 vNormal;
 out vec2 vTexCoord;
 out vec3 vTangent;
+out vec3 vBitangent;
 out vec3 vWorldPos;
 uniform mat4 uProj;
 uniform mat4 uView;
@@ -23,6 +24,7 @@ void main() {
     vTexCoord = aTexCoord;
     vNormal = normalize((uModel * vec4(aNormal, 0.0)).xyz);
     vTangent = normalize((uModel * vec4(aTangent, 0.0)).xyz);
+    vBitangent = normalize((uModel * vec4(aBitangent, 0.0)).xyz);
     vWorldPos = (uModel * vec4(aPosition, 1.0)).xyz;
 }";
 
@@ -30,6 +32,7 @@ void main() {
 in vec3 vNormal;
 in vec2 vTexCoord;
 in vec3 vTangent;
+in vec3 vBitangent;
 in vec3 vWorldPos;
 out vec4 fragColor;
 uniform sampler2D uDiffuseMap;
@@ -38,21 +41,18 @@ uniform vec3 uLightDir;
 uniform vec3 uLight1Dir;
 uniform vec3 uLight0Color;
 uniform vec3 uLight1Color;
+
 void main() {
     vec3 diffuseColor = texture(uDiffuseMap, vTexCoord).rgb;
     vec3 normalMapSample = texture(uNormalMap, vTexCoord).rgb;
-    vec3 tangentNormal = normalize(normalMapSample * 2.0 - 1.0);
+    vec3 tangentNormal = normalize(normalMapSample * 2.0 - 1.0);    
     vec3 N = normalize(vNormal);
-    vec3 T_original = normalize(vTangent);   
-    vec3 B = normalize(cross(N, T_original));    
-    vec2 st0 = dFdx(vTexCoord);
-    vec2 st1 = dFdy(vTexCoord);
-    if (sign(st0.t * st1.s - st1.t * st0.s) < 0.0) {
-        B = -B;
-    }
-    vec3 T = normalize(cross(B, N));  
+    vec3 T = normalize(vTangent);
+    vec3 B = normalize(vBitangent); 
+    // B = normalize(B - dot(B, N) * N);
+    // T = normalize(cross(B, N));        
     mat3 TBN = mat3(T, B, N);
-    vec3 worldNormal = normalize(TBN * tangentNormal);
+    vec3 worldNormal = normalize(TBN * tangentNormal);    
     float diff0 = max(dot(worldNormal, normalize(-uLightDir)), 0.0);
     float diff1 = max(dot(worldNormal, normalize(-uLight1Dir)), 0.0);    
     vec3 lighting = diffuseColor * (uLight0Color * diff0 + uLight1Color * diff1);    
@@ -154,6 +154,7 @@ void main()
             attributes[1] = "aNormal";
             attributes[2] = "aTexCoord";
             attributes[3] = "aTangent";
+            attributes[4] = "aBitangent";
             NormalShader.Create(gl, vertexNormal, fragmentNormal, attributes);
 
             Initialized = true;
