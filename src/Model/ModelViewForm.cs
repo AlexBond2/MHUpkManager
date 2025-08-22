@@ -307,6 +307,11 @@ namespace MHUpkManager
             sh.SetUniformMatrix4(gl, "uView", matView.ToArray());
             sh.SetUniformMatrix4(gl, "uModel", matModel.ToArray());
 
+            Matrix4x4.Invert(matView, out Matrix4x4 invView);
+            Vector3 camPos = new (invView.M41, invView.M42, invView.M43);
+
+            sh.SetUniform3(gl, "uViewPos", camPos.X, camPos.Y, camPos.Z);
+
             // Light 0
             Vector3 uLightDir = Vector3.Normalize(new(1.0f, 1.0f, 1.0f));
             sh.SetUniform3(gl, "uLightDir", uLightDir.X, uLightDir.Y, uLightDir.Z);
@@ -319,6 +324,7 @@ namespace MHUpkManager
 
             sh.SetUniform1(gl, "uDiffuseMap", 0);
             sh.SetUniform1(gl, "uNormalMap", 2);
+            sh.SetUniform1(gl, "uSMSPSKMap", 3);
 
             gl.BindVertexArray(model.vaoId);
 
@@ -336,6 +342,18 @@ namespace MHUpkManager
                 else
                     gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
 
+                gl.ActiveTexture(OpenGL.GL_TEXTURE3);
+                if (section.GetTextureType(TextureType.uSMSPSKMap, out var smspsk))
+                {
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, smspsk.TextureId);
+                    sh.SetUniform1(gl, "uHasSMSPSK", 1.0f);
+                }
+                else
+                {
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+                    sh.SetUniform1(gl, "uHasSMSPSK", 0.0f);
+                }
+
                 int indexStart = (int)section.BaseIndex;
                 int indexCount = (int)(section.NumTriangles * 3);
 
@@ -347,6 +365,8 @@ namespace MHUpkManager
             gl.ActiveTexture(OpenGL.GL_TEXTURE0);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.ActiveTexture(OpenGL.GL_TEXTURE2);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+            gl.ActiveTexture(OpenGL.GL_TEXTURE3);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
 
             sh.Unbind(gl);

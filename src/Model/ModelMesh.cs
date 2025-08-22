@@ -489,14 +489,15 @@ namespace MHUpkManager.Model
         {
             Type = type;
             Name = textureObj?.Name;
-            TextureId = GLLib.BindGLTexture(gl, textureObj, out MipIndex, out Texture2D, out Data);
+            TextureId = BindGLTexture(gl, textureObj, out MipIndex, out Texture2D, out Data);
         }
     }
 
     public enum TextureType
     {
         uDiffuseMap,
-        uNormalMap
+        uNormalMap,
+        uSMSPSKMap
     }
 
     public struct MeshSectionData
@@ -518,6 +519,9 @@ namespace MHUpkManager.Model
 
             textureObj = Material?.GetTextureParameterValue("Normal");
             if (textureObj != null) Textures.Add(new(TextureType.uNormalMap, gl, textureObj));
+
+            textureObj = Material?.GetTextureParameterValue("specmult_specpow_skinmask");
+            if (textureObj != null) Textures.Add(new(TextureType.uSMSPSKMap, gl, textureObj));
         }
 
         public bool IsDiffuse()

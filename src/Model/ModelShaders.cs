@@ -35,12 +35,45 @@ in vec3 vTangent;
 in vec3 vBitangent;
 in vec3 vWorldPos;
 out vec4 fragColor;
+
 uniform sampler2D uDiffuseMap;
 uniform sampler2D uNormalMap;
+uniform sampler2D uSMSPSKMap;
+
 uniform vec3 uLightDir;
 uniform vec3 uLight1Dir;
 uniform vec3 uLight0Color;
 uniform vec3 uLight1Color;
+
+uniform vec3 uViewPos;
+uniform float uSkinScatterStrength = 0.5;
+uniform float uSkinSpecularPower = 32.0;
+uniform vec3 uSkinSubsurfaceColor = vec3(1.0, 0.4, 0.3);
+uniform float uHasSMSPSK = 0.0;
+
+vec3 calculateLighting(vec3 normal, vec3 lightDir, vec3 lightColor, vec3 viewDir, 
+                      float specMult, float specPower, float skinMask, float hasSMSPSK)
+{
+    vec3 L = normalize(-lightDir);
+    float NdotL = max(dot(normal, L), 0.0);
+    
+    vec3 diffuse = vec3(NdotL) * lightColor;
+    
+    float subsurfaceAmount = hasSMSPSK * skinMask * uSkinScatterStrength;
+    float subsurface = pow(max(0.0, dot(-normal, L)), 2.0) * subsurfaceAmount;
+    vec3 subsurfaceContrib = uSkinSubsurfaceColor * subsurface;
+    
+    vec3 halfDir = normalize(L + viewDir);
+    float NdotH = max(dot(normal, halfDir), 0.0);
+    
+    float finalSpecPower = mix(16.0, mix(uSkinSpecularPower, uSkinSpecularPower * 2.0, specPower), hasSMSPSK);
+    float finalSpecMult = mix(0.2, specMult, hasSMSPSK);
+    
+    float spec = pow(NdotH, finalSpecPower) * finalSpecMult;
+    vec3 specular = vec3(spec) * lightColor;
+    
+    return diffuse + subsurfaceContrib + specular;
+}
 
 void main() {
     vec3 diffuseColor = texture(uDiffuseMap, vTexCoord).rgb;
@@ -48,15 +81,26 @@ void main() {
     vec3 tangentNormal = normalize(normalMapSample * 2.0 - 1.0);    
     vec3 N = normalize(vNormal);
     vec3 T = normalize(vTangent);
-    vec3 B = normalize(vBitangent); 
-    // B = normalize(B - dot(B, N) * N);
-    // T = normalize(cross(B, N));        
+    vec3 B = normalize(vBitangent);   
     mat3 TBN = mat3(T, B, N);
-    vec3 worldNormal = normalize(TBN * tangentNormal);    
-    float diff0 = max(dot(worldNormal, normalize(-uLightDir)), 0.0);
-    float diff1 = max(dot(worldNormal, normalize(-uLight1Dir)), 0.0);    
-    vec3 lighting = diffuseColor * (uLight0Color * diff0 + uLight1Color * diff1);    
-    fragColor = vec4(lighting, 1.0);
+    vec3 worldNormal = normalize(TBN * tangentNormal);
+
+    vec4 smspskData = texture(uSMSPSKMap, vTexCoord);
+    float specularMultiplier = smspskData.r;
+    float specularPower = smspskData.g;
+    float skinMask = smspskData.b;
+    vec3 viewDir = normalize(uViewPos - vWorldPos);
+
+    vec3 lighting = vec3(0.0);
+    
+    lighting += calculateLighting(worldNormal, uLightDir, uLight0Color, viewDir,
+                                specularMultiplier, specularPower, skinMask, uHasSMSPSK);
+    
+    lighting += calculateLighting(worldNormal, uLight1Dir, uLight1Color, viewDir,
+                                specularMultiplier, specularPower, skinMask, uHasSMSPSK);
+    
+    vec3 finalColor = diffuseColor * lighting;
+    fragColor = vec4(finalColor, 1.0);
 }";
 
         private const string vertexFont = @"#version 150 core
