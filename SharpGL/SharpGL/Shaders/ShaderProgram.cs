@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace SharpGL.Shaders
@@ -115,6 +116,11 @@ namespace SharpGL.Shaders
             gl.Uniform1(GetUniformLocation(gl, uniformName), v1);
         }
 
+        public void SetFloat(OpenGL gl, string uniformName, float v1)
+        {
+            gl.Uniform1(GetUniformLocation(gl, uniformName), v1);
+        }
+
         public void SetUniform1(OpenGL gl, string uniformName, int v1)
         {
             gl.Uniform1(GetUniformLocation(gl, uniformName), v1);
@@ -128,6 +134,11 @@ namespace SharpGL.Shaders
         public void SetUniform3(OpenGL gl, string uniformName, float v1, float v2, float v3)
         {
             gl.Uniform3(GetUniformLocation(gl, uniformName), v1, v2, v3);
+        }
+
+        public void SetVector3(OpenGL gl, string uniformName, Vector3 v)
+        {
+            gl.Uniform3(GetUniformLocation(gl, uniformName), v.X, v.Y, v.Z);
         }
 
         public void SetUniform4(OpenGL gl, string uniformName, float v1, float v2, float v3, float v4)

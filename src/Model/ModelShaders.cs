@@ -5,101 +5,265 @@ namespace MHUpkManager.Model
 {
     public class ModelShaders
     {
+        // Vertex Shader
         private const string vertexNormal = @"#version 150 core
 in vec3 aPosition;
 in vec3 aNormal;
 in vec2 aTexCoord;
 in vec3 aTangent;
 in vec3 aBitangent;
+
 out vec3 vNormal;
 out vec2 vTexCoord;
 out vec3 vTangent;
 out vec3 vBitangent;
 out vec3 vWorldPos;
+out vec3 vViewDir;
+
 uniform mat4 uProj;
 uniform mat4 uView;
 uniform mat4 uModel;
+uniform vec3 uViewPos;
+
 void main() {
     gl_Position = uProj * uView * uModel * vec4(aPosition, 1.0);
     vTexCoord = aTexCoord;
-    vNormal = normalize((uModel * vec4(aNormal, 0.0)).xyz);
-    vTangent = normalize((uModel * vec4(aTangent, 0.0)).xyz);
-    vBitangent = normalize((uModel * vec4(aBitangent, 0.0)).xyz);
+    
+    // Transform normals to world space
+    mat3 normalMatrix = mat3(transpose(inverse(uModel)));
+    vNormal = normalize(normalMatrix * aNormal);
+    vTangent = normalize(normalMatrix * aTangent);
+    vBitangent = normalize(normalMatrix * aBitangent);
+    
     vWorldPos = (uModel * vec4(aPosition, 1.0)).xyz;
+    vViewDir = normalize(uViewPos - vWorldPos);
 }";
 
+        // Fragment Shader
         private const string fragmentNormal = @"#version 150 core
 in vec3 vNormal;
 in vec2 vTexCoord;
 in vec3 vTangent;
 in vec3 vBitangent;
 in vec3 vWorldPos;
+in vec3 vViewDir;
+
 out vec4 fragColor;
 
+// Textures
 uniform sampler2D uDiffuseMap;
 uniform sampler2D uNormalMap;
-uniform sampler2D uSMSPSKMap;
+uniform sampler2D uSMSPSKMap;      // R=SpecMult, G=SpecPow, B=SkinMask, A=Reflectivity
+uniform sampler2D uSpecColorMap;    // Specular color texture
 
+// Texture flags
+uniform float uHasSMSPSK = 0.0;
+uniform float uHasSpecColorMap = 0.0;
+uniform float uHasNormalMap = 1.0;
+
+// Lighting
 uniform vec3 uLightDir;
 uniform vec3 uLight1Dir;
 uniform vec3 uLight0Color;
 uniform vec3 uLight1Color;
-
 uniform vec3 uViewPos;
-uniform float uSkinScatterStrength = 0.5;
-uniform float uSkinSpecularPower = 32.0;
-uniform vec3 uSkinSubsurfaceColor = vec3(1.0, 0.4, 0.3);
-uniform float uHasSMSPSK = 0.0;
 
-vec3 calculateLighting(vec3 normal, vec3 lightDir, vec3 lightColor, vec3 viewDir, 
-                      float specMult, float specPower, float skinMask, float hasSMSPSK)
-{
+// Material scalar parameters from UE3
+uniform float uLambertDiffusePower = 1.0;
+uniform float uPhongDiffusePower = 1.0;
+uniform float uLightingAmbient = 0.1;
+uniform float uShadowAmbientMult = 1.0;
+uniform float uNormalStrength = 1.0;
+uniform float uReflectionMult = 1.0;
+uniform float uRimColorMult = 0.0;
+uniform float uRimFalloff = 2.0;
+uniform float uScreenLightAmount = 0.0;
+uniform float uScreenLightMult = 1.0;
+uniform float uScreenLightPower = 1.0;
+uniform float uSpecMult = 1.0;
+uniform float uSpecMultLQ = 0.5;
+uniform float uSpecularPower = 15.0;
+uniform float uSpecularPowerMask = 1.0;
+
+// Material vector parameters from UE3
+uniform vec3 uLambertAmbient = vec3(0.1);
+uniform vec3 uShadowAmbientColor = vec3(0.05);
+uniform vec3 uFillLightColor = vec3(0.2, 0.19, 0.18);
+uniform vec3 uSpecularColor = vec3(0.5);  // Used when no spec color map
+
+// Subsurface scattering (from material properties)
+uniform vec3 uSubsurfaceInscatteringColor = vec3(1.0, 1.0, 1.0);
+uniform vec3 uSubsurfaceAbsorptionColor = vec3(0.902, 0.784, 0.784);
+uniform float uImageReflectionNormalDampening = 5.0;
+
+// Character material specific
+uniform float uSkinScatterStrength = 0.5;
+uniform float uTwoSidedLighting = 0.0;
+
+vec3 calculateNormal() {
+    vec3 N = normalize(vNormal);
+    
+    if (uHasNormalMap > 0.5) {
+        vec3 normalMapSample = texture(uNormalMap, vTexCoord).rgb;
+        vec3 tangentNormal = normalize((normalMapSample * 2.0 - 1.0) * vec3(1.0, 1.0, uNormalStrength));
+        
+        vec3 T = normalize(vTangent);
+        vec3 B = normalize(vBitangent);
+        mat3 TBN = mat3(T, B, N);
+        
+        return normalize(TBN * tangentNormal);
+    }
+    
+    return N;
+}
+
+vec3 getSpecularColor() {
+    if (uHasSpecColorMap > 0.5) {
+        return texture(uSpecColorMap, vTexCoord).rgb;
+    }
+    return uSpecularColor;
+}
+
+vec3 calculateDiffuse(vec3 normal, vec3 lightDir, float skinMask) {
     vec3 L = normalize(-lightDir);
     float NdotL = max(dot(normal, L), 0.0);
     
-    vec3 diffuse = vec3(NdotL) * lightColor;
+    // Lambert diffuse with power control
+    float lambert = pow(NdotL, uLambertDiffusePower);
     
-    float subsurfaceAmount = hasSMSPSK * skinMask * uSkinScatterStrength;
-    float subsurface = pow(max(0.0, dot(-normal, L)), 2.0) * subsurfaceAmount;
-    vec3 subsurfaceContrib = uSkinSubsurfaceColor * subsurface;
+    // Phong diffuse for more control
+    float phong = pow(max(0.0, dot(normal, L)), uPhongDiffusePower);
     
-    vec3 halfDir = normalize(L + viewDir);
-    float NdotH = max(dot(normal, halfDir), 0.0);
+    // Mix between lambert and phong based on material settings
+    float diffuse = mix(lambert, phong, 0.5);
     
-    float finalSpecPower = mix(16.0, mix(uSkinSpecularPower, uSkinSpecularPower * 2.0, specPower), hasSMSPSK);
-    float finalSpecMult = mix(0.2, specMult, hasSMSPSK);
+    // Two-sided lighting for thin surfaces (ears, etc)
+    if (uTwoSidedLighting > 0.5) {
+        float backLight = max(0.0, dot(-normal, L));
+        diffuse = max(diffuse, backLight * 0.5);
+    }
     
-    float spec = pow(NdotH, finalSpecPower) * finalSpecMult;
-    vec3 specular = vec3(spec) * lightColor;
+    // Subsurface scattering for skin
+    if (uHasSMSPSK > 0.5 && skinMask > 0.0) {
+        float scatter = pow(max(0.0, dot(-normal, L)), 2.0);
+        vec3 subsurface = uSubsurfaceInscatteringColor * scatter * skinMask * uSkinScatterStrength;
+        
+        // Apply absorption color
+        subsurface *= uSubsurfaceAbsorptionColor;
+        
+        return vec3(diffuse) + subsurface;
+    }
     
-    return diffuse + subsurfaceContrib + specular;
+    return vec3(diffuse);
+}
+
+vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir, float specMult, float specPower, float skinMask) {
+    vec3 L = normalize(-lightDir);
+    vec3 H = normalize(L + viewDir);
+    float NdotH = max(dot(normal, H), 0.0);
+    
+    // Adjust specular power based on SMSPSK map and parameters
+    float finalSpecPower = uSpecularPower;
+    if (uHasSMSPSK > 0.5) {
+        finalSpecPower = mix(uSpecularPower, uSpecularPower * 4.0, specPower) * uSpecularPowerMask;
+        
+        // Skin has different specular characteristics
+        if (skinMask > 0.0) {
+            finalSpecPower *= mix(1.0, 2.0, skinMask);
+        }
+    }
+    
+    // Calculate specular intensity
+    float spec = pow(NdotH, finalSpecPower);
+    
+    // Apply multipliers
+    float finalSpecMult = uSpecMult;
+    if (uHasSMSPSK > 0.5) {
+        finalSpecMult *= specMult;
+        // Lower quality specular option
+        finalSpecMult = mix(finalSpecMult, uSpecMultLQ, 0.0);
+    }
+    
+    vec3 specColor = getSpecularColor();
+    return specColor * spec * finalSpecMult;
+}
+
+vec3 calculateRimLighting(vec3 normal, vec3 viewDir) {
+    if (uRimColorMult <= 0.0) return vec3(0.0);
+    
+    float rim = 1.0 - max(dot(normal, viewDir), 0.0);
+    rim = pow(rim, uRimFalloff) * uRimColorMult;
+    
+    return uFillLightColor * rim;
+}
+
+vec3 calculateScreenSpaceLighting(vec3 normal) {
+    if (uScreenLightAmount <= 0.0) return vec3(0.0);
+    
+    // Simple screen-space ambient
+    vec3 screenNormal = normal * 0.5 + 0.5;
+    float screenLight = pow(screenNormal.y, uScreenLightPower) * uScreenLightMult;
+    
+    return vec3(screenLight * uScreenLightAmount);
 }
 
 void main() {
+    // Sample textures
     vec3 diffuseColor = texture(uDiffuseMap, vTexCoord).rgb;
-    vec3 normalMapSample = texture(uNormalMap, vTexCoord).rgb;
-    vec3 tangentNormal = normalize(normalMapSample * 2.0 - 1.0);    
-    vec3 N = normalize(vNormal);
-    vec3 T = normalize(vTangent);
-    vec3 B = normalize(vBitangent);   
-    mat3 TBN = mat3(T, B, N);
-    vec3 worldNormal = normalize(TBN * tangentNormal);
-
-    vec4 smspskData = texture(uSMSPSKMap, vTexCoord);
+    vec4 smspskData = uHasSMSPSK > 0.5 ? texture(uSMSPSKMap, vTexCoord) : vec4(0.5, 0.0, 0.0, 0.0);
+    
+    // Extract SMSPSK components
     float specularMultiplier = smspskData.r;
     float specularPower = smspskData.g;
     float skinMask = smspskData.b;
-    vec3 viewDir = normalize(uViewPos - vWorldPos);
-
-    vec3 lighting = vec3(0.0);
+    float reflectivity = smspskData.a * uReflectionMult;
     
-    lighting += calculateLighting(worldNormal, uLightDir, uLight0Color, viewDir,
-                                specularMultiplier, specularPower, skinMask, uHasSMSPSK);
+    // Calculate world normal
+    vec3 worldNormal = calculateNormal();
+    vec3 viewDir = normalize(vViewDir);
     
-    lighting += calculateLighting(worldNormal, uLight1Dir, uLight1Color, viewDir,
-                                specularMultiplier, specularPower, skinMask, uHasSMSPSK);
+    // Ambient lighting
+    vec3 ambient = uLambertAmbient * uLightingAmbient;
+    ambient += uShadowAmbientColor * uShadowAmbientMult;
     
-    vec3 finalColor = diffuseColor * lighting;
+    // Main light
+    vec3 diffuse0 = calculateDiffuse(worldNormal, uLightDir, skinMask) * uLight0Color;
+    vec3 specular0 = calculateSpecular(worldNormal, uLightDir, viewDir, 
+                                      specularMultiplier, specularPower, skinMask) * uLight0Color;
+    
+    // Secondary light
+    vec3 diffuse1 = calculateDiffuse(worldNormal, uLight1Dir, skinMask) * uLight1Color;
+    vec3 specular1 = calculateSpecular(worldNormal, uLight1Dir, viewDir,
+                                      specularMultiplier, specularPower, skinMask) * uLight1Color;
+    
+    // Fill light
+    vec3 fillLight = uFillLightColor * max(0.0, dot(worldNormal, vec3(0.0, 1.0, 0.0))) * 0.5;
+    
+    // Rim lighting
+    vec3 rimLight = calculateRimLighting(worldNormal, viewDir);
+    
+    // Screen space lighting
+    vec3 screenLight = calculateScreenSpaceLighting(worldNormal);
+    
+    // Combine all lighting
+    vec3 totalDiffuse = ambient + diffuse0 + diffuse1 + fillLight;
+    vec3 totalSpecular = specular0 + specular1;
+    
+    // Apply to diffuse color
+    vec3 finalColor = diffuseColor * totalDiffuse;
+    finalColor += totalSpecular;
+    finalColor += rimLight;
+    finalColor += screenLight;
+    
+    // Simple reflection based on reflectivity
+    if (reflectivity > 0.0) {
+        vec3 reflectDir = reflect(-viewDir, worldNormal);
+        // Dampen reflection based on normal
+        float reflectAmount = reflectivity / (1.0 + uImageReflectionNormalDampening);
+        finalColor += vec3(reflectAmount) * 0.2; // Simplified reflection
+    }
+    
+    
     fragColor = vec4(finalColor, 1.0);
 }";
 

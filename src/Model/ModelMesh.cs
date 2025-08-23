@@ -497,7 +497,8 @@ namespace MHUpkManager.Model
     {
         uDiffuseMap,
         uNormalMap,
-        uSMSPSKMap
+        uSMSPSKMap,
+        uSpecColorMap
     }
 
     public struct MeshSectionData
@@ -522,6 +523,9 @@ namespace MHUpkManager.Model
 
             textureObj = Material?.GetTextureParameterValue("specmult_specpow_skinmask");
             if (textureObj != null) Textures.Add(new(TextureType.uSMSPSKMap, gl, textureObj));
+
+            textureObj = Material?.GetTextureParameterValue("SpecColor");
+            if (textureObj != null) Textures.Add(new(TextureType.uSpecColorMap, gl, textureObj));
         }
 
         public bool IsDiffuse()

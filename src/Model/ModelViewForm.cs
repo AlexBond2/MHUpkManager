@@ -310,21 +310,54 @@ namespace MHUpkManager
             Matrix4x4.Invert(matView, out Matrix4x4 invView);
             Vector3 camPos = new (invView.M41, invView.M42, invView.M43);
 
-            sh.SetUniform3(gl, "uViewPos", camPos.X, camPos.Y, camPos.Z);
+            sh.SetVector3(gl, "uViewPos", camPos);
 
             // Light 0
-            Vector3 uLightDir = Vector3.Normalize(new(1.0f, 1.0f, 1.0f));
-            sh.SetUniform3(gl, "uLightDir", uLightDir.X, uLightDir.Y, uLightDir.Z);
-            sh.SetUniform3(gl, "uLight0Color", 0.9f, 0.9f, 0.9f);
+            Vector3 uLightDir = Vector3.Normalize(new(1.0f));
+            sh.SetVector3(gl, "uLightDir", uLightDir);
+            sh.SetVector3(gl, "uLight0Color", new(0.9f));
 
             // Light 1
             Vector3 uLight1Dir = Vector3.Normalize(new(-1.0f, -1.0f, 1.0f));
-            sh.SetUniform3(gl, "uLight1Dir", uLight1Dir.X, uLight1Dir.Y, uLight1Dir.Z);
-            sh.SetUniform3(gl, "uLight1Color", 0.6f, 0.6f, 0.6f);
+            sh.SetVector3(gl, "uLight1Dir", uLight1Dir);
+            sh.SetVector3(gl, "uLight1Color", new(0.6f));
+
+            // Scalar Parameters
+            sh.SetFloat(gl, "uLambertDiffusePower", 1.0f);
+            sh.SetFloat(gl, "uPhongDiffusePower", 1.0f);
+            sh.SetFloat(gl, "uLightingAmbient", 0.1f);
+            sh.SetFloat(gl, "uShadowAmbientMult", 1.0f);
+            sh.SetFloat(gl, "uNormalStrength", 1.0f);
+            sh.SetFloat(gl, "uReflectionMult", 1.0f);
+            sh.SetFloat(gl, "uRimColorMult", 0.0f);    // 0 = Off rim light
+            sh.SetFloat(gl, "uRimFalloff", 2.0f);
+            sh.SetFloat(gl, "uScreenLightAmount", 0.0f);
+            sh.SetFloat(gl, "uScreenLightMult", 1.0f);
+            sh.SetFloat(gl, "uScreenLightPower", 1.0f);
+            sh.SetFloat(gl, "uSpecMult", 1.0f);
+            sh.SetFloat(gl, "uSpecMultLQ", 0.5f);
+            sh.SetFloat(gl, "uSpecularPower", 15.0f);  
+            sh.SetFloat(gl, "uSpecularPowerMask", 1.0f);
+
+            // Vector Parameters
+            sh.SetVector3(gl, "uLambertAmbient", new Vector3(0.1f));
+            sh.SetVector3(gl, "uShadowAmbientColor", new Vector3(0.05f, 0.05f, 0.08f));
+            sh.SetVector3(gl, "uFillLightColor", new Vector3(0.2f, 0.19f, 0.18f));
+            sh.SetVector3(gl, "uSpecularColor", new Vector3(0.502f));
+
+            // Subsurface Scattering
+            sh.SetVector3(gl, "uSubsurfaceInscatteringColor", new Vector3(1.0f));
+            sh.SetVector3(gl, "uSubsurfaceAbsorptionColor", new Vector3(0.902f, 0.784f, 0.784f)); 
+            sh.SetFloat(gl, "uImageReflectionNormalDampening", 5.0f);
+            sh.SetFloat(gl, "uSkinScatterStrength", 0.5f);
+
+            // Side
+            sh.SetFloat(gl, "uTwoSidedLighting", 0.0f);
 
             sh.SetUniform1(gl, "uDiffuseMap", 0);
             sh.SetUniform1(gl, "uNormalMap", 2);
             sh.SetUniform1(gl, "uSMSPSKMap", 3);
+            sh.SetUniform1(gl, "uSpecColorMap", 4);
 
             gl.BindVertexArray(model.vaoId);
 
@@ -338,20 +371,38 @@ namespace MHUpkManager
 
                 gl.ActiveTexture(OpenGL.GL_TEXTURE2);
                 if (section.GetTextureType(TextureType.uNormalMap, out var normal))
+                {
                     gl.BindTexture(OpenGL.GL_TEXTURE_2D, normal.TextureId);
+                    sh.SetFloat(gl, "uHasNormalMap", 1.0f);
+                }
                 else
+                {
                     gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+                    sh.SetFloat(gl, "uHasNormalMap", 1.0f);
+                }
 
                 gl.ActiveTexture(OpenGL.GL_TEXTURE3);
                 if (section.GetTextureType(TextureType.uSMSPSKMap, out var smspsk))
                 {
                     gl.BindTexture(OpenGL.GL_TEXTURE_2D, smspsk.TextureId);
-                    sh.SetUniform1(gl, "uHasSMSPSK", 1.0f);
+                    sh.SetFloat(gl, "uHasSMSPSK", 1.0f);
                 }
                 else
                 {
                     gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
-                    sh.SetUniform1(gl, "uHasSMSPSK", 0.0f);
+                    sh.SetFloat(gl, "uHasSMSPSK", 0.0f);
+                }
+
+                gl.ActiveTexture(OpenGL.GL_TEXTURE4);
+                if (section.GetTextureType(TextureType.uSpecColorMap, out var speccolor))
+                {
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, speccolor.TextureId);
+                    sh.SetFloat(gl, "uHasSpecColorMap", 1.0f);
+                }
+                else
+                {
+                    gl.BindTexture(OpenGL.GL_TEXTURE_2D, whiteTexId);
+                    sh.SetFloat(gl, "uHasSpecColorMap", 0.0f);
                 }
 
                 int indexStart = (int)section.BaseIndex;
@@ -367,6 +418,8 @@ namespace MHUpkManager
             gl.ActiveTexture(OpenGL.GL_TEXTURE2);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.ActiveTexture(OpenGL.GL_TEXTURE3);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+            gl.ActiveTexture(OpenGL.GL_TEXTURE4);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
 
             sh.Unbind(gl);
