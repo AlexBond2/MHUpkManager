@@ -51,6 +51,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public UArray<FMeshMaterialShaderMap> MeshShaderMaps { get; set; }
         public FGuid MaterialId { get; set; }
         public string FriendlyName { get; set; }
+        public FStaticParameterSet MaterialStaticParameters { get; set; }
+        public FUniformExpressionSet UniformExpressionSet { get; set; }
+
         public static FMaterialShaderMap ReadData(UBuffer buffer)
         {
             var matShader = new FMaterialShaderMap();
@@ -67,9 +70,15 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             matShader.MaterialId = FGuid.ReadData(buffer);
             matShader.FriendlyName = buffer.ReadString();
 
+            /*
+            if (matShader.MaterialId.ToSystemGuid() == new Guid("74e5f49e-f8d5-42ea-bd06-803ccaf90c29"))
+            {
+                matShader.MaterialStaticParameters = FStaticParameterSet.ReadData(buffer);
+                matShader.UniformExpressionSet = FUniformExpressionSet.ReadData(buffer);
+                DumpExpressionSet.DumpUniformExpressionSetToFile(matShader.UniformExpressionSet, $"{matShader.MaterialId}.txt");
+            }*/
+
             buffer.SkipOffset(matShader.SkipOffset);
-            // StaticParameters
-            // UniformExpressionSet
             // Platform
             return matShader;
         }
@@ -77,6 +86,40 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public string Format => "";
 
         public override string ToString() => $"MaterialShaderMap<{MaterialId}, {FriendlyName}>";
+    }
+
+    public class FUniformExpressionSet
+    {
+        public FShaderFrequencyUniformExpressions PixelExpressions { get; set; }
+        public UArray<FMaterialUniformExpressionRef> UniformCubeTextureExpressions { get; set; }
+        public FShaderFrequencyUniformExpressions VertexExpressions { get; set; }
+
+        public static FUniformExpressionSet ReadData(UBuffer buffer)
+        {
+            var expressionSet = new FUniformExpressionSet();
+            expressionSet.PixelExpressions = FShaderFrequencyUniformExpressions.ReadData(buffer);
+            expressionSet.UniformCubeTextureExpressions = buffer.ReadArray(FMaterialUniformExpressionRef.ReadData);
+            expressionSet.VertexExpressions = FShaderFrequencyUniformExpressions.ReadData(buffer);
+            return expressionSet;
+        }
+    }
+
+    public class FShaderFrequencyUniformExpressions
+    {
+        public UArray<FMaterialUniformExpressionRef> UniformVectorExpressions { get; set; }
+        public UArray<FMaterialUniformExpressionRef> UniformScalarExpressions { get; set; }
+        public UArray<FMaterialUniformExpressionRef> Uniform2DTextureExpressions { get; set; }
+
+        public static FShaderFrequencyUniformExpressions ReadData(UBuffer buffer)
+        {
+            var expressions = new FShaderFrequencyUniformExpressions();
+
+            expressions.UniformVectorExpressions = buffer.ReadArray(FMaterialUniformExpressionRef.ReadData);
+            expressions.UniformScalarExpressions = buffer.ReadArray(FMaterialUniformExpressionRef.ReadData);
+            expressions.Uniform2DTextureExpressions = buffer.ReadArray(FMaterialUniformExpressionRef.ReadData);
+           
+            return expressions;
+        }
     }
 
     public class FMeshMaterialShaderMap : IAtomicStruct
