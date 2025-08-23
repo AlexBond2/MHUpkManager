@@ -346,6 +346,8 @@ namespace MHUpkManager
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
             gl.ActiveTexture(OpenGL.GL_TEXTURE4);
             gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
+            gl.ActiveTexture(OpenGL.GL_TEXTURE5);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, 0);
 
             sh.Unbind(gl);
 

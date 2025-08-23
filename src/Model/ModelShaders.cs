@@ -54,12 +54,17 @@ out vec4 fragColor;
 uniform sampler2D uDiffuseMap;
 uniform sampler2D uNormalMap;
 uniform sampler2D uSMSPSKMap;      // R=SpecMult, G=SpecPow, B=SkinMask, A=Reflectivity
+uniform sampler2D uESPAMap;        // Emissive_SpecPower_Ambient
+uniform sampler2D uSMRRMap;        // SpecMult_RimMask_Reflection
+uniform sampler2D uRampMap;         // tf2_ramp
 uniform sampler2D uSpecColorMap;    // Specular color texture
 
 // Texture flags
 uniform float uHasDiffuseMap = 1.0;
 uniform float uHasNormalMap = 1.0;
 uniform float uHasSMSPSK = 0.0;
+uniform float uHasESPA = 0.0;
+uniform float uHasSMRR = 0.0;
 uniform float uHasSpecColorMap = 0.0;
 
 // Lighting
@@ -101,6 +106,59 @@ uniform float uImageReflectionNormalDampening = 5.0;
 // Character material specific
 uniform float uSkinScatterStrength = 0.5;
 uniform float uTwoSidedLighting = 0.0;
+
+struct MaterialMasks {
+    float specMult;
+    float specPower;
+    float skinMask;
+    float reflectivity;
+    float emissive;
+    float ambientOcclusion;
+    float rimMask;
+};
+
+MaterialMasks getMaterialMasks() {
+    MaterialMasks masks;
+    
+    if (uHasSMSPSK > 0.5) {
+        // 1: SMSPSK
+        vec4 smspsk = texture(uSMSPSKMap, vTexCoord);
+        masks.specMult = smspsk.r;
+        masks.specPower = smspsk.g;
+        masks.skinMask = smspsk.b;
+        masks.reflectivity = smspsk.a;
+        masks.emissive = 0.0;
+        masks.ambientOcclusion = 1.0;
+        masks.rimMask = 1.0;
+    }
+    else if (uHasESPA > 0.5 && uHasSMRR > 0.5) {
+        // 2: ESPA + SMRR
+        vec4 espa = texture(uESPAMap, vTexCoord);
+        vec4 smrr = uHasSMRR > 0.5 ? texture(uSMRRMap, vTexCoord) : vec4(0.0);
+        
+        masks.specMult = smrr.r;
+        masks.specPower = smrr.g;
+        masks.reflectivity = smrr.b;
+
+        masks.skinMask = espa.b;
+
+        masks.emissive = 0.0;
+        masks.ambientOcclusion = 1.0;
+        masks.rimMask = 1.0;
+    }
+    else {
+        // Defoult values if no maps are present
+        masks.specMult = 0.0;
+        masks.specPower = 0.0;
+        masks.skinMask = 0.0;
+        masks.reflectivity = 0.0;
+        masks.emissive = 0.0;
+        masks.ambientOcclusion = 1.0;
+        masks.rimMask = 1.0;
+    }
+    
+    return masks;
+}
 
 vec3 calculateNormal() {
     vec3 N = normalize(vNormal);
@@ -181,13 +239,12 @@ vec3 calculateSpecular(vec3 normal, vec3 lightDir, vec3 viewDir, float specMult,
     // Apply multipliers
     float finalSpecMult = uSpecMult;
     if (uHasSMSPSK > 0.5) {
-        finalSpecMult *= specMult;
         // Lower quality specular option
         finalSpecMult = mix(finalSpecMult, uSpecMultLQ, 0.0);
     }
     
     vec3 specColor = getSpecularColor();
-    return specColor * spec * finalSpecMult;
+    return specColor * spec * finalSpecMult * specMult;
 }
 
 vec3 calculateRimLighting(vec3 normal, vec3 viewDir) {
@@ -210,15 +267,20 @@ vec3 calculateScreenSpaceLighting(vec3 normal) {
 }
 
 void main() {
+    // Get material masks
+    MaterialMasks masks = getMaterialMasks();
+    float specularMultiplier = masks.specMult;
+    float specularPower = masks.specPower;
+    float skinMask = masks.skinMask;
+    float reflectivity = masks.reflectivity * uReflectionMult;
+    float emissive = masks.emissive;
+    float ambientOcclusion = masks.ambientOcclusion;
+    float rimMask = masks.rimMask;
+
     // Sample textures
     vec3 diffuseColor = uHasDiffuseMap > 0.5 ? texture(uDiffuseMap, vTexCoord).rgb : uDiffuseColor;
-    vec4 smspskData = uHasSMSPSK > 0.5 ? texture(uSMSPSKMap, vTexCoord) : vec4(0.5, 0.0, 0.0, 0.0);
-    
-    // Extract SMSPSK components
-    float specularMultiplier = smspskData.r;
-    float specularPower = smspskData.g;
-    float skinMask = smspskData.b;
-    float reflectivity = smspskData.a * uReflectionMult;
+
+    diffuseColor *= ambientOcclusion;
     
     // Calculate world normal
     vec3 worldNormal = uHasNormalMap > 0.5 ? calculateNormal() : normalize(vNormal);
@@ -242,7 +304,7 @@ void main() {
     vec3 fillLight = uFillLightColor * max(0.0, dot(worldNormal, vec3(0.0, 1.0, 0.0))) * 0.5;
     
     // Rim lighting
-    vec3 rimLight = calculateRimLighting(worldNormal, viewDir);
+    vec3 rimLight = calculateRimLighting(worldNormal, viewDir) * rimMask;
     
     // Screen space lighting
     vec3 screenLight = calculateScreenSpaceLighting(worldNormal);
@@ -264,8 +326,12 @@ void main() {
         float reflectAmount = reflectivity / (1.0 + uImageReflectionNormalDampening);
         finalColor += vec3(reflectAmount) * 0.2; // Simplified reflection
     }
-    
-    
+
+    if (emissive > 0.0) {
+        finalColor += diffuseColor * emissive * 2.0;
+    }    
+    finalColor = clamp(finalColor, 0.0, 1.0);
+
     fragColor = vec4(finalColor, 1.0);
 }";
 

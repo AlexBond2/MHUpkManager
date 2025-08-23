@@ -500,7 +500,9 @@ namespace MHUpkManager.Model
         uDiffuseMap,
         uNormalMap,
         uSMSPSKMap,
-        uSpecColorMap
+        uSpecColorMap,
+        uESPAMap,
+        uSMRRMap
     }
 
     public class MaterialParameters
@@ -557,12 +559,11 @@ namespace MHUpkManager.Model
             LoadScalarParameter(material, "specularpower", ref SpecularPower);
             */
             //LoadScalarParameter(material, "specularpowermask", ref SpecularPowerMask); // 255
-
+            
             LoadVectorParameter(material, "lambertambient", ref LambertAmbient);
             LoadVectorParameter(material, "shadowambientcolor", ref ShadowAmbientColor);
             LoadVectorParameter(material, "filllightcolor", ref FillLightColor);
-            LoadVectorParameter(material, "specularcolor", ref SpecularColor);
-
+            LoadVectorParameter(material, "specularcolor", ref SpecularColor);            
         }
 
         private static void LoadScalarParameter(UMaterialInstanceConstant material, string paramName, ref float value)
@@ -631,6 +632,8 @@ namespace MHUpkManager.Model
             LoadTexture(gl, "Diffuse", TextureType.uDiffuseMap);
             LoadTexture(gl, "Normal", TextureType.uNormalMap);
             LoadTexture(gl, "specmult_specpow_skinmask", TextureType.uSMSPSKMap);
+            LoadTexture(gl, "emissivespecpow", TextureType.uESPAMap);
+            LoadTexture(gl, "specmultrimmaskrefl", TextureType.uSMRRMap);
             LoadTexture(gl, "SpecColor", TextureType.uSpecColorMap);
         }
 
@@ -682,7 +685,13 @@ namespace MHUpkManager.Model
             BindTexture(gl, sh, OpenGL.GL_TEXTURE2, TextureType.uSMSPSKMap,
                                "uSMSPSKMap", "uHasSMSPSK");
 
-            BindTexture(gl, sh, OpenGL.GL_TEXTURE3, TextureType.uSpecColorMap,
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE3, TextureType.uESPAMap,
+                               "uESPAMap", "uHasESPA");
+
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE4, TextureType.uSMRRMap,
+                               "uSMRRMap", "uHasSMRR");
+
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE5, TextureType.uSpecColorMap,
                                "uSpecColorMap", "uHasSpecColorMap");
         }
 
