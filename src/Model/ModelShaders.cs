@@ -57,9 +57,10 @@ uniform sampler2D uSMSPSKMap;      // R=SpecMult, G=SpecPow, B=SkinMask, A=Refle
 uniform sampler2D uSpecColorMap;    // Specular color texture
 
 // Texture flags
+uniform float uHasDiffuseMap = 1.0;
+uniform float uHasNormalMap = 1.0;
 uniform float uHasSMSPSK = 0.0;
 uniform float uHasSpecColorMap = 0.0;
-uniform float uHasNormalMap = 1.0;
 
 // Lighting
 uniform vec3 uLightDir;
@@ -89,6 +90,7 @@ uniform float uSpecularPowerMask = 1.0;
 uniform vec3 uLambertAmbient = vec3(0.1);
 uniform vec3 uShadowAmbientColor = vec3(0.05);
 uniform vec3 uFillLightColor = vec3(0.2, 0.19, 0.18);
+uniform vec3 uDiffuseColor = vec3(0.5);
 uniform vec3 uSpecularColor = vec3(0.5);  // Used when no spec color map
 
 // Subsurface scattering (from material properties)
@@ -209,7 +211,7 @@ vec3 calculateScreenSpaceLighting(vec3 normal) {
 
 void main() {
     // Sample textures
-    vec3 diffuseColor = texture(uDiffuseMap, vTexCoord).rgb;
+    vec3 diffuseColor = uHasDiffuseMap > 0.5 ? texture(uDiffuseMap, vTexCoord).rgb : uDiffuseColor;
     vec4 smspskData = uHasSMSPSK > 0.5 ? texture(uSMSPSKMap, vTexCoord) : vec4(0.5, 0.0, 0.0, 0.0);
     
     // Extract SMSPSK components
@@ -219,7 +221,7 @@ void main() {
     float reflectivity = smspskData.a * uReflectionMult;
     
     // Calculate world normal
-    vec3 worldNormal = calculateNormal();
+    vec3 worldNormal = uHasNormalMap > 0.5 ? calculateNormal() : normalize(vNormal);
     vec3 viewDir = normalize(vViewDir);
     
     // Ambient lighting

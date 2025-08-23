@@ -8,6 +8,7 @@ namespace SharpGL.Shaders
 {
     public class ShaderProgram
     {
+        private OpenGL GL;
         private readonly Shader vertexShader = new Shader();
         private readonly Shader fragmentShader = new Shader();
 
@@ -23,6 +24,8 @@ namespace SharpGL.Shaders
         public void Create(OpenGL gl, string vertexShaderSource, string fragmentShaderSource, 
             Dictionary<uint, string> attributeLocations)
         {
+            GL = gl;
+
             //  Create the shaders.
             vertexShader.Create(gl, OpenGL.GL_VERTEX_SHADER, vertexShaderSource);
             fragmentShader.Create(gl, OpenGL.GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -58,6 +61,7 @@ namespace SharpGL.Shaders
             fragmentShader.Delete(gl);
             gl.DeleteProgram(shaderProgramObject);
             shaderProgramObject = 0;
+            GL = null;
         }
 
         public int GetAttributeLocation(OpenGL gl, string attributeName)
@@ -116,14 +120,19 @@ namespace SharpGL.Shaders
             gl.Uniform1(GetUniformLocation(gl, uniformName), v1);
         }
 
-        public void SetFloat(OpenGL gl, string uniformName, float v1)
+        public void SetFloat(string uniformName, float v1)
         {
-            gl.Uniform1(GetUniformLocation(gl, uniformName), v1);
+            GL.Uniform1(GetUniformLocation(GL, uniformName), v1);
         }
 
         public void SetUniform1(OpenGL gl, string uniformName, int v1)
         {
             gl.Uniform1(GetUniformLocation(gl, uniformName), v1);
+        }
+
+        public void SetInt(string uniformName, int v1)
+        {
+            GL.Uniform1(GetUniformLocation(GL, uniformName), v1);
         }
 
         public void SetUniform2(OpenGL gl, string uniformName, float v1, float v2)
@@ -136,9 +145,9 @@ namespace SharpGL.Shaders
             gl.Uniform3(GetUniformLocation(gl, uniformName), v1, v2, v3);
         }
 
-        public void SetVector3(OpenGL gl, string uniformName, Vector3 v)
+        public void SetVector3(string uniformName, Vector3 v)
         {
-            gl.Uniform3(GetUniformLocation(gl, uniformName), v.X, v.Y, v.Z);
+            GL.Uniform3(GetUniformLocation(GL, uniformName), v.X, v.Y, v.Z);
         }
 
         public void SetUniform4(OpenGL gl, string uniformName, float v1, float v2, float v3, float v4)

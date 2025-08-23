@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Numerics;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine.Texture;
@@ -445,6 +446,28 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             foreach (var parameter in TextureParameterValues)
                 if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))
                     return parameter.ParameterValue;
+
+            return null;
+        }
+
+        public float? GetScalarParameterValue(string parameterName)
+        {
+            if (TextureParameterValues == null) return null;
+
+            foreach (var parameter in ScalarParameterValues)
+                if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))
+                    return parameter.ParameterValue;
+
+            return null;
+        }
+
+        public Vector3? GetVectorParameterValue(string parameterName)
+        {
+            if (TextureParameterValues == null) return null;
+
+            foreach (var parameter in VectorParameterValues)
+                if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))
+                    return parameter.ParameterValue.ToVector3();
 
             return null;
         }

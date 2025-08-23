@@ -501,6 +501,8 @@ namespace UpkManager.Models.UpkFile.Core
             };
             return color;
         }
+
+        public Vector3 ToVector3() => new (R, G, B);
     }
 
     [UnrealStruct("RawDistribution")]

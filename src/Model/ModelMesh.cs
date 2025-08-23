@@ -1,7 +1,9 @@
 ﻿using SharpGL;
+using SharpGL.Shaders;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using UpkManager.Models.UpkFile.Classes;
+using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine.Material;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
@@ -501,6 +503,111 @@ namespace MHUpkManager.Model
         uSpecColorMap
     }
 
+    public class MaterialParameters
+    {
+        // Scalar Parameters
+        public float LambertDiffusePower = 1.0f;
+        public float PhongDiffusePower = 1.0f;
+        public float LightingAmbient = 0.3f;
+        public float ShadowAmbientMult = 1.0f;
+        public float NormalStrength = 1.0f;
+        public float ReflectionMult = 1.0f;
+        public float RimColorMult = 0.0f;
+        public float RimFalloff = 2.0f;
+        public float ScreenLightAmount = 0.0f;
+        public float ScreenLightMult = 1.0f;
+        public float ScreenLightPower = 1.0f;
+        public float SpecMult = 1.0f;
+        public float SpecMultLQ = 0.5f;
+        public float SpecularPower = 15.0f;
+        public float SpecularPowerMask = 1.0f;
+
+        // Vector Parameters
+        public Vector3 LambertAmbient = new (0.1f, 0.1f, 0.1f);
+        public Vector3 ShadowAmbientColor = new (0.05f, 0.05f, 0.08f);
+        public Vector3 FillLightColor = new (0.2f, 0.19f, 0.18f);
+        public Vector3 SpecularColor = new (0.502f);
+
+        // Subsurface Scattering
+        public Vector3 SubsurfaceInscatteringColor = new (1.0f, 1.0f, 1.0f);
+        public Vector3 SubsurfaceAbsorptionColor = new (0.902f, 0.784f, 0.784f);
+        public float ImageReflectionNormalDampening = 5.0f;
+        public float SkinScatterStrength = 0.5f;
+        public float TwoSidedLighting = 0.0f;
+
+        public void LoadFromMaterial(UMaterialInstanceConstant material)
+        {
+            LoadScalarParameter(material, "lambertdiffusepower", ref LambertDiffusePower);
+            LoadScalarParameter(material, "lightingambient", ref LightingAmbient);
+            LoadScalarParameter(material, "phongdiffusepower", ref PhongDiffusePower);
+            LoadScalarParameter(material, "shadowambientmult", ref ShadowAmbientMult);
+            LoadScalarParameter(material, "normalstrength", ref NormalStrength);
+
+            // TODO normalize values
+
+            // LoadScalarParameter(material, "reflectionmult", ref ReflectionMult); // 10
+            // LoadScalarParameter(material, "rimcolormult", ref RimColorMult); // 5
+            /* 
+            LoadScalarParameter(material, "rimfalloff", ref RimFalloff);
+            LoadScalarParameter(material, "screenlight_amount", ref ScreenLightAmount);
+            LoadScalarParameter(material, "screenlight_mult", ref ScreenLightMult);
+            //LoadScalarParameter(material, "screenlight_power", ref ScreenLightPower); // 4
+            LoadScalarParameter(material, "specmult", ref SpecMult);
+            LoadScalarParameter(material, "specmult_lq", ref SpecMultLQ);
+            LoadScalarParameter(material, "specularpower", ref SpecularPower);
+            */
+            //LoadScalarParameter(material, "specularpowermask", ref SpecularPowerMask); // 255
+
+            LoadVectorParameter(material, "lambertambient", ref LambertAmbient);
+            LoadVectorParameter(material, "shadowambientcolor", ref ShadowAmbientColor);
+            LoadVectorParameter(material, "filllightcolor", ref FillLightColor);
+            LoadVectorParameter(material, "specularcolor", ref SpecularColor);
+
+        }
+
+        private static void LoadScalarParameter(UMaterialInstanceConstant material, string paramName, ref float value)
+        {
+            var param = material.GetScalarParameterValue(paramName);
+            if (param.HasValue) value = param.Value;
+        }
+
+        private static void LoadVectorParameter(UMaterialInstanceConstant material, string paramName, ref Vector3 value)
+        {
+            var param = material.GetVectorParameterValue(paramName);
+            if (param.HasValue) value = param.Value;
+        }
+
+        public void ApplyToShader(ShaderProgram shader)
+        {
+            shader.SetFloat("uLambertDiffusePower", LambertDiffusePower);
+            shader.SetFloat("uPhongDiffusePower", PhongDiffusePower);
+            shader.SetFloat("uLightingAmbient", LightingAmbient);
+            shader.SetFloat("uShadowAmbientMult", ShadowAmbientMult);
+            shader.SetFloat("uNormalStrength", NormalStrength);
+            shader.SetFloat("uReflectionMult", ReflectionMult);
+            shader.SetFloat("uRimColorMult", RimColorMult);
+            shader.SetFloat("uRimFalloff", RimFalloff);
+            shader.SetFloat("uScreenLightAmount", ScreenLightAmount);
+            shader.SetFloat("uScreenLightMult", ScreenLightMult);
+            shader.SetFloat("uScreenLightPower", ScreenLightPower);
+            shader.SetFloat("uSpecMult", SpecMult);
+            shader.SetFloat("uSpecMultLQ", SpecMultLQ);
+            shader.SetFloat("uSpecularPower", SpecularPower);
+            shader.SetFloat("uSpecularPowerMask", SpecularPowerMask);
+
+            shader.SetVector3("uLambertAmbient", LambertAmbient);
+            shader.SetVector3("uShadowAmbientColor", ShadowAmbientColor);
+            shader.SetVector3("uFillLightColor", FillLightColor);
+            shader.SetVector3("uSpecularColor", SpecularColor);
+
+            shader.SetVector3("uSubsurfaceInscatteringColor", SubsurfaceInscatteringColor);
+            shader.SetVector3("uSubsurfaceAbsorptionColor", SubsurfaceAbsorptionColor);
+            shader.SetFloat("uImageReflectionNormalDampening", ImageReflectionNormalDampening);
+            shader.SetFloat("uSkinScatterStrength", SkinScatterStrength);
+            shader.SetFloat("uTwoSidedLighting", TwoSidedLighting);
+        }
+    }
+
     public struct MeshSectionData
     {
         public uint BaseIndex;
@@ -509,23 +616,29 @@ namespace MHUpkManager.Model
         public UMaterialInstanceConstant Material;
         public int MaterialIndex;
         public List<Texture2DData> Textures;
+        public MaterialParameters Parameters;
 
         public void LoadMaterial(OpenGL gl, FObject material)
         {
             Textures = [];
             Material = material?.LoadObject<UMaterialInstanceConstant>();
 
-            var textureObj = Material?.GetTextureParameterValue("Diffuse");
-            if (textureObj != null) Textures.Add(new(TextureType.uDiffuseMap, gl, textureObj));
+            Parameters = new();
+            if (Material == null) return;
 
-            textureObj = Material?.GetTextureParameterValue("Normal");
-            if (textureObj != null) Textures.Add(new(TextureType.uNormalMap, gl, textureObj));
+            Parameters.LoadFromMaterial(Material);
 
-            textureObj = Material?.GetTextureParameterValue("specmult_specpow_skinmask");
-            if (textureObj != null) Textures.Add(new(TextureType.uSMSPSKMap, gl, textureObj));
+            LoadTexture(gl, "Diffuse", TextureType.uDiffuseMap);
+            LoadTexture(gl, "Normal", TextureType.uNormalMap);
+            LoadTexture(gl, "specmult_specpow_skinmask", TextureType.uSMSPSKMap);
+            LoadTexture(gl, "SpecColor", TextureType.uSpecColorMap);
+        }
 
-            textureObj = Material?.GetTextureParameterValue("SpecColor");
-            if (textureObj != null) Textures.Add(new(TextureType.uSpecColorMap, gl, textureObj));
+        private readonly void LoadTexture(OpenGL gl, string parameterName, TextureType textureType)
+        {
+            var textureObj = Material.GetTextureParameterValue(parameterName);
+            if (textureObj != null)
+                Textures.Add(new Texture2DData(textureType, gl, textureObj));
         }
 
         public bool IsDiffuse()
@@ -554,6 +667,40 @@ namespace MHUpkManager.Model
 
             texture = default;
             return false;
+        }
+
+        public void ApplyToShader(OpenGL gl, ShaderProgram sh, bool showTextures)
+        {
+            Parameters.ApplyToShader(sh);
+
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE0, TextureType.uDiffuseMap,
+                               "uDiffuseMap", "uHasDiffuseMap", showTextures);
+
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE1, TextureType.uNormalMap,
+                               "uNormalMap", "uHasNormalMap");
+
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE2, TextureType.uSMSPSKMap,
+                               "uSMSPSKMap", "uHasSMSPSK");
+
+            BindTexture(gl, sh, OpenGL.GL_TEXTURE3, TextureType.uSpecColorMap,
+                               "uSpecColorMap", "uHasSpecColorMap");
+        }
+
+        private readonly void BindTexture(OpenGL gl, ShaderProgram sh, uint textureUnit,
+                                 TextureType textureType, string samplerName,
+                                 string flagName, bool enabled = true)
+        {
+            if (enabled && GetTextureType(textureType, out var texture))
+            {
+                gl.ActiveTexture(textureUnit);
+                gl.BindTexture(OpenGL.GL_TEXTURE_2D, texture.TextureId);
+                sh.SetInt(samplerName, (int)(textureUnit - OpenGL.GL_TEXTURE0));
+                sh.SetFloat(flagName, 1.0f);
+            }
+            else
+            {
+                sh.SetFloat(flagName, 0.0f);
+            }
         }
     }
 
