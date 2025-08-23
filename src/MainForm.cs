@@ -447,9 +447,27 @@ namespace MHUpkManager
         private void propertiesMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
             viewDataInHEXMenuItem.Enabled = false;
+            copySelectedMenuItem.Enabled = false;
+            findNameMenuItem.Enabled = false; 
+            copySelectedMenuItem.Text = "Copy [Selected]";
+            findNameMenuItem.Text = "Find [Buffer]";
 
-            if (propertiesView.SelectedNode?.Tag is not byte[] data || data.Length == 0) return;
+            if (Clipboard.ContainsText())
+            {
+                string clipboardText = Clipboard.GetText().Trim();
+                if (!string.IsNullOrEmpty(clipboardText) && clipboardText.Length <= 50)
+                {
+                    findNameMenuItem.Enabled = true;
+                    findNameMenuItem.Text = $"Find [{clipboardText}]";
+                }
+            }
 
+            if (propertiesView.SelectedNode == null) return;
+
+            copySelectedMenuItem.Enabled = true;
+            copySelectedMenuItem.Text = $"Copy [{propertiesView.SelectedNode.Text}]";
+
+            if (propertiesView.SelectedNode.Tag is not byte[] data || data.Length == 0) return;
             viewDataInHEXMenuItem.Enabled = true;
         }
 
@@ -602,6 +620,48 @@ namespace MHUpkManager
                     tfcStatus.Text = $"Ready ({totalEntries:N0} textures)";
                 }
             }
+        }
+
+        private void copySelectedMenuItem_Click(object sender, EventArgs e)
+        {
+            if (propertiesView.SelectedNode == null) return;
+            Clipboard.SetText(propertiesView.SelectedNode.Text);
+        }
+
+        private void findNameMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!Clipboard.ContainsText()) return;
+
+            string searchText = Clipboard.GetText().Trim();
+            if (string.IsNullOrEmpty(searchText)) return;
+
+            TreeNode foundNode = FindNodeByText(propertiesView.Nodes, searchText);
+
+            if (foundNode != null)
+            {
+                foundNode.EnsureVisible();
+                propertiesView.SelectedNode = foundNode;
+                propertiesView.Focus();
+            }
+            else
+            {
+                MessageBox.Show($"Text '{searchText}' not found in tree", "Search Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private static TreeNode FindNodeByText(TreeNodeCollection nodes, string searchText)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (node.Text.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    return node;
+
+                TreeNode foundInChildren = FindNodeByText(node.Nodes, searchText);
+                if (foundInChildren != null)
+                    return foundInChildren;
+            }
+
+            return null;
         }
     }
 }

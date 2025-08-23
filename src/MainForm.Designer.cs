@@ -92,6 +92,9 @@ namespace MHUpkManager
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
+            copySelectedMenuItem = new ToolStripMenuItem();
+            findNameMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem4 = new ToolStripSeparator();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -134,26 +137,26 @@ namespace MHUpkManager
             // openFileMenuItem
             // 
             openFileMenuItem.Name = "openFileMenuItem";
-            openFileMenuItem.Size = new Size(180, 22);
+            openFileMenuItem.Size = new Size(158, 22);
             openFileMenuItem.Text = "Open Upk...";
             openFileMenuItem.Click += openMenuItem_Click;
             // 
             // loadManifestMenuItem
             // 
             loadManifestMenuItem.Name = "loadManifestMenuItem";
-            loadManifestMenuItem.Size = new Size(180, 22);
+            loadManifestMenuItem.Size = new Size(158, 22);
             loadManifestMenuItem.Text = "Load Manifest...";
             loadManifestMenuItem.Click += loadManifestMenuItem_Click;
             // 
             // toolStripMenuItem3
             // 
             toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(177, 6);
+            toolStripMenuItem3.Size = new Size(155, 6);
             // 
             // saveMenuItem
             // 
             saveMenuItem.Name = "saveMenuItem";
-            saveMenuItem.Size = new Size(180, 22);
+            saveMenuItem.Size = new Size(158, 22);
             saveMenuItem.Text = "Save Upk...";
             saveMenuItem.Click += saveMenuItem_Click;
             // 
@@ -429,9 +432,9 @@ namespace MHUpkManager
             // 
             // propertiesMenu
             // 
-            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem, viewModelMenuItem });
+            propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem4, copySelectedMenuItem, findNameMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem, viewModelMenuItem });
             propertiesMenu.Name = "propertiesMenu";
-            propertiesMenu.Size = new Size(185, 126);
+            propertiesMenu.Size = new Size(185, 198);
             propertiesMenu.Opening += propertiesMenu_Opening;
             // 
             // objectNameClassMenuItem
@@ -706,6 +709,25 @@ namespace MHUpkManager
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
+            // copySelectedMenuItem
+            // 
+            copySelectedMenuItem.Name = "copySelectedMenuItem";
+            copySelectedMenuItem.Size = new Size(184, 22);
+            copySelectedMenuItem.Text = "Copy Selected";
+            copySelectedMenuItem.Click += copySelectedMenuItem_Click;
+            // 
+            // findNameMenuItem
+            // 
+            findNameMenuItem.Name = "findNameMenuItem";
+            findNameMenuItem.Size = new Size(184, 22);
+            findNameMenuItem.Text = "Find Buffer";
+            findNameMenuItem.Click += findNameMenuItem_Click;
+            // 
+            // toolStripMenuItem4
+            // 
+            toolStripMenuItem4.Name = "toolStripMenuItem4";
+            toolStripMenuItem4.Size = new Size(181, 6);
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -808,5 +830,8 @@ namespace MHUpkManager
         private ToolStripSeparator toolStripMenuItem3;
         private ToolStripStatusLabel toolStripStatusLabel2;
         private ToolStripStatusLabel tfcStatus;
+        private ToolStripSeparator toolStripMenuItem4;
+        private ToolStripMenuItem copySelectedMenuItem;
+        private ToolStripMenuItem findNameMenuItem;
     }
 }
