@@ -283,7 +283,7 @@ void main() {
     diffuseColor *= ambientOcclusion;
     
     // Calculate world normal
-    vec3 worldNormal = uHasNormalMap > 0.5 ? calculateNormal() : normalize(vNormal);
+    vec3 worldNormal = calculateNormal(); 
     vec3 viewDir = normalize(vViewDir);
     
     // Ambient lighting

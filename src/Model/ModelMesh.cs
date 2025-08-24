@@ -640,7 +640,7 @@ namespace MHUpkManager.Model
         private readonly void LoadTexture(OpenGL gl, string parameterName, TextureType textureType)
         {
             var textureObj = Material.GetTextureParameterValue(parameterName);
-            if (textureObj != null)
+            if (textureObj != null && textureObj.TableEntry is UnrealExportTableEntry)
                 Textures.Add(new Texture2DData(textureType, gl, textureObj));
         }
 
