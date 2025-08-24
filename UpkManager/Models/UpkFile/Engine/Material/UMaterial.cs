@@ -452,7 +452,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
 
         public float? GetScalarParameterValue(string parameterName)
         {
-            if (TextureParameterValues == null) return null;
+            if (ScalarParameterValues == null) return null;
 
             foreach (var parameter in ScalarParameterValues)
                 if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))
@@ -463,7 +463,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
 
         public Vector3? GetVectorParameterValue(string parameterName)
         {
-            if (TextureParameterValues == null) return null;
+            if (VectorParameterValues == null) return null;
 
             foreach (var parameter in VectorParameterValues)
                 if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))

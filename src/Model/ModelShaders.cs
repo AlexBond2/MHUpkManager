@@ -137,14 +137,14 @@ MaterialMasks getMaterialMasks() {
         vec4 smrr = uHasSMRR > 0.5 ? texture(uSMRRMap, vTexCoord) : vec4(0.0);
         
         masks.specMult = smrr.r;
-        masks.specPower = smrr.g;
+        masks.rimMask = smrr.g; 
         masks.reflectivity = smrr.b;
 
         masks.skinMask = espa.b;
+        masks.specPower = espa.g;
 
-        masks.emissive = 0.0;
+        masks.emissive = espa.r;
         masks.ambientOcclusion = 1.0;
-        masks.rimMask = 1.0;
     }
     else {
         // Defoult values if no maps are present
