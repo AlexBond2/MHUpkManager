@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGL", "SharpGL\SharpGL\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGL.WinForms", "SharpGL\SharpGL.WinForms\SharpGL.WinForms.csproj", "{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpkIndexGenerator", "UpkIndexGenerator\UpkIndexGenerator.csproj", "{AF8A57D4-2CA2-D364-9BCE-EBB876581999}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Debug|x64.Build.0 = Debug|x64
 		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Release|x64.ActiveCfg = Release|x64
 		{4AA3BD5D-4E87-0719-46BD-BE9ADEEE0CE5}.Release|x64.Build.0 = Release|x64
+		{AF8A57D4-2CA2-D364-9BCE-EBB876581999}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AF8A57D4-2CA2-D364-9BCE-EBB876581999}.Debug|x64.Build.0 = Debug|Any CPU
+		{AF8A57D4-2CA2-D364-9BCE-EBB876581999}.Release|x64.ActiveCfg = Release|x64
+		{AF8A57D4-2CA2-D364-9BCE-EBB876581999}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
