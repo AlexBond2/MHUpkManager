@@ -1,4 +1,4 @@
-﻿using Str.Common.Extensions;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -143,9 +143,15 @@ namespace UpkManager.Models.UpkFile
 
             readExportTable(progress);
 
-            await ExportTable.ForEachAsync(export => Task.Run(() => export.ExpandReferences(this)));
+            await Parallel.ForEachAsync(ExportTable, async (export, ct) =>
+            {
+                await Task.Run(() => export.ExpandReferences(this), ct);
+            });
 
-            await ImportTable.ForEachAsync(import => Task.Run(() => import.ExpandReferences(this)));
+            await Parallel.ForEachAsync(ImportTable, async (import, ct) =>
+            {
+                await Task.Run(() => import.ExpandReferences(this), ct);
+            });
 
             message.Update("Slicing and Dicing...");
 
@@ -153,13 +159,15 @@ namespace UpkManager.Models.UpkFile
 
             message.Total = ExportTableCount; 
             message.Update("Reading Objects...");
-            
-            await ExportTable.ForEachAsync(export =>            
-                Task.Run(() => {
+
+            await Parallel.ForEachAsync(ExportTable, async (export, ct) =>
+            {
+                await Task.Run(() =>
+                {
                     export.ReadUnrealObject(reader, this);
                     message.IncrementCurrent();
-                })
-            );
+                }, ct);
+            });
 
             message.Complete();
         }
