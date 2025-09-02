@@ -9,6 +9,7 @@
 		<SelfContained>false</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<UseWindowsForms>false</UseWindowsForms>
+		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
 	
   <ItemGroup>
