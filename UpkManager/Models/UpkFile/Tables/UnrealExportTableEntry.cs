@@ -78,7 +78,6 @@ namespace UpkManager.Models.UpkFile.Tables
         #region Unreal Properties
 
         public ByteArrayReader UnrealObjectReader { get; private set; }
-        public UnrealHeader UnrealHeader { get; private set; }
         public UnrealObjectBase UnrealObject { get; private set; }
         public FName ClassReferenceNameIndex { get; private set; }
         public FName SuperReferenceNameIndex { get; private set; }
@@ -91,6 +90,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         internal void ReadExportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
+            UnrealHeader = header;
             ClassReference = reader.ReadInt32(); // ClassIndex
             SuperReference = reader.ReadInt32(); // SuperIndex
             OuterReference = reader.ReadInt32(); // OuterIndex
@@ -116,18 +116,17 @@ namespace UpkManager.Models.UpkFile.Tables
             PackageFlags = reader.ReadUInt32(); // PackageFlags
         }
 
-        internal void ExpandReferences(UnrealHeader header)
+        internal void ExpandReferences()
         {
-            ClassReferenceNameIndex = header.GetObjectTableEntry(ClassReference)?.ObjectNameIndex;
-            SuperReferenceNameIndex = header.GetObjectTableEntry(SuperReference)?.ObjectNameIndex;
-            OuterReferenceNameIndex = header.GetObjectTableEntry(OuterReference)?.ObjectNameIndex;
-            ArchetypeReferenceNameIndex = header.GetObjectTableEntry(ArchetypeReference)?.ObjectNameIndex;
+            ClassReferenceNameIndex = UnrealHeader.GetObjectTableEntry(ClassReference)?.ObjectNameIndex;
+            SuperReferenceNameIndex = UnrealHeader.GetObjectTableEntry(SuperReference)?.ObjectNameIndex;
+            OuterReferenceNameIndex = UnrealHeader.GetObjectTableEntry(OuterReference)?.ObjectNameIndex;
+            ArchetypeReferenceNameIndex = UnrealHeader.GetObjectTableEntry(ArchetypeReference)?.ObjectNameIndex;
         }
 
-        internal void ReadUnrealObject(ByteArrayReader reader, UnrealHeader unrealHeader)
+        internal void ReadUnrealObject(ByteArrayReader reader)
         {
-            UnrealObjectReader = reader.Splice(SerialDataOffset, SerialDataSize);
-            UnrealHeader = unrealHeader;
+            UnrealObjectReader = reader.Splice(SerialDataOffset, SerialDataSize);            
         }
 
         public async Task ParseUnrealObject(bool skipProperties, bool skipParse)

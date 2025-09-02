@@ -6,6 +6,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #region Properties
 
+        public UnrealHeader UnrealHeader { get; protected set; }
         public int OuterReference { get; protected set; }
 
         public FObject ObjectNameIndex { get; protected set; }

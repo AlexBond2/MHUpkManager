@@ -42,6 +42,7 @@ namespace UpkManager.Models.UpkFile.Tables
 
         public Task ReadImportTableEntry(ByteArrayReader reader, UnrealHeader header)
         {
+            UnrealHeader = header;
             PackageNameIndex.ReadNameTableIndex(reader, header); // PackageName
             ClassNameIndex.ReadNameTableIndex(reader, header);   // ClassName
             OuterReference = reader.ReadInt32();                 // OuterIndex
@@ -50,9 +51,9 @@ namespace UpkManager.Models.UpkFile.Tables
             return Task.CompletedTask;
         }
 
-        public void ExpandReferences(UnrealHeader header)
+        public void ExpandReferences()
         {
-            OuterReferenceNameIndex = header.GetObjectTableEntry(OuterReference)?.ObjectNameIndex;
+            OuterReferenceNameIndex = UnrealHeader.GetObjectTableEntry(OuterReference)?.ObjectNameIndex;
         }
 
         #endregion Unreal Methods
@@ -82,6 +83,14 @@ namespace UpkManager.Models.UpkFile.Tables
 
         #endregion UnrealUpkBuilderBase Implementation
 
+        public override string GetPathName()
+        {
+            var outer = UnrealHeader.GetObjectTableEntry(OuterReference);
+            if (outer is UnrealExportTableEntry)
+                return outer.GetPathName() + "." + base.GetPathName();
+            else
+                return base.GetPathName();
+        }
     }
 
 }

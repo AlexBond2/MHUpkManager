@@ -145,12 +145,12 @@ namespace UpkManager.Models.UpkFile
 
             await Parallel.ForEachAsync(ExportTable, async (export, ct) =>
             {
-                await Task.Run(() => export.ExpandReferences(this), ct);
+                await Task.Run(() => export.ExpandReferences(), ct);
             });
 
             await Parallel.ForEachAsync(ImportTable, async (import, ct) =>
             {
-                await Task.Run(() => import.ExpandReferences(this), ct);
+                await Task.Run(() => import.ExpandReferences(), ct);
             });
 
             message.Update("Slicing and Dicing...");
@@ -164,7 +164,7 @@ namespace UpkManager.Models.UpkFile
             {
                 await Task.Run(() =>
                 {
-                    export.ReadUnrealObject(reader, this);
+                    export.ReadUnrealObject(reader);
                     message.IncrementCurrent();
                 }, ct);
             });
