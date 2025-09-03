@@ -124,6 +124,12 @@ namespace UpkManager.Models.UpkFile
         public async Task ReadHeaderAsync(Action<UnrealLoadProgress> progress)
         {
             var message = new UnrealLoadProgress { Progress = progress };
+            if (ExportTableCount > 0)
+            {
+                message.Complete();
+                return;
+            }
+
             message.Update("Parsing Header...");
 
             readUpkHeader();

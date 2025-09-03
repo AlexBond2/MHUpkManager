@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,51 +10,79 @@ using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Repository {
 
-  public sealed class UpkFileRepository : IUpkFileRepository {
+  public sealed class UpkFileRepository : IUpkFileRepository 
+  {
+        private readonly Dictionary<string, UnrealHeader> _headerCache = [];
+        private readonly Queue<string> _cacheOrder = new();
+        private const int MaxCacheSize = 10;
 
-    #region IUpkFileRepository Implementation
-            
-    public async Task<UnrealHeader> LoadUpkFile(string Filename) {
-      byte[] data = await Task.Run(() => File.ReadAllBytes(Filename));
+        #region IUpkFileRepository Implementation
 
-      ByteArrayReader reader = ByteArrayReader.CreateNew(data, 0);
+        public async Task<UnrealHeader> LoadUpkFile(string filename)
+        {
+            if (_headerCache.TryGetValue(filename, out var cachedHeader))
+                return cachedHeader;
 
-      UnrealHeader header = new (reader) {
-        FullFilename = Filename,
-        FileSize     = data.LongLength
-      };
+            byte[] data = await Task.Run(() => File.ReadAllBytes(filename));
 
-      return header;
-    }
+            var reader = ByteArrayReader.CreateNew(data, 0);
 
-    public async Task SaveUpkFile(UnrealHeader Header, string Filename) {
-      if (Header == null) return;
+            UnrealHeader header = new (reader) 
+            {
+                FullFilename = filename,
+                FileSize     = data.LongLength
+            };
 
-      foreach(UnrealExportTableEntry export in Header.ExportTable.Where(export => export.UnrealObject == null)) 
-                await export.ParseUnrealObject(false, false);
+            AddToCache(filename, header);
 
-      FileStream stream = new (Filename, FileMode.Create);
+            return header;
+        }
 
-      int headerSize = Header.GetBuilderSize();
+        private void AddToCache(string fullPath, UnrealHeader header)
+        {
+            if (_headerCache.ContainsKey(fullPath))
+                return;
 
-      ByteArrayWriter writer = ByteArrayWriter.CreateNew(headerSize);
+            if (_headerCache.Count >= MaxCacheSize)
+            {
+                string oldestKey = _cacheOrder.Dequeue();
+                _headerCache.Remove(oldestKey);
+            }
 
-      await Header.WriteBuffer(writer, 0);
+            _headerCache[fullPath] = header;
+            _cacheOrder.Enqueue(fullPath);
+        }
 
-      await stream.WriteAsync(writer.GetBytes(), 0, headerSize);
+        public async Task SaveUpkFile(UnrealHeader Header, string Filename) 
+        {
+            if (Header == null) return;
 
-      foreach(UnrealExportTableEntry export in Header.ExportTable) {
-        ByteArrayWriter objectWriter = await export.WriteObjectBuffer();
+            foreach(UnrealExportTableEntry export in Header.ExportTable.Where(export => export.UnrealObject == null)) 
+                    await export.ParseUnrealObject(false, false);
 
-        await stream.WriteAsync(objectWriter.GetBytes(), 0, objectWriter.Index);
-      }
+            FileStream stream = new (Filename, FileMode.Create);
 
-      await stream.FlushAsync();
+            int headerSize = Header.GetBuilderSize();
 
-      stream.Close();
-    }
+            ByteArrayWriter writer = ByteArrayWriter.CreateNew(headerSize);
 
-    #endregion IUpkFileRepository Implementation
+            await Header.WriteBuffer(writer, 0);
+
+            await stream.WriteAsync(writer.GetBytes(), 0, headerSize);
+
+            foreach(UnrealExportTableEntry export in Header.ExportTable) 
+            {
+                ByteArrayWriter objectWriter = await export.WriteObjectBuffer();
+
+                await stream.WriteAsync(objectWriter.GetBytes(), 0, objectWriter.Index);
+            }
+
+            await stream.FlushAsync();
+
+            stream.Close();
+        }
+
+        #endregion IUpkFileRepository Implementation
 
   }
 
