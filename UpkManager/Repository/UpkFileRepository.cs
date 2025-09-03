@@ -7,6 +7,8 @@ using UpkManager.Contracts;
 using UpkManager.Helpers;
 using UpkManager.Models.UpkFile;
 using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Indexing;
+using System;
 
 namespace UpkManager.Repository {
 
@@ -15,6 +17,8 @@ namespace UpkManager.Repository {
         private readonly Dictionary<string, UnrealHeader> _headerCache = [];
         private readonly Queue<string> _cacheOrder = new();
         private const int MaxCacheSize = 10;
+
+        public UpkFilePackageSystem PackageIndex { get; private set; }
 
         #region IUpkFileRepository Implementation
 
@@ -30,7 +34,8 @@ namespace UpkManager.Repository {
             UnrealHeader header = new (reader) 
             {
                 FullFilename = filename,
-                FileSize     = data.LongLength
+                FileSize     = data.LongLength,
+                Repository   = this
             };
 
             AddToCache(filename, header);
@@ -82,8 +87,33 @@ namespace UpkManager.Repository {
             stream.Close();
         }
 
+        public void LoadPackageIndex(string indexPath)
+        {
+            PackageIndex = UpkFilePackageSystem.LoadFromFile(indexPath);
+        }
+
+        public UnrealObjectTableEntryBase GetExportEntry(string pathName, string root)
+        {
+            return Task.Run(async () =>
+                {
+                    UnrealObjectTableEntryBase entry = null;
+
+                    var location = PackageIndex?.GetFirstLocation(pathName, LocationFilter.MinSize);
+                    if (location == null) return entry;
+
+                    string fullPath = Path.Combine(root, location.UpkFileName);
+                    int exportIndex = location.ExportIndex;
+
+                    var header = await LoadUpkFile(fullPath);            
+                    await header.ReadHeaderAsync(null);
+
+                    entry = header.ExportTable.Find( e => e.TableIndex ==  exportIndex);
+                    return entry;
+                }).GetAwaiter().GetResult();
+        }
+
         #endregion IUpkFileRepository Implementation
 
-  }
+    }
 
 }

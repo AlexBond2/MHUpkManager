@@ -19,8 +19,7 @@ namespace MHUpkManager
 {
     public partial class MainForm : Form
     {
-        private readonly IUpkFileRepository repository;
-        private UpkFilePackageSystem packageIndex;
+        private readonly UpkFileRepository repository;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
         public UnrealUpkFile UpkFile { get; set; }
 
@@ -37,6 +36,8 @@ namespace MHUpkManager
             TextureFileCache.Initialize();
 
             repository = new UpkFileRepository();
+            LoadPackageIndex();
+
             rootNodes = [];
 
             EnableDoubleBuffering(nameGridView);
@@ -47,18 +48,15 @@ namespace MHUpkManager
 
             hexViewForm = new HexViewForm();
             textureViewForm = new TextureViewForm();
-
-            // Load the package index
-            LoadPackageIndex();
         }
 
         private void LoadPackageIndex()
         {
             try
-            {
+            {   
                 string indexPath = Path.Combine(Application.StartupPath, "Data", "mh152.mpk");
                 if (File.Exists(indexPath))
-                    packageIndex = UpkFilePackageSystem.LoadFromFile(indexPath);
+                    repository.LoadPackageIndex(indexPath);
                 else
                     WarningBox($"Package index not found at {indexPath}");
             }
@@ -588,9 +586,8 @@ namespace MHUpkManager
                 {
                     var fullPath = import.GetPathName();
                     packageInfoMenuItem.Text = fullPath;
-                    if (packageIndex == null) return;
 
-                    var locations = packageIndex.GetLocations(fullPath);
+                    var locations = repository.PackageIndex?.GetLocations(fullPath);
                     if (locations == null || locations.Count == 0) return;
                     BuildLocationMenuItems(locations);
                 }

@@ -10,6 +10,7 @@ using UpkManager.Helpers;
 using UpkManager.Models.UpkFile.Compression;
 using UpkManager.Models.UpkFile.Objects;
 using UpkManager.Models.UpkFile.Tables;
+using UpkManager.Repository;
 
 
 namespace UpkManager.Models.UpkFile
@@ -116,6 +117,8 @@ namespace UpkManager.Models.UpkFile
         public string Filename => Path.GetFileName(FullFilename);
 
         public long FileSize { get; set; }
+
+        public UpkFileRepository Repository { get; set; }
 
         #endregion Unreal Properties
 

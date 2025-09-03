@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 
 using UpkManager.Helpers;
 
@@ -90,6 +92,13 @@ namespace UpkManager.Models.UpkFile.Tables
                 return outer.GetPathName() + "." + base.GetPathName();
             else
                 return base.GetPathName();
+        }
+
+        public UnrealObjectTableEntryBase GetExportEntry()
+        {
+            var pathName = GetPathName();
+            var root = Path.GetDirectoryName(UnrealHeader.FullFilename);
+            return UnrealHeader.Repository.GetExportEntry(pathName, root);
         }
     }
 

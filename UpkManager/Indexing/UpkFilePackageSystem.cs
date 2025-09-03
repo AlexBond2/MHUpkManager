@@ -151,6 +151,21 @@ namespace UpkManager.Indexing
             return [.. locations];
         }
 
+        public LocationEntry GetFirstLocation(string packagePath, LocationFilter filter)
+        {
+            if (!data.ObjectPathMap.TryGetValue(packagePath, out var locations) 
+                || locations == null 
+                || locations.Count == 0)
+                return null;
+
+            return filter switch
+            {
+                LocationFilter.MinSize => locations.OrderBy(x => x.FileSize).FirstOrDefault(),
+                LocationFilter.MaxSize => locations.OrderByDescending(x => x.FileSize).FirstOrDefault(),
+                _ => locations.FirstOrDefault(),
+            };
+        }
+
         /// <summary>
         /// Add a full mapping: ObjectPath -> UPK file -> location
         /// </summary>
@@ -271,5 +286,11 @@ namespace UpkManager.Indexing
         }
 
         #endregion
+    }
+
+    public enum LocationFilter
+    {
+        MinSize,
+        MaxSize
     }
 }

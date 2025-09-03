@@ -1,6 +1,4 @@
-﻿
-using System;
-using UpkManager.Models.UpkFile.Classes;
+﻿using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Objects;
 
 namespace UpkManager.Models.UpkFile.Tables
@@ -22,7 +20,14 @@ namespace UpkManager.Models.UpkFile.Tables
             if (Object is T cached)
                 return cached;
 
-            if (TableEntry is UnrealExportTableEntry export)
+            var entry = TableEntry;
+
+            if (entry is UnrealImportTableEntry import)
+            {
+                entry = import.GetExportEntry();
+            }
+
+            if (entry is UnrealExportTableEntry export)
             {
                 if (export.UnrealObject == null)
                     export.ParseUnrealObject(false, false).GetAwaiter().GetResult();

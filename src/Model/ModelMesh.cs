@@ -1,5 +1,6 @@
 ﻿using SharpGL;
 using SharpGL.Shaders;
+using SharpGLTF.Schema2;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using UpkManager.Models.UpkFile.Classes;
@@ -640,7 +641,7 @@ namespace MHUpkManager.Model
         private readonly void LoadTexture(OpenGL gl, string parameterName, TextureType textureType)
         {
             var textureObj = Material.GetTextureParameterValue(parameterName);
-            if (textureObj != null && textureObj.TableEntry is UnrealExportTableEntry)
+            if (textureObj?.LoadObject<UTexture2D>() != null)
                 Textures.Add(new Texture2DData(textureType, gl, textureObj));
         }
 
