@@ -46,6 +46,12 @@
     </EmbeddedResource>
   </ItemGroup>
   
+  <ItemGroup>
+    <None Update="Data\mh152.mpk">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
   <Target Name="CopyDlls" AfterTargets="AfterBuild">
     <Copy SourceFiles="..\UpkManager\Compression\lib64\lzo2_64.dll" DestinationFolder="$(OutDir)" />
     <Copy SourceFiles="..\UpkManager\Compression\lib64\msvcr100.dll" DestinationFolder="$(OutDir)" />

@@ -4,14 +4,12 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
 using UpkManager.Contracts;
 using UpkManager.Indexing;
 using UpkManager.Models.UpkFile;
-using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkIndexGenerator
 {
@@ -117,10 +115,10 @@ namespace UpkIndexGenerator
 
             foreach (var importEntry in header.ImportTable)
             {
-                if (!IsPackageOuter(header, importEntry))
+                if (!UpkFilePackageSystem.IsPackageOuter(header, importEntry))
                     continue;
 
-                var packageName = GetPackageName(header, importEntry);
+                var packageName = UpkFilePackageSystem.GetPackageName(header, importEntry);
                 var fullPath = importEntry.GetPathName().ToLowerInvariant();
                 if (string.IsNullOrEmpty(fullPath))
                     continue;
@@ -250,29 +248,6 @@ namespace UpkIndexGenerator
 
         #endregion
 
-        #region Helpers
-
-        private static bool IsPackageOuter(UnrealHeader header, UnrealImportTableEntry importEntry)
-        {
-            if (importEntry?.OuterReferenceNameIndex == null)
-                return false;
-
-            var outerRef = header.GetObjectTableEntry(importEntry.OuterReference);
-            if (outerRef is not UnrealExportTableEntry outerExport)
-                return false;
-
-            var className = outerExport.ClassReferenceNameIndex?.Name;
-            return className != null && className.Equals("Package", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string GetPackageName(UnrealHeader header, UnrealImportTableEntry importEntry)
-        {
-            var outerRef = header.GetObjectTableEntry(importEntry.OuterReference);
-            return outerRef?.ObjectNameIndex?.Name;
-        }
-
-        #endregion
-
         #region Convenience API
 
         public static async Task InitializeDatabaseAsync(CancellationToken ct = default)
@@ -286,7 +261,7 @@ namespace UpkIndexGenerator
             // Open SQLite context
             using var context = new UpkIndexContext(DbPath);
             // Create new MessagePack database
-            using var ufps = new UpkFilePackageSystem(outputMessagePack, createNew: true);
+            var ufps = new UpkFilePackageSystem(outputMessagePack, createNew: true);
 
             // Read all object locations from SQLite
             var locations = context.ObjectLocations

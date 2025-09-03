@@ -53,6 +53,8 @@ namespace MHUpkManager
             objectMenu = new ContextMenuStrip(components);
             viewParentMenuItem = new ToolStripMenuItem();
             viewObjectMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem5 = new ToolStripSeparator();
+            packageInfoMenuItem = new ToolStripMenuItem();
             iconList = new ImageList(components);
             panel4 = new Panel();
             filterClear = new Button();
@@ -65,6 +67,9 @@ namespace MHUpkManager
             propertiesView = new TreeView();
             propertiesMenu = new ContextMenuStrip(components);
             objectNameClassMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem4 = new ToolStripSeparator();
+            copySelectedMenuItem = new ToolStripMenuItem();
+            findNameMenuItem = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             viewObjectInHEXMenuItem = new ToolStripMenuItem();
             viewDataInHEXMenuItem = new ToolStripMenuItem();
@@ -92,9 +97,6 @@ namespace MHUpkManager
             exportColumn4 = new DataGridViewTextBoxColumn();
             exportColumn5 = new DataGridViewTextBoxColumn();
             buttonColumn = new DataGridViewButtonColumn();
-            copySelectedMenuItem = new ToolStripMenuItem();
-            findNameMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem4 = new ToolStripSeparator();
             menuStrip1.SuspendLayout();
             statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -264,15 +266,16 @@ namespace MHUpkManager
             // 
             // objectMenu
             // 
-            objectMenu.Items.AddRange(new ToolStripItem[] { viewParentMenuItem, viewObjectMenuItem });
+            objectMenu.Items.AddRange(new ToolStripItem[] { packageInfoMenuItem, toolStripMenuItem5, viewParentMenuItem, viewObjectMenuItem });
             objectMenu.Name = "objectMenu";
-            objectMenu.Size = new Size(138, 48);
+            objectMenu.Size = new Size(181, 98);
+            objectMenu.Opening += objectMenu_Opening;
             // 
             // viewParentMenuItem
             // 
             viewParentMenuItem.Enabled = false;
             viewParentMenuItem.Name = "viewParentMenuItem";
-            viewParentMenuItem.Size = new Size(137, 22);
+            viewParentMenuItem.Size = new Size(180, 22);
             viewParentMenuItem.Text = "View Parent";
             viewParentMenuItem.Click += viewParentMenuItem_Click;
             // 
@@ -280,9 +283,22 @@ namespace MHUpkManager
             // 
             viewObjectMenuItem.Enabled = false;
             viewObjectMenuItem.Name = "viewObjectMenuItem";
-            viewObjectMenuItem.Size = new Size(137, 22);
+            viewObjectMenuItem.Size = new Size(180, 22);
             viewObjectMenuItem.Text = "View Object";
             viewObjectMenuItem.Click += viewObjectMenuItem_Click;
+            // 
+            // toolStripMenuItem5
+            // 
+            toolStripMenuItem5.Name = "toolStripMenuItem5";
+            toolStripMenuItem5.Size = new Size(177, 6);
+            // 
+            // packageInfoMenuItem
+            // 
+            packageInfoMenuItem.Enabled = false;
+            packageInfoMenuItem.Name = "packageInfoMenuItem";
+            packageInfoMenuItem.Size = new Size(180, 22);
+            packageInfoMenuItem.Text = "Package Info";
+            packageInfoMenuItem.Click += packageInfoMenuItem_Click;
             // 
             // iconList
             // 
@@ -434,7 +450,7 @@ namespace MHUpkManager
             // 
             propertiesMenu.Items.AddRange(new ToolStripItem[] { objectNameClassMenuItem, toolStripMenuItem4, copySelectedMenuItem, findNameMenuItem, toolStripMenuItem1, viewObjectInHEXMenuItem, viewDataInHEXMenuItem, toolStripMenuItem2, viewTextureMenuItem, viewModelMenuItem });
             propertiesMenu.Name = "propertiesMenu";
-            propertiesMenu.Size = new Size(185, 198);
+            propertiesMenu.Size = new Size(185, 176);
             propertiesMenu.Opening += propertiesMenu_Opening;
             // 
             // objectNameClassMenuItem
@@ -443,6 +459,25 @@ namespace MHUpkManager
             objectNameClassMenuItem.Size = new Size(184, 22);
             objectNameClassMenuItem.Text = "ObjectName :: Class";
             objectNameClassMenuItem.Click += objectNameClassMenuItem_Click;
+            // 
+            // toolStripMenuItem4
+            // 
+            toolStripMenuItem4.Name = "toolStripMenuItem4";
+            toolStripMenuItem4.Size = new Size(181, 6);
+            // 
+            // copySelectedMenuItem
+            // 
+            copySelectedMenuItem.Name = "copySelectedMenuItem";
+            copySelectedMenuItem.Size = new Size(184, 22);
+            copySelectedMenuItem.Text = "Copy Selected";
+            copySelectedMenuItem.Click += copySelectedMenuItem_Click;
+            // 
+            // findNameMenuItem
+            // 
+            findNameMenuItem.Name = "findNameMenuItem";
+            findNameMenuItem.Size = new Size(184, 22);
+            findNameMenuItem.Text = "Find Buffer";
+            findNameMenuItem.Click += findNameMenuItem_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -709,25 +744,6 @@ namespace MHUpkManager
             buttonColumn.UseColumnTextForButtonValue = true;
             buttonColumn.Width = 50;
             // 
-            // copySelectedMenuItem
-            // 
-            copySelectedMenuItem.Name = "copySelectedMenuItem";
-            copySelectedMenuItem.Size = new Size(184, 22);
-            copySelectedMenuItem.Text = "Copy Selected";
-            copySelectedMenuItem.Click += copySelectedMenuItem_Click;
-            // 
-            // findNameMenuItem
-            // 
-            findNameMenuItem.Name = "findNameMenuItem";
-            findNameMenuItem.Size = new Size(184, 22);
-            findNameMenuItem.Text = "Find Buffer";
-            findNameMenuItem.Click += findNameMenuItem_Click;
-            // 
-            // toolStripMenuItem4
-            // 
-            toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(181, 6);
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -822,6 +838,7 @@ namespace MHUpkManager
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem viewParentMenuItem;
         private ToolStripMenuItem viewObjectMenuItem;
+        private ToolStripMenuItem packageInfoMenuItem;
         private ContextMenuStrip objectMenu;
         private ToolStripSeparator toolStripMenuItem2;
         private ToolStripMenuItem viewTextureMenuItem;
@@ -833,5 +850,6 @@ namespace MHUpkManager
         private ToolStripSeparator toolStripMenuItem4;
         private ToolStripMenuItem copySelectedMenuItem;
         private ToolStripMenuItem findNameMenuItem;
+        private ToolStripSeparator toolStripMenuItem5;
     }
 }

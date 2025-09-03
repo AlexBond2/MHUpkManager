@@ -1,11 +1,10 @@
-using System.Reflection;
-using System.Security.Cryptography;
-
 using MHUpkManager.Models;
 using MHUpkManager.TextureManager;
-
+using System.Reflection;
+using System.Security.Cryptography;
 using UpkManager.Contracts;
 using UpkManager.Extensions;
+using UpkManager.Indexing;
 using UpkManager.Models;
 using UpkManager.Models.UpkFile.Classes;
 using UpkManager.Models.UpkFile.Core;
@@ -21,6 +20,7 @@ namespace MHUpkManager
     public partial class MainForm : Form
     {
         private readonly IUpkFileRepository repository;
+        private UpkFilePackageSystem packageIndex;
         public const string AppName = "MH UPK Manager v.1.0 by AlexBond";
         public UnrealUpkFile UpkFile { get; set; }
 
@@ -47,6 +47,25 @@ namespace MHUpkManager
 
             hexViewForm = new HexViewForm();
             textureViewForm = new TextureViewForm();
+
+            // Load the package index
+            LoadPackageIndex();
+        }
+
+        private void LoadPackageIndex()
+        {
+            try
+            {
+                string indexPath = Path.Combine(Application.StartupPath, "Data", "mh152.mpk");
+                if (File.Exists(indexPath))
+                    packageIndex = UpkFilePackageSystem.LoadFromFile(indexPath);
+                else
+                    WarningBox($"Package index not found at {indexPath}");
+            }
+            catch (Exception ex)
+            {
+                WarningBox($"Failed to load package index: {ex.Message}");
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -83,10 +102,63 @@ namespace MHUpkManager
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                UpkFile = await OpenUpkFile(openFileDialog.FileName);
+                await OpenUpkFileFromPath(openFileDialog.FileName, 0);
+            }
+        }
+
+        private async Task OpenUpkFileFromPath(string filePath, int index)
+        {
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                UpkFile = await OpenUpkFile(filePath);
                 Text = $"{AppName} - [{UpkFile.GameFilename}]";
                 await LoadUpkFile(UpkFile);
+
+                SelectExportObject(index);
             }
+            finally
+            {
+                Cursor.Current = Cursors.Default;
+            }
+        }
+
+        private void SelectExportObject(int index)
+        {
+            if (index <= 0)
+            {
+                if (objectsTree.Nodes.Count > 0 && objectsTree.Nodes[0].Nodes.Count > 0)
+                {
+                    var firstNode = objectsTree.Nodes[0].Nodes[0];
+                    objectsTree.SelectedNode = firstNode;
+                    firstNode.EnsureVisible();
+                }
+                return;
+            }
+
+            var export = UpkFile.Header.ExportTable.FirstOrDefault(e => e.TableIndex == index);
+            if (export == null) return;
+
+            foreach (TreeNode root in objectsTree.Nodes)
+                if (FindAndSelectNode(root, index)) return;
+        }
+
+        private bool FindAndSelectNode(TreeNode node, int index)
+        {
+            if (node.Tag is UnrealExportTableEntry entry && entry.TableIndex == index)
+            {
+                objectsTree.SelectedNode = node;
+                node.EnsureVisible();
+                return true;
+            }
+
+            foreach (TreeNode child in node.Nodes)
+            {
+                if (FindAndSelectNode(child, index))
+                    return true;
+            }
+
+            return false;
         }
 
         private async Task LoadUpkFile(UnrealUpkFile upkFile)
@@ -281,15 +353,12 @@ namespace MHUpkManager
         {
             currentObject = e.Node?.Tag;
             viewObjectInHEXMenuItem.Enabled = false;
-            viewObjectMenuItem.Enabled = false;
-            viewParentMenuItem.Enabled = false;
+
             viewTextureMenuItem.Enabled = false;
             viewModelMenuItem.Enabled = false;
 
             if (currentObject is null) return;
 
-            viewObjectMenuItem.Enabled = true;
-            viewParentMenuItem.Enabled = true;
             objectNameClassMenuItem.Text = e.Node.Text;
 
             if (currentObject is UnrealExportTableEntry export)
@@ -448,7 +517,7 @@ namespace MHUpkManager
         {
             viewDataInHEXMenuItem.Enabled = false;
             copySelectedMenuItem.Enabled = false;
-            findNameMenuItem.Enabled = false; 
+            findNameMenuItem.Enabled = false;
             copySelectedMenuItem.Text = "Copy [Selected]";
             findNameMenuItem.Text = "Find [Buffer]";
 
@@ -494,6 +563,96 @@ namespace MHUpkManager
             hexViewForm.SetTitle(name);
             hexViewForm.SetHexData(data);
             hexViewForm.ShowDialog();
+        }
+
+        private void objectMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            packageInfoMenuItem.DropDownItems.Clear();
+
+            if (currentObject == null)
+            {
+                viewObjectMenuItem.Enabled = false;
+                viewParentMenuItem.Enabled = false;
+                packageInfoMenuItem.Enabled = false;
+                packageInfoMenuItem.Text = "Package Info";
+                return;
+            }
+
+            viewObjectMenuItem.Enabled = true;
+            viewParentMenuItem.Enabled = true;
+            packageInfoMenuItem.Enabled = true;
+
+            if (currentObject is UnrealImportTableEntry import)
+            {
+                if (UpkFilePackageSystem.IsPackageOuter(UpkFile.Header, import))
+                {
+                    var fullPath = import.GetPathName();
+                    packageInfoMenuItem.Text = fullPath;
+                    if (packageIndex == null) return;
+
+                    var locations = packageIndex.GetLocations(fullPath);
+                    if (locations == null || locations.Count == 0) return;
+                    BuildLocationMenuItems(locations);
+                }
+            }
+            else if (currentObject is UnrealExportTableEntry export)
+            {
+                packageInfoMenuItem.Text = export.GetPathName();
+            }
+        }
+
+        private void BuildLocationMenuItems(List<UpkFilePackageSystem.LocationEntry> locations)
+        {
+            int index = 0;
+            foreach (var loc in locations)
+            {
+                // Create menu item text
+                string menuText = $"[{loc.ExportIndex}] {loc.UpkFileName}";
+
+                // Create menu item
+                var fileMenuItem = new ToolStripMenuItem(menuText);
+                fileMenuItem.Tag = new FileLoadInfo
+                {
+                    FilePath = loc.UpkFileName,
+                    ExportIndex = loc.ExportIndex
+                };
+                fileMenuItem.Click += PackageFileMenuItem_Click;
+
+                packageInfoMenuItem.DropDownItems.Add(fileMenuItem);
+
+                if (index++ >= 5) break; // Limit to first 5 items
+            }
+
+            // If there are more files, add info item
+            var totalFiles = locations.Count;
+            if (totalFiles > 5)
+            {
+                packageInfoMenuItem.DropDownItems.Add(new ToolStripSeparator());
+
+                var moreItem = new ToolStripMenuItem($"+{totalFiles - 5} more files");
+                moreItem.Enabled = false; // Make it non-clickable
+                packageInfoMenuItem.DropDownItems.Add(moreItem);
+            }
+        }
+
+        private async void PackageFileMenuItem_Click(object sender, EventArgs e)
+        {
+            var menuItem = sender as ToolStripMenuItem;
+            if (menuItem?.Tag is FileLoadInfo info)
+            {
+                string fullPath = Path.Combine(UpkFile.ContentsRoot, info.FilePath);
+
+                if (File.Exists(fullPath))
+                    await OpenUpkFileFromPath(fullPath, info.ExportIndex);
+                else
+                    WarningBox($"File not found: {fullPath}");
+            }
+        }
+
+        private class FileLoadInfo
+        {
+            public string FilePath { get; set; }
+            public int ExportIndex { get; set; }
         }
 
         private void viewParentMenuItem_Click(object sender, EventArgs e)
@@ -662,6 +821,11 @@ namespace MHUpkManager
             }
 
             return null;
+        }
+
+        private void packageInfoMenuItem_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(packageInfoMenuItem.Text);
         }
     }
 }

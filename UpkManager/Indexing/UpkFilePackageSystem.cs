@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UpkManager.Models.UpkFile;
+using UpkManager.Models.UpkFile.Tables;
 
 namespace UpkManager.Indexing
 {
-    public class UpkFilePackageSystem : IDisposable
+    public class UpkFilePackageSystem
     {
         private readonly string dbFilePath;
         private PackageData data;
@@ -20,7 +22,7 @@ namespace UpkManager.Indexing
 
             public PackageData()
             {
-                ObjectPathMap = new Dictionary<string, List<LocationEntry>>();
+                ObjectPathMap = [];
             }
         }
 
@@ -156,7 +158,7 @@ namespace UpkManager.Indexing
         {
             if (!data.ObjectPathMap.TryGetValue(objectPath, out var locations))
             {
-                locations = new List<LocationEntry>();
+                locations = [];
                 data.ObjectPathMap[objectPath] = locations;
             }
 
@@ -247,12 +249,27 @@ namespace UpkManager.Indexing
             }
         }
 
-        /// <summary>
-        /// Save changes if any and dispose
-        /// </summary>
-        public void Dispose()
+        #region Helpers
+
+        public static bool IsPackageOuter(UnrealHeader header, UnrealImportTableEntry importEntry)
         {
-            Save();
+            if (importEntry?.OuterReferenceNameIndex == null)
+                return false;
+
+            var outerRef = header.GetObjectTableEntry(importEntry.OuterReference);
+            if (outerRef is not UnrealExportTableEntry outerExport)
+                return false;
+
+            var className = outerExport.ClassReferenceNameIndex?.Name;
+            return className != null && className.Equals("Package", StringComparison.OrdinalIgnoreCase);
         }
+
+        public static string GetPackageName(UnrealHeader header, UnrealImportTableEntry importEntry)
+        {
+            var outerRef = header.GetObjectTableEntry(importEntry.OuterReference);
+            return outerRef?.ObjectNameIndex?.Name;
+        }
+
+        #endregion
     }
 }
