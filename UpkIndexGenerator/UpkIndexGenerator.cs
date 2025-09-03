@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UpkManager.Contracts;
-using UpkManager.Indexing; // use new UpkIndexingSystem
+using UpkManager.Indexing;
 using UpkManager.Repository;
 
 namespace UpkIndexGenerator
@@ -18,6 +18,24 @@ namespace UpkIndexGenerator
             Console.WriteLine("  Marvel Heroes Omega");
             Console.WriteLine("=================================\n");
 
+            // Check for -convert command
+            if (args.Length > 0 && args[0].Equals("-convert", StringComparison.OrdinalIgnoreCase))
+            {
+                string sqliteDbPath = args.Length > 1 ? args[1] : "mh152upk.db";
+                string outputLiteDb = args.Length > 2 ? args[2] : "mh152.mpk";
+
+                Console.WriteLine($"Converting SQLite DB '{sqliteDbPath}' → MessagePack '{outputLiteDb}'...");
+
+                UpkIndexingSystem.DbPath = sqliteDbPath;
+
+                // Call conversion method from UpkFilePackageSystem
+                UpkIndexingSystem.Convert(outputLiteDb);
+
+                Console.WriteLine("Conversion finished successfully.");
+                return;
+            }
+
+            // Default scanning path
             string upkDirectory = args.Length > 0
                 ? args[0]
                 : @"d:\\marvel\\Upk\\Test\\";
@@ -44,6 +62,8 @@ namespace UpkIndexGenerator
                 File.Move(outputDb, backupName, overwrite: true);
                 Console.WriteLine($"Existing database backed up to: {backupName}\n");
             }
+
+            UpkIndexingSystem.DbPath = outputDb;
 
             IUpkFileRepository repository = new UpkFileRepository();
             var stopwatch = Stopwatch.StartNew();

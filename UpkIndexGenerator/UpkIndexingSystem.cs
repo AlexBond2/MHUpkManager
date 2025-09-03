@@ -4,14 +4,16 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
 using UpkManager.Contracts;
+using UpkManager.Indexing;
 using UpkManager.Models.UpkFile;
 using UpkManager.Models.UpkFile.Tables;
 
-namespace UpkManager.Indexing
+namespace UpkIndexGenerator
 {
     public static class UpkIndexingSystem
     {
@@ -49,15 +51,16 @@ namespace UpkManager.Indexing
             public bool ExportsDone { get; set; }
         }
 
-        public class UpkIndexContext : DbContext
+        public class UpkIndexContext(string dbPath) : DbContext
         {
+            private readonly string dbPath = dbPath;
             public DbSet<PackageImportInfo> PackageImports { get; set; }
             public DbSet<UpkObjectLocation> ObjectLocations { get; set; }
             public DbSet<ScannedFile> ScannedFiles { get; set; }
 
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
-                optionsBuilder.UseSqlite("Data Source=mh152upk.db");
+                optionsBuilder.UseSqlite($"Data Source={dbPath}");
             }
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -78,6 +81,7 @@ namespace UpkManager.Indexing
 
         #region Configuration
 
+        public static string DbPath { get; set; } = "mh152upk.db";
         public static int RequiredVersion { get; set; } = 868;
         public static int RequiredEngineVersion { get; set; } = 10897;
 
@@ -87,7 +91,7 @@ namespace UpkManager.Indexing
 
         public static async Task CollectPackageImportsFromFileAsync(string upkFilePath, IUpkFileRepository repository, CancellationToken ct)
         {
-            using var context = new UpkIndexContext();
+            using var context = new UpkIndexContext(DbPath);
 
             var fileInfo = new FileInfo(upkFilePath);
             var fileName = fileInfo.Name;
@@ -158,7 +162,7 @@ namespace UpkManager.Indexing
 
         public static async Task CollectObjectLocationsFromFileAsync(string upkFilePath, IUpkFileRepository repository, CancellationToken ct)
         {
-            using var context = new UpkIndexContext();
+            using var context = new UpkIndexContext(DbPath);
 
             var fileInfo = new FileInfo(upkFilePath);
             var fileName = fileInfo.Name;
@@ -273,8 +277,39 @@ namespace UpkManager.Indexing
 
         public static async Task InitializeDatabaseAsync(CancellationToken ct = default)
         {
-            using var context = new UpkIndexContext();
+            using var context = new UpkIndexContext(DbPath);
             await context.Database.EnsureCreatedAsync(ct);
+        }
+
+        public static void Convert(string outputMessagePack)
+        {
+            // Open SQLite context
+            using var context = new UpkIndexContext(DbPath);
+            // Create new MessagePack database
+            using var ufps = new UpkFilePackageSystem(outputMessagePack, createNew: true);
+
+            // Read all object locations from SQLite
+            var locations = context.ObjectLocations
+                                   .Select(o => new
+                                   {
+                                       o.ObjectPath,
+                                       o.UpkFileName,
+                                       o.ExportIndex,
+                                       o.FileSize
+                                   })
+                                   .ToList();
+
+            Console.WriteLine($"Converting {locations.Count} object locations to MessagePack...");
+
+            // Add each mapping
+            foreach (var loc in locations)
+            {
+                ufps.AddMapping(loc.ObjectPath, loc.UpkFileName, loc.ExportIndex, loc.FileSize);
+            }
+
+            // Save MessagePack file
+            ufps.Save();
+            Console.WriteLine($"Conversion finished. MessagePack saved to '{outputMessagePack}'");
         }
 
         #endregion
