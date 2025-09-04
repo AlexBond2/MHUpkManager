@@ -538,6 +538,8 @@ namespace MHUpkManager.Model
         public float SkinScatterStrength = 0.5f;
         public float TwoSidedLighting = 0.0f;
 
+        public bool TwoSided = false;
+
         public void LoadFromMaterial(UMaterialInstanceConstant material)
         {
             LoadScalarParameter(material, "lambertdiffusepower", ref LambertDiffusePower);
@@ -564,7 +566,11 @@ namespace MHUpkManager.Model
             LoadVectorParameter(material, "lambertambient", ref LambertAmbient);
             LoadVectorParameter(material, "shadowambientcolor", ref ShadowAmbientColor);
             LoadVectorParameter(material, "filllightcolor", ref FillLightColor);
-            LoadVectorParameter(material, "specularcolor", ref SpecularColor);            
+            LoadVectorParameter(material, "specularcolor", ref SpecularColor);
+
+            var parentMaterial = material.Parent?.LoadObject<UMaterial>();
+            if (parentMaterial != null)
+                TwoSided = parentMaterial.TwoSided;
         }
 
         private static void LoadScalarParameter(UMaterialInstanceConstant material, string paramName, ref float value)
@@ -579,7 +585,7 @@ namespace MHUpkManager.Model
             if (param.HasValue) value = param.Value;
         }
 
-        public void ApplyToShader(ShaderProgram shader)
+        public void ApplyToShader(OpenGL gl, ShaderProgram shader)
         {
             shader.SetFloat("uLambertDiffusePower", LambertDiffusePower);
             shader.SetFloat("uPhongDiffusePower", PhongDiffusePower);
@@ -607,6 +613,11 @@ namespace MHUpkManager.Model
             shader.SetFloat("uImageReflectionNormalDampening", ImageReflectionNormalDampening);
             shader.SetFloat("uSkinScatterStrength", SkinScatterStrength);
             shader.SetFloat("uTwoSidedLighting", TwoSidedLighting);
+
+            if (TwoSided)
+                gl.Disable(OpenGL.GL_CULL_FACE);
+            else
+                gl.Enable(OpenGL.GL_CULL_FACE);
         }
     }
 
@@ -675,7 +686,7 @@ namespace MHUpkManager.Model
 
         public void ApplyToShader(OpenGL gl, ShaderProgram sh, bool showTextures)
         {
-            Parameters.ApplyToShader(sh);
+            Parameters.ApplyToShader(gl, sh);
 
             BindTexture(gl, sh, OpenGL.GL_TEXTURE0, TextureType.uDiffuseMap,
                                "uDiffuseMap", "uHasDiffuseMap", showTextures);
