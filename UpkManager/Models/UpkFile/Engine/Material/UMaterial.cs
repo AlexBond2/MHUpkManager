@@ -20,6 +20,12 @@ namespace UpkManager.Models.UpkFile.Engine.Material
     public class UMaterial : UMaterialInterface
     {
         [PropertyField]
+        public FColorMaterialInput DiffuseColor { get; set; }
+
+        [PropertyField]
+        public FVectorMaterialInput Normal { get; set; }
+
+        [PropertyField]
         public FColorMaterialInput EmissiveColor { get; set; }
 
         [PropertyField]
@@ -42,6 +48,9 @@ namespace UpkManager.Models.UpkFile.Engine.Material
 
         [PropertyField]
         public float OpacityMaskClipValue { get; set; }
+
+        [PropertyField]
+        public FVector2MaterialInput Distortion { get; set; }
 
         [PropertyField]
         public EBlendMode BlendMode { get; set; }
@@ -543,24 +552,28 @@ namespace UpkManager.Models.UpkFile.Engine.Material
         public string Format => "";
     }
 
+    [UnrealStruct("ColorMaterialInput")]
     public class FColorMaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
         [StructField] public FColor Constant { get; set; }
     }
 
+    [UnrealStruct("ScalarMaterialInput")]
     public class FScalarMaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
         [StructField] public float Constant { get; set; }
     }
 
+    [UnrealStruct("VectorMaterialInput")]
     public class FVectorMaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
         [StructField] public FVector Constant { get; set; }
     }
 
+    [UnrealStruct("Vector2MaterialInput")]
     public class FVector2MaterialInput : FMaterialInput
     {
         [StructField] public bool UseConstant { get; set; }
