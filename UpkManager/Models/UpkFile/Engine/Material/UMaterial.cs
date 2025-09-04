@@ -444,7 +444,7 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             if (TextureParameterValues == null) return null;
 
             foreach (var parameter in TextureParameterValues)
-                if (parameter.ParameterName.Name.StartsWith(parameterName, StringComparison.OrdinalIgnoreCase))
+                if (parameter.ParameterName.Name.Contains(parameterName, StringComparison.OrdinalIgnoreCase))
                     return parameter.ParameterValue;
 
             return null;

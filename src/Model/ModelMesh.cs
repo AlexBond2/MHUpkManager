@@ -631,7 +631,7 @@ namespace MHUpkManager.Model
             Parameters.LoadFromMaterial(Material);
 
             LoadTexture(gl, "Diffuse", TextureType.uDiffuseMap);
-            LoadTexture(gl, "Normal", TextureType.uNormalMap);
+            LoadTexture(gl, "Norm", TextureType.uNormalMap);
             LoadTexture(gl, "specmult_specpow_skinmask", TextureType.uSMSPSKMap);
             LoadTexture(gl, "emissivespecpow", TextureType.uESPAMap);
             LoadTexture(gl, "specmultrimmaskrefl", TextureType.uSMRRMap);
