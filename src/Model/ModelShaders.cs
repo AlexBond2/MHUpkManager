@@ -107,6 +107,8 @@ uniform float uImageReflectionNormalDampening = 5.0;
 uniform float uSkinScatterStrength = 0.5;
 uniform float uTwoSidedLighting = 0.0;
 
+uniform float uAlphaTest = 0.0;
+
 struct MaterialMasks {
     float specMult;
     float specPower;
@@ -278,7 +280,10 @@ void main() {
     float rimMask = masks.rimMask;
 
     // Sample textures
-    vec3 diffuseColor = uHasDiffuseMap > 0.5 ? texture(uDiffuseMap, vTexCoord).rgb : uDiffuseColor;
+    vec4 diffuseSample = uHasDiffuseMap > 0.5 ? texture(uDiffuseMap, vTexCoord) : vec4(uDiffuseColor, 1.0);
+    vec3 diffuseColor = diffuseSample.rgb;
+
+    if (uAlphaTest > 0 && diffuseSample.a < 0.5) discard;
 
     diffuseColor *= ambientOcclusion;
     

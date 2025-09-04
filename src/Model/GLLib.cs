@@ -626,13 +626,15 @@ namespace MHUpkManager.Model
                 UploadUncompressedTexture(gl, OpenGL.GL_BGRA, width, height, data);
             }
 
+            gl.GenerateMipmap(OpenGL.GL_TEXTURE_2D);
+
             outData = data;
             return textureId;
         }
 
         public static void SetDefaultTextureParameters(OpenGL gl)
         {
-            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR);
+            gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_LINEAR_MIPMAP_LINEAR);
             gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_LINEAR);
             gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_REPEAT);
             gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_REPEAT);

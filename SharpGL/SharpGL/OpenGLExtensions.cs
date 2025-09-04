@@ -4726,6 +4726,11 @@ namespace SharpGL
             GetDelegateFor<glGenerateMipmapEXT>()(target);
         }
 
+        public void GenerateMipmap(uint target)
+        {
+            GetDelegateFor<glGenerateMipmap>()(target);
+        }
+
         //  Delegates
         private delegate bool glIsRenderbufferEXT(uint renderbuffer);
         private delegate void glBindRenderbufferEXT(uint target, uint renderbuffer);
@@ -4744,6 +4749,7 @@ namespace SharpGL
         private delegate void glFramebufferRenderbufferEXT(uint target, uint attachment, uint renderbuffertarget, uint renderbuffer);
         private delegate void glGetFramebufferAttachmentParameterivEXT(uint target, uint attachment, uint pname, int[] parameters);
         private delegate void glGenerateMipmapEXT(uint target);
+        private delegate void glGenerateMipmap(uint target);
 
         //  Constants
         public const uint GL_INVALID_FRAMEBUFFER_OPERATION_EXT = 0x0506;

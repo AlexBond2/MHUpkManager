@@ -1,10 +1,8 @@
 ﻿using SharpGL;
 using SharpGL.Shaders;
-using SharpGLTF.Schema2;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using UpkManager.Models.UpkFile.Classes;
-using UpkManager.Models.UpkFile.Core;
 using UpkManager.Models.UpkFile.Engine.Material;
 using UpkManager.Models.UpkFile.Engine.Mesh;
 using UpkManager.Models.UpkFile.Engine.Texture;
@@ -538,6 +536,7 @@ namespace MHUpkManager.Model
         public float SkinScatterStrength = 0.5f;
         public float TwoSidedLighting = 0.0f;
 
+        public EBlendMode BlendMode = EBlendMode.BLEND_Opaque;
         public bool TwoSided = false;
 
         public void LoadFromMaterial(UMaterialInstanceConstant material)
@@ -570,7 +569,20 @@ namespace MHUpkManager.Model
 
             var parentMaterial = material.Parent?.LoadObject<UMaterial>();
             if (parentMaterial != null)
+            {
                 TwoSided = parentMaterial.TwoSided;
+                BlendMode = parentMaterial.BlendMode;
+            }
+
+            if (material.StaticPermutationResources?.Length > 0)
+            {
+                var resource = material.StaticPermutationResources[0];
+                if (resource.bIsMaskedOverrideValue &&
+                    resource.BlendModeOverrideValue != EBlendMode.BLEND_Opaque)
+                {
+                    BlendMode = resource.BlendModeOverrideValue;
+                }
+            }
         }
 
         private static void LoadScalarParameter(UMaterialInstanceConstant material, string paramName, ref float value)
@@ -618,6 +630,41 @@ namespace MHUpkManager.Model
                 gl.Disable(OpenGL.GL_CULL_FACE);
             else
                 gl.Enable(OpenGL.GL_CULL_FACE);
+
+            float useAlphaTest = 0f;
+            switch (BlendMode)
+            {
+                case EBlendMode.BLEND_Opaque:
+                    gl.Disable(OpenGL.GL_BLEND);
+                    gl.DepthMask(1);
+                    break;
+
+                case EBlendMode.BLEND_Masked:
+                    gl.Disable(OpenGL.GL_BLEND);
+                    gl.DepthMask(1);
+                    useAlphaTest = 1f;
+                    break;
+
+                case EBlendMode.BLEND_Translucent:
+                    gl.Enable(OpenGL.GL_BLEND);
+                    gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
+                    gl.DepthMask(0);
+                    break;
+
+                case EBlendMode.BLEND_Additive:
+                    gl.Enable(OpenGL.GL_BLEND);
+                    gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE);
+                    gl.DepthMask(0);
+                    break;
+
+                default:
+                    gl.Enable(OpenGL.GL_BLEND);
+                    gl.BlendFunc(OpenGL.GL_DST_COLOR, OpenGL.GL_ZERO);
+                    gl.DepthMask(0);
+                    break;
+            }
+
+            shader.SetFloat("uAlphaTest", useAlphaTest);
         }
     }
 
