@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UpkManager.Contracts;
-using UpkManager.Indexing;
 using UpkManager.Repository;
 
 namespace UpkIndexGenerator

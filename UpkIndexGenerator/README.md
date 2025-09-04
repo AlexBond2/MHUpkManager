@@ -48,9 +48,9 @@ UpkIndexGenerator.exe -convert "my_index.db" "my_index.mpk"
 
 ## Performance
 
-* Typical run (about 15k UPK files) takes ~20 minutes on a modern desktop.
-* Resulting SQLite database size is ~50 MB for a full scan.
-* MessagePack format provides faster lookups with in-memory storage and reduces file size to ~9 MB.
+* Typical run (about 15k UPK files) takes ~40 minutes on a modern desktop.
+* Resulting SQLite database size is ~220 MB for a full scan.
+* MessagePack format provides faster lookups with in-memory storage and reduces file size to ~13 MB.
 
 ## Requirements
 

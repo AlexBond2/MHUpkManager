@@ -88,7 +88,7 @@ namespace UpkManager.Models.UpkFile.Tables
         public override string GetPathName()
         {
             var outer = UnrealHeader.GetObjectTableEntry(OuterReference);
-            if (outer is UnrealExportTableEntry)
+            if (outer != null)
                 return outer.GetPathName() + "." + base.GetPathName();
             else
                 return base.GetPathName();

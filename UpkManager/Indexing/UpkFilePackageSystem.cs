@@ -272,10 +272,12 @@ namespace UpkManager.Indexing
                 return false;
 
             var outerRef = header.GetObjectTableEntry(importEntry.OuterReference);
-            if (outerRef is not UnrealExportTableEntry outerExport)
-                return false;
+            string className = null;
+            if (outerRef is UnrealExportTableEntry outerExport)
+                className = outerExport.ClassReferenceNameIndex?.Name;
+            else if(outerRef is UnrealImportTableEntry import)
+                className = import.ClassNameIndex?.Name;
 
-            var className = outerExport.ClassReferenceNameIndex?.Name;
             return className != null && className.Equals("Package", StringComparison.OrdinalIgnoreCase);
         }
 
