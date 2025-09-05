@@ -67,7 +67,7 @@ namespace SharpGL.RenderContextProviders
             pfd.dwFlags = Win32.PFD_DRAW_TO_WINDOW | Win32.PFD_SUPPORT_OPENGL | Win32.PFD_DOUBLEBUFFER;
             pfd.iPixelType = Win32.PFD_TYPE_RGBA;
             pfd.cColorBits = (byte)bitDepth;
-            pfd.cDepthBits = 24;
+            pfd.cDepthBits = 32;
             pfd.cStencilBits = 8;
             pfd.iLayerType = Win32.PFD_MAIN_PLANE;
 

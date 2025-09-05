@@ -244,10 +244,12 @@ namespace MHUpkManager
             // perspective
             float zoom = transView.Zoom;
 
+            float adaptiveNear = zoom / 5.0f;
+
             var matProjection = Matrix4x4.CreatePerspectiveFieldOfView(
                 MathF.PI * transView.Per / 180.0f,
                 aspect,
-                zoom / 50.0f,
+                adaptiveNear,
                 MaxDepth);
 
             if (transView.Rot.Z > 360.0f) transView.Rot.Z -= 360.0f;
