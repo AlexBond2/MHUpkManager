@@ -169,18 +169,17 @@ namespace UpkManager.Models.UpkFile.Engine.Material
             StaticPermutationResources = new FMaterialResource[2];
             StaticParameters = new FStaticParameterSet[2];
 
-            uint qualityMask = 0x1;
             if (bHasStaticPermutationResource)
             {
-                qualityMask = buffer.Reader.ReadUInt32();
-            }
+                uint qualityMask = buffer.Reader.ReadUInt32();
             
-            for (int qIndex = 0; qIndex < 2; qIndex++)
-            {
-                if ((qualityMask & (1 << qIndex)) == 0) continue;
+                for (int qIndex = 0; qIndex < 2; qIndex++)
+                {
+                    if ((qualityMask & (1 << qIndex)) == 0) continue;
 
-                StaticPermutationResources[qIndex] = FMaterialResource.ReadData(buffer);
-                StaticParameters[qIndex] = FStaticParameterSet.ReadData(buffer);
+                    StaticPermutationResources[qIndex] = FMaterialResource.ReadData(buffer);
+                    StaticParameters[qIndex] = FStaticParameterSet.ReadData(buffer);
+                }  
             }
         }
     }

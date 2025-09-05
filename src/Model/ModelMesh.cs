@@ -574,7 +574,7 @@ namespace MHUpkManager.Model
                 BlendMode = parentMaterial.BlendMode;
             }
 
-            if (material.StaticPermutationResources?.Length > 0)
+            if (material.bHasStaticPermutationResource && material.StaticPermutationResources.Length > 0)
             {
                 var resource = material.StaticPermutationResources[0];
                 if (resource.bIsMaskedOverrideValue &&
@@ -648,7 +648,7 @@ namespace MHUpkManager.Model
                 case EBlendMode.BLEND_Translucent:
                     gl.Enable(OpenGL.GL_BLEND);
                     gl.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
-                    gl.DepthMask(0);
+                    // gl.DepthMask(0); // Off without Diff
                     break;
 
                 case EBlendMode.BLEND_Additive:

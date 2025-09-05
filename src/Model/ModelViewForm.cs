@@ -237,9 +237,10 @@ namespace MHUpkManager
 
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
             gl.Enable(OpenGL.GL_DEPTH_TEST);
+            gl.DepthMask(1);
 
             // face culling
-            gl.Enable(OpenGL.GL_CULL_FACE);
+            gl.Enable(OpenGL.GL_CULL_FACE);            
 
             // perspective
             float zoom = transView.Zoom;
