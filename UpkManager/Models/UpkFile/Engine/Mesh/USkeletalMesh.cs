@@ -461,6 +461,43 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
             Weight2 = weights[2];
             Weight3 = weights[3];
         }
+
+        public static Vector3 SafeNormal(FPackedNormal pn)
+        {
+            Vector3 n = pn.ToVector().ToVector3();
+
+            if (float.IsNaN(n.X) || float.IsNaN(n.Y) || float.IsNaN(n.Z) ||
+                float.IsInfinity(n.X) || float.IsInfinity(n.Y) || float.IsInfinity(n.Z))
+                return Vector3.UnitY;
+
+            if (n.LengthSquared() < 1e-5f)
+                return Vector3.UnitY;
+
+            return Vector3.Normalize(n);
+        }
+
+        public static Vector3 ComputeBitangent(Vector3 normal, Vector3 tangent, FPackedNormal normalPacked)
+        {
+            float determinantSign = normalPacked.GetW();
+
+            if (float.IsNaN(determinantSign) || float.IsInfinity(determinantSign))
+                determinantSign = 1.0f;
+
+            // B = (N × T) * sign
+            Vector3 bitangent = Vector3.Cross(normal, tangent);
+
+            if (determinantSign < 0.0f)
+                bitangent = -bitangent;
+
+            if (bitangent.LengthSquared() < 1e-5f)
+            {
+                Vector3 arbitrary = Math.Abs(Vector3.Dot(normal, Vector3.UnitX)) < 0.9f
+                    ? Vector3.UnitX : Vector3.UnitY;
+                bitangent = Vector3.Cross(normal, arbitrary);
+            }
+
+            return Vector3.Normalize(bitangent);
+        }
     }
 
     public class FSkeletalMeshVertexBuffer : FVertexBuffer
@@ -502,10 +539,10 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
         {
             foreach (var vertex in VertexData)
             {
-                Vector3 normal = SafeNormal(vertex.TangentZ);
-                Vector3 tangent = SafeNormal(vertex.TangentX);
+                Vector3 normal = GLVertex.SafeNormal(vertex.TangentZ);
+                Vector3 tangent = GLVertex.SafeNormal(vertex.TangentX);
 
-                Vector3 bitangent = ComputeBitangent(normal, tangent, vertex.TangentZ);
+                Vector3 bitangent = GLVertex.ComputeBitangent(normal, tangent, vertex.TangentZ);
 
                 GLVertex glVertex = new()
                 {
@@ -518,43 +555,6 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
                 glVertex.SetBoneData(vertex.InfluenceBones, vertex.InfluenceWeights);
                 yield return glVertex;
             }
-        }
-
-        private static Vector3 ComputeBitangent(Vector3 normal, Vector3 tangent, FPackedNormal normalPacked)
-        {
-            float determinantSign = normalPacked.GetW();
-
-            if (float.IsNaN(determinantSign) || float.IsInfinity(determinantSign))
-                determinantSign = 1.0f;
-
-            // B = (N × T) * sign
-            Vector3 bitangent = Vector3.Cross(normal, tangent);
-
-            if (determinantSign < 0.0f)
-                bitangent = -bitangent;
-
-            if (bitangent.LengthSquared() < 1e-5f)
-            {
-                Vector3 arbitrary = Math.Abs(Vector3.Dot(normal, Vector3.UnitX)) < 0.9f
-                    ? Vector3.UnitX : Vector3.UnitY;
-                bitangent = Vector3.Cross(normal, arbitrary);
-            }
-
-            return Vector3.Normalize(bitangent);
-        }
-
-        private static Vector3 SafeNormal(FPackedNormal pn)
-        {
-            Vector3 n = pn.ToVector().ToVector3();
-
-            if (float.IsNaN(n.X) || float.IsNaN(n.Y) || float.IsNaN(n.Z) ||
-                float.IsInfinity(n.X) || float.IsInfinity(n.Y) || float.IsInfinity(n.Z))
-                return Vector3.UnitY;
-
-            if (n.LengthSquared() < 1e-5f)
-                return Vector3.UnitY;
-
-            return Vector3.Normalize(n);
         }
 
         public static FSkeletalMeshVertexBuffer ReadData(UBuffer buffer)

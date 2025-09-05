@@ -233,11 +233,17 @@ namespace UpkManager.Models.UpkFile.Engine.Mesh
             int index = 0;
             foreach (var vertex in VertexBuffer.VertexData)
             {
+                Vector3 normal = GLVertex.SafeNormal(vertex.TangentZ);
+                Vector3 tangent = GLVertex.SafeNormal(vertex.TangentX);
+
+                Vector3 bitangent = GLVertex.ComputeBitangent(normal, tangent, vertex.TangentZ);
+
                 GLVertex glVertex = new()
                 {
                     Position = PositionVertexBuffer.VertexData[index].Position.ToVector3(),
-                    Normal = vertex.TangentZ.ToVector().ToVector3(),
-                    Tangent = vertex.TangentX.ToVector().ToVector3(),
+                    Normal = normal,
+                    Tangent = tangent,
+                    Bitangent = bitangent,
                     TexCoord = vertex.GetVector2(0) // Assuming we only need the first UV set
                 };
                 yield return glVertex;
