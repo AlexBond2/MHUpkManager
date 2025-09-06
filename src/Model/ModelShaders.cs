@@ -283,7 +283,10 @@ void main() {
     vec4 diffuseSample = uHasDiffuseMap > 0.5 ? texture(uDiffuseMap, vTexCoord) : vec4(uDiffuseColor, 1.0);
     vec3 diffuseColor = diffuseSample.rgb;
 
-    if (uAlphaTest > 0 && diffuseSample.a < 0.5) discard;
+    if (uAlphaTest > 0){
+        float alpha = textureLod(uDiffuseMap, vTexCoord, 0.0).a;
+        if (alpha < 0.5) discard;
+    }
 
     diffuseColor *= ambientOcclusion;
     
